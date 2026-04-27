@@ -18,6 +18,7 @@ describe('Dashboard', () => {
     addItem: vi.fn(),
     updateItem: vi.fn(),
     deleteItem: vi.fn(),
+    reorderItem: vi.fn(),
   }
 
   beforeEach(() => {

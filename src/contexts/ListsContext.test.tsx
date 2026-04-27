@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { ListsProvider, useLists } from './ListsContext'
 import type { List } from '../types'

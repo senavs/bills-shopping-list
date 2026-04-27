@@ -70,6 +70,27 @@ export const ListDetail = () => {
     setDragOverIndex(null)
   }
 
+  const handleTouchStart = (index: number) => {
+    dragIndexRef.current = index
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault()
+    const touch = e.touches[0]
+    const el = document.elementFromPoint(touch.clientX, touch.clientY)
+    const row = el?.closest('[data-index]')
+    const idx = row ? Number(row.getAttribute('data-index')) : null
+    setDragOverIndex(idx)
+  }
+
+  const handleTouchEnd = () => {
+    if (dragIndexRef.current !== null && dragOverIndex !== null && dragIndexRef.current !== dragOverIndex) {
+      reorderItem(list.id, dragIndexRef.current, dragOverIndex)
+    }
+    dragIndexRef.current = null
+    setDragOverIndex(null)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <div className="container mx-auto p-4 max-w-4xl">
@@ -96,11 +117,15 @@ export const ListDetail = () => {
             {list.items.map((item, index) => (
               <div
                 key={item.id}
+                data-index={index}
                 draggable
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={() => handleDrop(index)}
                 onDragEnd={handleDragEnd}
+                onTouchStart={() => handleTouchStart(index)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow flex items-center gap-3 transition-opacity ${dragOverIndex === index ? 'opacity-50 border-2 border-blue-400' : 'opacity-100'}`}
               >
                 <span
@@ -142,7 +167,7 @@ export const ListDetail = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-0.5">
+                <div className="hidden sm:flex flex-col gap-0.5">
                   <button
                     onClick={() => reorderItem(list.id, index, index - 1)}
                     disabled={index === 0}
