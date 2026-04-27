@@ -9,7 +9,7 @@ function App() {
   return (
     <DarkModeProvider>
       <ListsProvider>
-        <BrowserRouter basename="/mvp">
+        <BrowserRouter>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/lists/new" element={<ListForm />} />
