@@ -35,7 +35,7 @@ export const Dashboard = () => {
 
     try {
       const data = await importData(file)
-      localStorage.setItem('bills-shopping-state', JSON.stringify(data))
+      localStorage.setItem('app', JSON.stringify(data))
       window.location.reload()
     } catch (error) {
       setImportError(error instanceof Error ? error.message : 'Import failed')

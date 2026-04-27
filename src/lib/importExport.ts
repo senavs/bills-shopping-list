@@ -23,7 +23,7 @@ export const validateImportData = (data: unknown): data is AppState => {
     if (!list || typeof list !== 'object') return false
     const l = list as Record<string, unknown>
     
-    return (
+    const isValidList = (
       typeof l.id === 'string' &&
       typeof l.name === 'string' &&
       (l.type === 'shopping' || l.type === 'restaurant') &&
@@ -32,6 +32,24 @@ export const validateImportData = (data: unknown): data is AppState => {
       Array.isArray(l.items) &&
       typeof l.archived === 'boolean'
     )
+    
+    if (!isValidList) return false
+    
+    // Validate items
+    const items = l.items as unknown[]
+    return items.every((item: unknown) => {
+      if (!item || typeof item !== 'object') return false
+      const i = item as Record<string, unknown>
+      
+      return (
+        typeof i.id === 'string' &&
+        typeof i.name === 'string' &&
+        typeof i.quantity === 'number' &&
+        typeof i.unitPrice === 'number' &&
+        typeof i.selected === 'boolean' &&
+        typeof i.includeInTax === 'boolean'
+      )
+    })
   })
 }
 
