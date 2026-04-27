@@ -10,6 +10,7 @@ describe('Dashboard', () => {
   const mockUseLists = {
     lists: [] as List[],
     archiveList: vi.fn(),
+    unarchiveList: vi.fn(),
     deleteList: vi.fn(),
     duplicateList: vi.fn(),
     createList: vi.fn(),

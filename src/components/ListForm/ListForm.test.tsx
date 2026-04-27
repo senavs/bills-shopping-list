@@ -22,6 +22,7 @@ describe('ListForm', () => {
     updateList: vi.fn(),
     deleteList: vi.fn(),
     archiveList: vi.fn(),
+    unarchiveList: vi.fn(),
     duplicateList: vi.fn(),
     addItem: vi.fn(),
     updateItem: vi.fn(),

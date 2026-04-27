@@ -7,7 +7,7 @@ import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { exportData, importData } from '../../lib/importExport'
 
 export const Dashboard = () => {
-  const { lists, archiveList, deleteList, duplicateList } = useLists()
+  const { lists, archiveList, unarchiveList, deleteList, duplicateList } = useLists()
   const { isDark, toggleDarkMode } = useDarkMode()
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
@@ -50,7 +50,7 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <div className="container mx-auto p-4 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -59,7 +59,7 @@ export const Dashboard = () => {
           <div className="flex gap-2">
             <button
               onClick={toggleDarkMode}
-              className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded text-sm"
+              className="w-10 h-10 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center"
               title={isDark ? 'Light mode' : 'Dark mode'}
             >
               {isDark ? '☀️' : '🌙'}
@@ -76,12 +76,6 @@ export const Dashboard = () => {
             >
               Import
             </button>
-            <Link
-              to="/lists/new"
-              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded"
-            >
-              + New List
-            </Link>
           </div>
         </div>
 
@@ -133,12 +127,20 @@ export const Dashboard = () => {
                 key={list.id}
                 list={list}
                 onArchive={() => archiveList(list.id)}
+                onUnarchive={() => unarchiveList(list.id)}
                 onDelete={() => setDeleteConfirm(list.id)}
                 onDuplicate={() => duplicateList(list.id)}
               />
             ))}
           </div>
         )}
+
+        <Link
+          to="/lists/new"
+          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center text-2xl z-10"
+        >
+          +
+        </Link>
       </div>
 
       <ConfirmDialog

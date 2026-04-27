@@ -4,11 +4,12 @@ import type { List } from '../../types'
 interface ListCardProps {
   list: List
   onArchive: () => void
+  onUnarchive: () => void
   onDelete: () => void
   onDuplicate: () => void
 }
 
-export const ListCard = ({ list, onArchive, onDelete, onDuplicate }: ListCardProps) => {
+export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate }: ListCardProps) => {
   const icon = list.type === 'shopping' ? '🛒' : '🍽️'
   
   return (
@@ -36,12 +37,19 @@ export const ListCard = ({ list, onArchive, onDelete, onDuplicate }: ListCardPro
         >
           Edit
         </Link>
-        {!list.archived && (
+        {!list.archived ? (
           <button
             onClick={onArchive}
             className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           >
             Archive
+          </button>
+        ) : (
+          <button
+            onClick={onUnarchive}
+            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+          >
+            Unarchive
           </button>
         )}
         <button

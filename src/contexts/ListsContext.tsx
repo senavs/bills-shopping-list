@@ -8,6 +8,7 @@ interface ListsContextType {
   updateList: (id: string, updates: Partial<List>) => void
   deleteList: (id: string) => void
   archiveList: (id: string) => void
+  unarchiveList: (id: string) => void
   duplicateList: (id: string) => void
   addItem: (listId: string, item: Omit<Item, 'id'>) => void
   updateItem: (listId: string, itemId: string, updates: Partial<Item>) => void
@@ -43,6 +44,10 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
 
   const archiveList = (id: string) => {
     updateList(id, { archived: true })
+  }
+
+  const unarchiveList = (id: string) => {
+    updateList(id, { archived: false })
   }
 
   const duplicateList = (id: string) => {
@@ -82,7 +87,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <ListsContext.Provider value={{ lists, createList, updateList, deleteList, archiveList, duplicateList, addItem, updateItem, deleteItem }}>
+    <ListsContext.Provider value={{ lists, createList, updateList, deleteList, archiveList, unarchiveList, duplicateList, addItem, updateItem, deleteItem }}>
       {children}
     </ListsContext.Provider>
   )
