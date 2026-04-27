@@ -71,6 +71,7 @@ export const ListForm = () => {
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="e.g., Weekly Groceries"
+              required
             />
           </div>
 
@@ -126,6 +127,7 @@ export const ListForm = () => {
               onChange={(e) => setTaxPercentage(e.target.value)}
               min="0"
               step="0.1"
+              required
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="0"
             />

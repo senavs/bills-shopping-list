@@ -75,6 +75,7 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="e.g., Milk"
+              required
               autoFocus
             />
           </div>
@@ -90,6 +91,7 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
                 onChange={(e) => setQuantity(e.target.value)}
                 min="0"
                 step="0.01"
+                required
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
@@ -104,6 +106,7 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
                 onChange={(e) => setUnitPrice(e.target.value)}
                 min="0"
                 step="0.01"
+                required
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
