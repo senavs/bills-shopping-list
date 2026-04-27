@@ -23,6 +23,9 @@ describe('ListForm', () => {
     deleteList: vi.fn(),
     archiveList: vi.fn(),
     duplicateList: vi.fn(),
+    addItem: vi.fn(),
+    updateItem: vi.fn(),
+    deleteItem: vi.fn(),
   }
 
   beforeEach(() => {
