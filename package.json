@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Offline Bills & Shopping List Web App",
+  "homepage": "https://senavs.github.io/bills-shopping-list/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
