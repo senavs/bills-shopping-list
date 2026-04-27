@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { ItemForm } from '../ItemForm/ItemForm'
@@ -7,9 +7,11 @@ import type { Item } from '../../types'
 
 export const ListDetail = () => {
   const { id } = useParams<{ id: string }>()
-  const { lists, addItem, updateItem, deleteItem } = useLists()
+  const { lists, addItem, updateItem, deleteItem, reorderItem } = useLists()
   const [showForm, setShowForm] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const dragIndexRef = useRef<number | null>(null)
 
   const list = lists.find(l => l.id === id)
 
@@ -46,6 +48,28 @@ export const ListDetail = () => {
     updateItem(list.id, itemId, { includeInTax })
   }
 
+  const handleDragStart = (index: number) => {
+    dragIndexRef.current = index
+  }
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    setDragOverIndex(index)
+  }
+
+  const handleDrop = (toIndex: number) => {
+    if (dragIndexRef.current !== null && dragIndexRef.current !== toIndex) {
+      reorderItem(list.id, dragIndexRef.current, toIndex)
+    }
+    dragIndexRef.current = null
+    setDragOverIndex(null)
+  }
+
+  const handleDragEnd = () => {
+    dragIndexRef.current = null
+    setDragOverIndex(null)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <div className="container mx-auto p-4 max-w-4xl">
@@ -69,11 +93,23 @@ export const ListDetail = () => {
           </div>
         ) : (
           <div className="space-y-2 mb-32">
-            {list.items.map(item => (
+            {list.items.map((item, index) => (
               <div
                 key={item.id}
-                className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow flex items-center gap-3"
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={() => handleDrop(index)}
+                onDragEnd={handleDragEnd}
+                className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow flex items-center gap-3 transition-opacity ${dragOverIndex === index ? 'opacity-50 border-2 border-blue-400' : 'opacity-100'}`}
               >
+                <span
+                  className="cursor-grab text-gray-400 dark:text-gray-500 select-none touch-none text-lg leading-none"
+                  aria-hidden="true"
+                >
+                  ⠿
+                </span>
+
                 <input
                   type="checkbox"
                   checked={item.selected}
@@ -104,6 +140,25 @@ export const ListDetail = () => {
                       Tax
                     </label>
                   </div>
+                </div>
+
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    onClick={() => reorderItem(list.id, index, index - 1)}
+                    disabled={index === 0}
+                    aria-label={`Move ${item.name} up`}
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xs leading-none"
+                  >
+                    ▲
+                  </button>
+                  <button
+                    onClick={() => reorderItem(list.id, index, index + 1)}
+                    disabled={index === list.items.length - 1}
+                    aria-label={`Move ${item.name} down`}
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xs leading-none"
+                  >
+                    ▼
+                  </button>
                 </div>
 
                 <div className="flex gap-2">

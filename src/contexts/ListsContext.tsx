@@ -13,6 +13,7 @@ interface ListsContextType {
   addItem: (listId: string, item: Omit<Item, 'id'>) => void
   updateItem: (listId: string, itemId: string, updates: Partial<Item>) => void
   deleteItem: (listId: string, itemId: string) => void
+  reorderItem: (listId: string, fromIndex: number, toIndex: number) => void
 }
 
 const ListsContext = createContext<ListsContextType | undefined>(undefined)
@@ -86,8 +87,18 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     ))
   }
 
+  const reorderItem = (listId: string, fromIndex: number, toIndex: number) => {
+    setLists(prev => prev.map(list => {
+      if (list.id !== listId) return list
+      const items = [...list.items]
+      const [moved] = items.splice(fromIndex, 1)
+      items.splice(toIndex, 0, moved)
+      return { ...list, items }
+    }))
+  }
+
   return (
-    <ListsContext.Provider value={{ lists, createList, updateList, deleteList, archiveList, unarchiveList, duplicateList, addItem, updateItem, deleteItem }}>
+    <ListsContext.Provider value={{ lists, createList, updateList, deleteList, archiveList, unarchiveList, duplicateList, addItem, updateItem, deleteItem, reorderItem }}>
       {children}
     </ListsContext.Provider>
   )
