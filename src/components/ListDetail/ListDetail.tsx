@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { ItemForm } from '../ItemForm/ItemForm'
+import { TotalsBar } from '../TotalsBar/TotalsBar'
 import type { Item } from '../../types'
 
 export const ListDetail = () => {
@@ -67,7 +68,7 @@ export const ListDetail = () => {
             No items yet. Tap the + button to add one.
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 mb-32">
             {list.items.map(item => (
               <div
                 key={item.id}
@@ -126,11 +127,13 @@ export const ListDetail = () => {
 
         <button
           onClick={() => setShowForm(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center text-2xl"
+          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center text-2xl z-10"
         >
           +
         </button>
       </div>
+
+      <TotalsBar list={list} />
 
       {showForm && (
         <ItemForm
