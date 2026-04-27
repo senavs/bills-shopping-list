@@ -1,12 +1,14 @@
 import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
+import { useDarkMode } from '../../contexts/DarkModeContext'
 import { ListCard } from './ListCard'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { exportData, importData } from '../../lib/importExport'
 
 export const Dashboard = () => {
   const { lists, archiveList, deleteList, duplicateList } = useLists()
+  const { isDark, toggleDarkMode } = useDarkMode()
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
@@ -55,6 +57,13 @@ export const Dashboard = () => {
             Bills & Shopping List
           </h1>
           <div className="flex gap-2">
+            <button
+              onClick={toggleDarkMode}
+              className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded text-sm"
+              title={isDark ? 'Light mode' : 'Dark mode'}
+            >
+              {isDark ? '☀️' : '🌙'}
+            </button>
             <button
               onClick={handleExport}
               className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded text-sm"
