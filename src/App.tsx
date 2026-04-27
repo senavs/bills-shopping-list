@@ -1,12 +1,16 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Dashboard } from './components/Dashboard/Dashboard'
+import { ListForm } from './components/ListForm/ListForm'
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Bills & Shopping List
-        </h1>
-      </div>
-    </div>
+    <BrowserRouter basename="/mvp">
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/lists/new" element={<ListForm />} />
+        <Route path="/lists/:id/edit" element={<ListForm />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
