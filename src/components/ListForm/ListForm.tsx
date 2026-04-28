@@ -112,8 +112,8 @@ export const ListForm = () => {
               onChange={(e) => setCurrency(e.target.value as 'BRL' | 'USD')}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
-              <option value="USD">USD ($)</option>
               <option value="BRL">BRL (R$)</option>
+              <option value="USD">USD ($)</option>
             </select>
           </div>
 
