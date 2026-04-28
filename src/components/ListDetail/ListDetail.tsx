@@ -111,6 +111,25 @@ export const ListDetail = () => {
                   ⠿
                 </span>
 
+                <div className="flex sm:hidden flex-col gap-0.5">
+                  <button
+                    onClick={() => reorderItem(list.id, index, index - 1)}
+                    disabled={index === 0}
+                    aria-label={`Move ${item.name} up`}
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-2 leading-none"
+                  >
+                    ▲
+                  </button>
+                  <button
+                    onClick={() => reorderItem(list.id, index, index + 1)}
+                    disabled={index === list.items.length - 1}
+                    aria-label={`Move ${item.name} down`}
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-2 leading-none"
+                  >
+                    ▼
+                  </button>
+                </div>
+
                 <input
                   type="checkbox"
                   checked={item.selected}
@@ -141,25 +160,6 @@ export const ListDetail = () => {
                       Tax
                     </label>
                   </div>
-                </div>
-
-                <div className="flex sm:hidden flex-col gap-0.5">
-                  <button
-                    onClick={() => reorderItem(list.id, index, index - 1)}
-                    disabled={index === 0}
-                    aria-label={`Move ${item.name} up`}
-                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-2 leading-none"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    onClick={() => reorderItem(list.id, index, index + 1)}
-                    disabled={index === list.items.length - 1}
-                    aria-label={`Move ${item.name} down`}
-                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-2 leading-none"
-                  >
-                    ▼
-                  </button>
                 </div>
 
                 <div className="hidden sm:flex flex-col gap-0.5">
