@@ -11,6 +11,7 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
   const [name, setName] = useState(item?.name || '')
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1')
   const [unitPrice, setUnitPrice] = useState(item?.unitPrice.toString() || '0')
+  const [includeInTax, setIncludeInTax] = useState(item?.includeInTax ?? true)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
       setName(item.name)
       setQuantity(item.quantity.toString())
       setUnitPrice(item.unitPrice.toString())
+      setIncludeInTax(item.includeInTax)
     }
   }, [item])
 
@@ -47,7 +49,7 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
       quantity: qty,
       unitPrice: price,
       selected: item?.selected || false,
-      includeInTax: item?.includeInTax ?? true,
+      includeInTax: includeInTax,
     })
   }
 
@@ -110,6 +112,19 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
+          </div>
+
+          <div className="mb-4 flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="includeInTax"
+              checked={includeInTax}
+              onChange={(e) => setIncludeInTax(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <label htmlFor="includeInTax" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+              Include in Tax/Tip 🧾
+            </label>
           </div>
 
           <div className="flex gap-3 justify-end">

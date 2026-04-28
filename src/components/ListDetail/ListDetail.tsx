@@ -44,10 +44,6 @@ export const ListDetail = () => {
     updateItem(list.id, itemId, { selected })
   }
 
-  const handleToggleIncludeInTax = (itemId: string, includeInTax: boolean) => {
-    updateItem(list.id, itemId, { includeInTax })
-  }
-
   const handleDragStart = (index: number) => {
     dragIndexRef.current = index
   }
@@ -146,7 +142,7 @@ export const ListDetail = () => {
                   </span>
                 </div>
 
-                <div className="flex flex-col items-end gap-3 shrink-0">
+                <div className="flex flex-col items-end gap-1 shrink-0">
                   <div className="flex gap-2">
                     <button
                       onClick={() => setEditingItem(item)}
@@ -161,15 +157,7 @@ export const ListDetail = () => {
                       Delete
                     </button>
                   </div>
-                  <label className="flex items-center text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={item.includeInTax}
-                      onChange={(e) => handleToggleIncludeInTax(item.id, e.target.checked)}
-                      className="mr-1"
-                    />
-                    Tax
-                  </label>
+                  {item.includeInTax && <span title="Taxed" className="text-sm">🧾</span>}
                 </div>
               </div>
             ))}
