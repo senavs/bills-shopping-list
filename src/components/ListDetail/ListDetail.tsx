@@ -146,7 +146,7 @@ export const ListDetail = () => {
                   </span>
                 </div>
 
-                <div className="flex flex-col items-end gap-1 shrink-0">
+                <div className="flex flex-col items-end gap-3 shrink-0">
                   <div className="flex gap-2">
                     <button
                       onClick={() => setEditingItem(item)}
