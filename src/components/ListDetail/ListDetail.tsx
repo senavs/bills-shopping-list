@@ -134,66 +134,42 @@ export const ListDetail = () => {
                   type="checkbox"
                   checked={item.selected}
                   onChange={(e) => handleToggleSelected(item.id, e.target.checked)}
-                  className="w-5 h-5"
+                  className="w-5 h-5 shrink-0"
                 />
-                
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className={`font-medium ${item.selected ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
-                      {item.name}
-                    </h3>
-                    <span className="text-gray-900 dark:text-white font-semibold">
-                      {list.currency} {(item.quantity * item.unitPrice).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 mt-1">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.quantity} × {list.currency} {item.unitPrice.toFixed(2)}
-                    </span>
-                    <label className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                      <input
-                        type="checkbox"
-                        checked={item.includeInTax}
-                        onChange={(e) => handleToggleIncludeInTax(item.id, e.target.checked)}
-                        className="mr-1"
-                      />
-                      Tax
-                    </label>
-                  </div>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className={`font-medium truncate ${item.selected ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+                    {item.name}
+                  </h3>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {item.quantity} × {list.currency === 'BRL' ? 'R$' : '$'} {item.unitPrice.toFixed(2)} = <span className="font-bold">{list.currency === 'BRL' ? 'R$' : '$'} {(item.quantity * item.unitPrice).toFixed(2)}</span>
+                  </span>
                 </div>
 
-                <div className="hidden sm:flex flex-col gap-0.5">
-                  <button
-                    onClick={() => reorderItem(list.id, index, index - 1)}
-                    disabled={index === 0}
-                    aria-label={`Move ${item.name} up`}
-                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xs leading-none"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    onClick={() => reorderItem(list.id, index, index + 1)}
-                    disabled={index === list.items.length - 1}
-                    aria-label={`Move ${item.name} down`}
-                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xs leading-none"
-                  >
-                    ▼
-                  </button>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setEditingItem(item)}
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteItem(list.id, item.id)}
-                    className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm"
-                  >
-                    Delete
-                  </button>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditingItem(item)}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteItem(list.id, item.id)}
+                      className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <label className="flex items-center text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={item.includeInTax}
+                      onChange={(e) => handleToggleIncludeInTax(item.id, e.target.checked)}
+                      className="mr-1"
+                    />
+                    Tax
+                  </label>
                 </div>
               </div>
             ))}
