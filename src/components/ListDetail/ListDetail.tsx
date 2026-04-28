@@ -70,27 +70,6 @@ export const ListDetail = () => {
     setDragOverIndex(null)
   }
 
-  const handleTouchStart = (index: number) => {
-    dragIndexRef.current = index
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault()
-    const touch = e.touches[0]
-    const el = document.elementFromPoint(touch.clientX, touch.clientY)
-    const row = el?.closest('[data-index]')
-    const idx = row ? Number(row.getAttribute('data-index')) : null
-    setDragOverIndex(idx)
-  }
-
-  const handleTouchEnd = () => {
-    if (dragIndexRef.current !== null && dragOverIndex !== null && dragIndexRef.current !== dragOverIndex) {
-      reorderItem(list.id, dragIndexRef.current, dragOverIndex)
-    }
-    dragIndexRef.current = null
-    setDragOverIndex(null)
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <div className="container mx-auto p-4 max-w-4xl">
@@ -123,13 +102,10 @@ export const ListDetail = () => {
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={() => handleDrop(index)}
                 onDragEnd={handleDragEnd}
-                onTouchStart={() => handleTouchStart(index)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
                 className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow flex items-center gap-3 transition-opacity ${dragOverIndex === index ? 'opacity-50 border-2 border-blue-400' : 'opacity-100'}`}
               >
                 <span
-                  className="cursor-grab text-gray-400 dark:text-gray-500 select-none touch-none text-lg leading-none"
+                  className="hidden sm:inline cursor-grab text-gray-400 dark:text-gray-500 select-none text-lg leading-none"
                   aria-hidden="true"
                 >
                   ⠿
@@ -165,6 +141,25 @@ export const ListDetail = () => {
                       Tax
                     </label>
                   </div>
+                </div>
+
+                <div className="flex sm:hidden flex-col gap-0.5">
+                  <button
+                    onClick={() => reorderItem(list.id, index, index - 1)}
+                    disabled={index === 0}
+                    aria-label={`Move ${item.name} up`}
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-2 leading-none"
+                  >
+                    ▲
+                  </button>
+                  <button
+                    onClick={() => reorderItem(list.id, index, index + 1)}
+                    disabled={index === list.items.length - 1}
+                    aria-label={`Move ${item.name} down`}
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-2 leading-none"
+                  >
+                    ▼
+                  </button>
                 </div>
 
                 <div className="hidden sm:flex flex-col gap-0.5">
