@@ -9,6 +9,7 @@ const createList = (overrides?: Partial<List>): List => ({
   currency: 'USD',
   taxPercentage: 10,
   items: [],
+  sections: [],
   archived: false,
   ...overrides,
 })

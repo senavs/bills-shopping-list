@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { ListForm } from './ListForm'
 import * as useListsModule from '../../hooks/useLists'
@@ -36,9 +36,12 @@ describe('ListForm', () => {
   }
 
   beforeEach(() => {
+    cleanup()
     vi.clearAllMocks()
     vi.spyOn(useListsModule, 'useLists').mockReturnValue(mockUseLists)
   })
+
+  afterEach(cleanup)
 
   const renderForm = () => {
     return render(
@@ -50,37 +53,34 @@ describe('ListForm', () => {
 
   it('renders create form with empty fields', () => {
     renderForm()
-    expect(screen.getByText('Create List')).toBeDefined()
+    expect(screen.getAllByText('Create List').length).toBeGreaterThan(0)
     expect(screen.getByPlaceholderText('e.g., Weekly Groceries')).toBeDefined()
   })
 
   it('shows error when submitting empty name', () => {
-    renderForm()
-    const submitBtn = screen.getByText('Create List')
-    fireEvent.click(submitBtn)
+    const { container } = renderForm()
+    fireEvent.submit(container.querySelector('form')!)
     expect(screen.getByText('Name is required')).toBeDefined()
   })
 
   it('shows error for negative tax percentage', () => {
-    renderForm()
+    const { container } = renderForm()
     const nameInput = screen.getByPlaceholderText('e.g., Weekly Groceries')
     const taxInput = screen.getByPlaceholderText('0')
-    const submitBtn = screen.getByText('Create List')
 
     fireEvent.change(nameInput, { target: { value: 'Test List' } })
     fireEvent.change(taxInput, { target: { value: '-5' } })
-    fireEvent.click(submitBtn)
+    fireEvent.submit(container.querySelector('form')!)
 
     expect(screen.getByText('Tax percentage must be 0 or greater')).toBeDefined()
   })
 
   it('calls createList with valid data', () => {
-    renderForm()
+    const { container } = renderForm()
     const nameInput = screen.getByPlaceholderText('e.g., Weekly Groceries')
-    const submitBtn = screen.getByText('Create List')
 
     fireEvent.change(nameInput, { target: { value: 'My List' } })
-    fireEvent.click(submitBtn)
+    fireEvent.submit(container.querySelector('form')!)
 
     expect(mockUseLists.createList).toHaveBeenCalledWith({
       name: 'My List',

@@ -64,9 +64,12 @@ describe('SectionBlock', () => {
   it('shows delete confirm dialog and calls onDeleteSection', () => {
     const onDeleteSection = vi.fn()
     render(<SectionBlock {...defaultProps} onDeleteSection={onDeleteSection} />)
-    fireEvent.click(screen.getByText('Delete'))
+    // Section header Delete is first; item rows also have Delete buttons
+    fireEvent.click(screen.getAllByText('Delete')[0])
     expect(screen.getByText(/delete "dairy"/i)).toBeDefined()
-    fireEvent.click(screen.getByRole('button', { name: /^delete$/i }))
+    // ConfirmDialog Delete button is the last Delete button in the DOM
+    const deleteButtons = screen.getAllByRole('button', { name: /^delete$/i })
+    fireEvent.click(deleteButtons[deleteButtons.length - 1])
     expect(onDeleteSection).toHaveBeenCalledWith('s1')
   })
 

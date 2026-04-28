@@ -8,7 +8,7 @@ export const loadState = (): AppState => {
     if (!item) return { lists: [] }
     const state: AppState = JSON.parse(item)
     // Migrate: ensure every list has a sections array
-    state.lists = state.lists.map(l => ({ sections: [], ...l }))
+    state.lists = state.lists.map(l => ({ ...l, sections: l.sections ?? [] }))
     return state
   } catch {
     return { lists: [] }
