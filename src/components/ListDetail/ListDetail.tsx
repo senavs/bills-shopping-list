@@ -152,22 +152,24 @@ export const ListDetail = () => {
           </div>
         )}
 
-        {/* FABs */}
-        <button
-          onClick={() => setShowSectionForm(true)}
-          className="fixed bottom-6 right-24 w-14 h-14 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 flex items-center justify-center text-xl z-10"
-          aria-label="New section"
-          title="New section"
-        >
-          ☰
-        </button>
-        <button
-          onClick={() => setShowItemForm(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center text-2xl z-10"
-          aria-label="Add item"
-        >
-          +
-        </button>
+        {/* FABs — stacked above TotalsBar */}
+        <div className="fixed bottom-6 right-4 flex flex-col gap-2 z-10">
+          <button
+            onClick={() => setShowSectionForm(true)}
+            className="w-11 h-11 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 flex items-center justify-center text-lg"
+            aria-label="New section"
+            title="New section"
+          >
+            ☰
+          </button>
+          <button
+            onClick={() => setShowItemForm(true)}
+            className="w-11 h-11 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center text-xl"
+            aria-label="Add item"
+          >
+            +
+          </button>
+        </div>
       </div>
 
       <TotalsBar list={list} />
