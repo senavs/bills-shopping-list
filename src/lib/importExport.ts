@@ -37,10 +37,9 @@ export const validateImportData = (data: unknown): data is AppState => {
     
     // Validate items
     const items = l.items as unknown[]
-    return items.every((item: unknown) => {
+    const itemsValid = items.every((item: unknown) => {
       if (!item || typeof item !== 'object') return false
       const i = item as Record<string, unknown>
-      
       return (
         typeof i.id === 'string' &&
         typeof i.name === 'string' &&
@@ -50,6 +49,23 @@ export const validateImportData = (data: unknown): data is AppState => {
         typeof i.includeInTax === 'boolean'
       )
     })
+    if (!itemsValid) return false
+
+    // Validate sections (optional field — missing means no sections)
+    if (l.sections !== undefined) {
+      if (!Array.isArray(l.sections)) return false
+      return (l.sections as unknown[]).every((sec: unknown) => {
+        if (!sec || typeof sec !== 'object') return false
+        const s = sec as Record<string, unknown>
+        return (
+          typeof s.id === 'string' &&
+          typeof s.name === 'string' &&
+          Array.isArray(s.itemIds) &&
+          typeof s.collapsed === 'boolean'
+        )
+      })
+    }
+    return true
   })
 }
 

@@ -7,6 +7,13 @@ export interface Item {
   includeInTax: boolean;
 }
 
+export interface Section {
+  id: string;
+  name: string;
+  itemIds: string[];
+  collapsed: boolean;
+}
+
 export interface List {
   id: string;
   name: string;
@@ -14,6 +21,7 @@ export interface List {
   currency: 'BRL' | 'USD';
   taxPercentage: number;
   items: Item[];
+  sections: Section[];
   archived: boolean;
 }
 

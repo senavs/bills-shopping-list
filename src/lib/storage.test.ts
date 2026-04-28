@@ -13,11 +13,18 @@ describe('storage', () => {
     })
 
     it('loads saved state from localStorage', () => {
-      const mockState = { lists: [{ id: '1', name: 'Test', type: 'shopping' as const, currency: 'USD' as const, taxPercentage: 10, items: [], archived: false }] }
+      const mockState = { lists: [{ id: '1', name: 'Test', type: 'shopping' as const, currency: 'USD' as const, taxPercentage: 10, items: [], sections: [], archived: false }] }
       localStorage.setItem('app', JSON.stringify(mockState))
       
       const state = loadState()
       expect(state).toEqual(mockState)
+    })
+
+    it('migrates lists missing sections field', () => {
+      const legacy = { lists: [{ id: '1', name: 'Test', type: 'shopping' as const, currency: 'USD' as const, taxPercentage: 0, items: [], archived: false }] }
+      localStorage.setItem('app', JSON.stringify(legacy))
+      const state = loadState()
+      expect(state.lists[0].sections).toEqual([])
     })
 
     it('returns empty lists on parse error', () => {
@@ -29,7 +36,7 @@ describe('storage', () => {
 
   describe('saveState', () => {
     it('saves state to localStorage', () => {
-      const state = { lists: [{ id: '1', name: 'Test', type: 'shopping' as const, currency: 'USD' as const, taxPercentage: 10, items: [], archived: false }] }
+      const state = { lists: [{ id: '1', name: 'Test', type: 'shopping' as const, currency: 'USD' as const, taxPercentage: 10, items: [], sections: [], archived: false }] }
       saveState(state)
       
       const saved = localStorage.getItem('app')

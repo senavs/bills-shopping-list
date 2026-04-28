@@ -19,6 +19,11 @@ describe('Dashboard', () => {
     updateItem: vi.fn(),
     deleteItem: vi.fn(),
     reorderItem: vi.fn(),
+    addSection: vi.fn(),
+    updateSection: vi.fn(),
+    deleteSection: vi.fn(),
+    reorderSection: vi.fn(),
+    reorderItemInSection: vi.fn(),
   }
 
   beforeEach(() => {

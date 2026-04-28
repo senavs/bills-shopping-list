@@ -5,7 +5,11 @@ const STORAGE_KEY = 'app'
 export const loadState = (): AppState => {
   try {
     const item = localStorage.getItem(STORAGE_KEY)
-    return item ? JSON.parse(item) : { lists: [] }
+    if (!item) return { lists: [] }
+    const state: AppState = JSON.parse(item)
+    // Migrate: ensure every list has a sections array
+    state.lists = state.lists.map(l => ({ sections: [], ...l }))
+    return state
   } catch {
     return { lists: [] }
   }
