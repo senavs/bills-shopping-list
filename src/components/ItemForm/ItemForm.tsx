@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react'
-import type { Item } from '../../types'
+import type { Item, Section } from '../../types'
 
 interface ItemFormProps {
   item?: Item
-  onSubmit: (item: Omit<Item, 'id'>) => void
+  sections?: Pick<Section, 'id' | 'name'>[]
+  initialSectionId?: string
+  onSubmit: (item: Omit<Item, 'id'>, sectionId: string) => void
   onCancel: () => void
 }
 
-export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
+export const ItemForm = ({ item, sections = [], initialSectionId = '', onSubmit, onCancel }: ItemFormProps) => {
   const [name, setName] = useState(item?.name || '')
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1')
   const [unitPrice, setUnitPrice] = useState(item?.unitPrice.toString() || '0')
   const [includeInTax, setIncludeInTax] = useState(item?.includeInTax ?? true)
+  const [selected, setSelected] = useState(item?.selected ?? false)
+  const [sectionId, setSectionId] = useState(initialSectionId)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -20,12 +24,13 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
       setQuantity(item.quantity.toString())
       setUnitPrice(item.unitPrice.toString())
       setIncludeInTax(item.includeInTax)
+      setSelected(item.selected)
     }
   }, [item])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!name.trim()) {
       setError('Name is required')
       return
@@ -44,13 +49,7 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
       return
     }
 
-    onSubmit({
-      name: name.trim(),
-      quantity: qty,
-      unitPrice: price,
-      selected: item?.selected || false,
-      includeInTax: includeInTax,
-    })
+    onSubmit({ name: name.trim(), quantity: qty, unitPrice: price, selected, includeInTax }, sectionId)
   }
 
   return (
@@ -126,6 +125,38 @@ export const ItemForm = ({ item, onSubmit, onCancel }: ItemFormProps) => {
               Include in Tax/Tip 🧾
             </label>
           </div>
+
+          <div className="mb-4 flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="selected"
+              checked={selected}
+              onChange={(e) => setSelected(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <label htmlFor="selected" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+              Selected 🛒
+            </label>
+          </div>
+
+          {sections.length > 0 && (
+            <div className="mb-4">
+              <label htmlFor="sectionId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Section
+              </label>
+              <select
+                id="sectionId"
+                value={sectionId}
+                onChange={(e) => setSectionId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">No section</option>
+                {sections.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="flex gap-3 justify-end">
             <button

@@ -38,9 +38,30 @@ export const ListDetail = () => {
   const assignedItemIds = new Set(list.sections.flatMap(s => s.itemIds))
   const unassignedItems = list.items.filter(i => !assignedItemIds.has(i.id))
 
-  const handleAddItem = (item: Omit<Item, 'id'>) => { addItem(list.id, item); setShowItemForm(false) }
-  const handleEditItem = (item: Omit<Item, 'id'>) => {
-    if (editingItem) { updateItem(list.id, editingItem.id, item); setEditingItem(null) }
+  const handleAddItem = (item: Omit<Item, 'id'>, sectionId: string) => {
+    const newId = addItem(list.id, item)
+    if (sectionId) {
+      const section = list.sections.find(s => s.id === sectionId)
+      if (section) updateSection(list.id, sectionId, { itemIds: [...section.itemIds, newId] })
+    }
+    setShowItemForm(false)
+  }
+
+  const handleEditItem = (item: Omit<Item, 'id'>, sectionId: string) => {
+    if (!editingItem) return
+    updateItem(list.id, editingItem.id, item)
+    const currentSectionId = list.sections.find(s => s.itemIds.includes(editingItem.id))?.id ?? ''
+    if (sectionId !== currentSectionId) {
+      if (currentSectionId) {
+        const oldSection = list.sections.find(s => s.id === currentSectionId)!
+        updateSection(list.id, currentSectionId, { itemIds: oldSection.itemIds.filter(id => id !== editingItem.id) })
+      }
+      if (sectionId) {
+        const newSection = list.sections.find(s => s.id === sectionId)!
+        updateSection(list.id, sectionId, { itemIds: [...newSection.itemIds, editingItem.id] })
+      }
+    }
+    setEditingItem(null)
   }
 
   // Unassigned item drag handlers
@@ -174,8 +195,16 @@ export const ListDetail = () => {
 
       <TotalsBar list={list} />
 
-      {showItemForm && <ItemForm onSubmit={handleAddItem} onCancel={() => setShowItemForm(false)} />}
-      {editingItem && <ItemForm item={editingItem} onSubmit={handleEditItem} onCancel={() => setEditingItem(null)} />}
+      {showItemForm && <ItemForm sections={list.sections} onSubmit={handleAddItem} onCancel={() => setShowItemForm(false)} />}
+      {editingItem && (
+        <ItemForm
+          item={editingItem}
+          sections={list.sections}
+          initialSectionId={list.sections.find(s => s.itemIds.includes(editingItem.id))?.id ?? ''}
+          onSubmit={handleEditItem}
+          onCancel={() => setEditingItem(null)}
+        />
+      )}
       {showSectionForm && (
         <SectionForm
           onSubmit={(name) => { addSection(list.id, name); setShowSectionForm(false) }}

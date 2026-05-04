@@ -10,7 +10,7 @@ interface ListsContextType {
   archiveList: (id: string) => void
   unarchiveList: (id: string) => void
   duplicateList: (id: string) => void
-  addItem: (listId: string, item: Omit<Item, 'id'>) => void
+  addItem: (listId: string, item: Omit<Item, 'id'>) => string
   updateItem: (listId: string, itemId: string, updates: Partial<Item>) => void
   deleteItem: (listId: string, itemId: string) => void
   reorderItem: (listId: string, fromIndex: number, toIndex: number) => void
@@ -66,8 +66,10 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  const addItem = (listId: string, item: Omit<Item, 'id'>) => {
-    updateListById(listId, l => ({ ...l, items: [...l.items, { ...item, id: crypto.randomUUID() }] }))
+  const addItem = (listId: string, item: Omit<Item, 'id'>): string => {
+    const id = crypto.randomUUID()
+    updateListById(listId, l => ({ ...l, items: [...l.items, { ...item, id }] }))
+    return id
   }
 
   const updateItem = (listId: string, itemId: string, updates: Partial<Item>) => {
