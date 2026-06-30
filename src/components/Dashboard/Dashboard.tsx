@@ -3,24 +3,34 @@ import { Link } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { useDarkMode } from '../../contexts/DarkModeContext'
 import { ListCard } from './ListCard'
+import { TemplateCard } from './TemplateCard'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { exportData, importData } from '../../lib/importExport'
 
 export const Dashboard = () => {
-  const { lists, archiveList, unarchiveList, deleteList, duplicateList } = useLists()
+  const { lists, archiveList, unarchiveList, deleteList, duplicateList, saveAsTemplate, createFromTemplate, deleteTemplate } = useLists()
   const { isDark, toggleDarkMode } = useDarkMode()
-  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active')
+  const [activeTab, setActiveTab] = useState<'active' | 'archived' | 'templates'>('active')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [deleteTemplateConfirm, setDeleteTemplateConfirm] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const filteredLists = lists.filter(list => 
+  const regularLists = lists.filter(list => !list.isTemplate)
+  const templates = lists.filter(list => list.isTemplate)
+
+  const filteredLists = regularLists.filter(list => 
     activeTab === 'active' ? !list.archived : list.archived
   )
 
   const handleDelete = (id: string) => {
     deleteList(id)
     setDeleteConfirm(null)
+  }
+
+  const handleDeleteTemplate = (id: string) => {
+    deleteTemplate(id)
+    setDeleteTemplateConfirm(null)
   }
 
   const handleExport = () => {
@@ -114,25 +124,56 @@ export const Dashboard = () => {
           >
             Archived
           </button>
+          <button
+            onClick={() => setActiveTab('templates')}
+            className={`pb-2 px-1 ${
+              activeTab === 'templates'
+                ? 'border-b-2 border-green-600 text-green-600 dark:text-green-400'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            Templates{templates.length > 0 && ` (${templates.length})`}
+          </button>
         </div>
 
-        {filteredLists.length === 0 ? (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-            No {activeTab} lists yet
-          </div>
+        {activeTab === 'templates' ? (
+          templates.length === 0 ? (
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <p className="mb-2">No templates yet</p>
+              <p className="text-sm">Save any list as a template to reuse it later</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {templates.map(template => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  onUseTemplate={() => createFromTemplate(template.id)}
+                  onDelete={() => setDeleteTemplateConfirm(template.id)}
+                />
+              ))}
+            </div>
+          )
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {filteredLists.map(list => (
-              <ListCard
-                key={list.id}
-                list={list}
-                onArchive={() => archiveList(list.id)}
-                onUnarchive={() => unarchiveList(list.id)}
-                onDelete={() => setDeleteConfirm(list.id)}
-                onDuplicate={() => duplicateList(list.id)}
-              />
-            ))}
-          </div>
+          filteredLists.length === 0 ? (
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              No {activeTab} lists yet
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {filteredLists.map(list => (
+                <ListCard
+                  key={list.id}
+                  list={list}
+                  onArchive={() => archiveList(list.id)}
+                  onUnarchive={() => unarchiveList(list.id)}
+                  onDelete={() => setDeleteConfirm(list.id)}
+                  onDuplicate={() => duplicateList(list.id)}
+                  onSaveAsTemplate={() => saveAsTemplate(list.id)}
+                />
+              ))}
+            </div>
+          )
         )}
 
         <Link
@@ -149,6 +190,14 @@ export const Dashboard = () => {
         message="Are you sure you want to delete this list? This action cannot be undone."
         onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
         onCancel={() => setDeleteConfirm(null)}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteTemplateConfirm !== null}
+        title="Delete Template"
+        message="Are you sure you want to delete this template? This action cannot be undone."
+        onConfirm={() => deleteTemplateConfirm && handleDeleteTemplate(deleteTemplateConfirm)}
+        onCancel={() => setDeleteTemplateConfirm(null)}
       />
     </div>
   )

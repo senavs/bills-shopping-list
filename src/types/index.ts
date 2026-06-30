@@ -23,6 +23,7 @@ export interface List {
   items: Item[];
   sections: Section[];
   archived: boolean;
+  isTemplate?: boolean;
 }
 
 export interface AppState {

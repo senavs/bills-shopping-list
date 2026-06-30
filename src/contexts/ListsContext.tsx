@@ -10,6 +10,9 @@ interface ListsContextType {
   archiveList: (id: string) => void
   unarchiveList: (id: string) => void
   duplicateList: (id: string) => void
+  saveAsTemplate: (id: string) => void
+  createFromTemplate: (templateId: string) => void
+  deleteTemplate: (id: string) => void
   addItem: (listId: string, item: Omit<Item, 'id'>) => string
   updateItem: (listId: string, itemId: string, updates: Partial<Item>) => void
   deleteItem: (listId: string, itemId: string) => void
@@ -64,6 +67,64 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
       }))
       setLists(prev => [...prev, { ...list, id: crypto.randomUUID(), name: `${list.name} (copy)`, items, sections }])
     }
+  }
+
+  const saveAsTemplate = (id: string) => {
+    const list = lists.find(l => l.id === id)
+    if (list) {
+      const itemIdMap: Record<string, string> = {}
+      const items = list.items.map(item => {
+        const newId = crypto.randomUUID()
+        itemIdMap[item.id] = newId
+        return { ...item, id: newId, selected: false }
+      })
+      const sections = list.sections.map(s => ({
+        ...s,
+        id: crypto.randomUUID(),
+        itemIds: s.itemIds.map(iid => itemIdMap[iid] ?? iid),
+        collapsed: false,
+      }))
+      setLists(prev => [...prev, {
+        ...list,
+        id: crypto.randomUUID(),
+        name: `${list.name}`,
+        items,
+        sections,
+        archived: false,
+        isTemplate: true,
+      }])
+    }
+  }
+
+  const createFromTemplate = (templateId: string) => {
+    const template = lists.find(l => l.id === templateId && l.isTemplate)
+    if (template) {
+      const itemIdMap: Record<string, string> = {}
+      const items = template.items.map(item => {
+        const newId = crypto.randomUUID()
+        itemIdMap[item.id] = newId
+        return { ...item, id: newId, selected: false }
+      })
+      const sections = template.sections.map(s => ({
+        ...s,
+        id: crypto.randomUUID(),
+        itemIds: s.itemIds.map(iid => itemIdMap[iid] ?? iid),
+        collapsed: false,
+      }))
+      setLists(prev => [...prev, {
+        ...template,
+        id: crypto.randomUUID(),
+        name: template.name,
+        items,
+        sections,
+        archived: false,
+        isTemplate: false,
+      }])
+    }
+  }
+
+  const deleteTemplate = (id: string) => {
+    setLists(prev => prev.filter(l => l.id !== id))
   }
 
   const addItem = (listId: string, item: Omit<Item, 'id'>): string => {
@@ -139,6 +200,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ListsContext.Provider value={{
       lists, createList, updateList, deleteList, archiveList, unarchiveList, duplicateList,
+      saveAsTemplate, createFromTemplate, deleteTemplate,
       addItem, updateItem, deleteItem, reorderItem,
       addSection, updateSection, deleteSection, reorderSection, reorderItemInSection,
     }}>

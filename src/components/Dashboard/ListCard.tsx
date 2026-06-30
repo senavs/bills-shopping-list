@@ -7,9 +7,10 @@ interface ListCardProps {
   onUnarchive: () => void
   onDelete: () => void
   onDuplicate: () => void
+  onSaveAsTemplate: () => void
 }
 
-export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate }: ListCardProps) => {
+export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, onSaveAsTemplate }: ListCardProps) => {
   const icon = list.type === 'shopping' ? '🛒' : '🍽️'
   
   return (
@@ -57,6 +58,12 @@ export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate }
           className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
           Duplicate
+        </button>
+        <button
+          onClick={onSaveAsTemplate}
+          className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
+        >
+          Template
         </button>
         <button
           onClick={onDelete}
