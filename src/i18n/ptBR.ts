@@ -7,7 +7,7 @@ export const ptBR: TranslationKeys = {
   edit: 'Editar',
   delete: 'Excluir',
   back: '← Voltar',
-  appTitle: 'Contas & Lista de Compras',
+  appTitle: 'BillBuddy',
   active: 'Ativas',
   archived: 'Arquivadas',
   templates: 'Modelos',

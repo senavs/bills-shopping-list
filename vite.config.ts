@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Bills & Shopping List',
-        short_name: 'Bills',
+        name: 'BillBuddy',
+        short_name: 'BillBuddy',
         description: 'Offline-first web app for tracking expenses while shopping or dining out',
         start_url: '/bills-shopping-list/',
         scope: '/bills-shopping-list/',

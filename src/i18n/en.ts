@@ -5,7 +5,7 @@ export const en = {
   edit: 'Edit',
   delete: 'Delete',
   back: '← Back',
-  appTitle: 'Bills & Shopping List',
+  appTitle: 'BillBuddy',
   active: 'Active',
   archived: 'Archived',
   templates: 'Templates',

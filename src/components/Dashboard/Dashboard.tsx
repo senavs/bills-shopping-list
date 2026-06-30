@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { useDarkMode } from '../../contexts/DarkModeContext'
@@ -16,7 +16,22 @@ export const Dashboard = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deleteTemplateConfirm, setDeleteTemplateConfirm] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [menuOpen])
 
   const regularLists = lists.filter(list => !list.isTemplate)
   const templates = lists.filter(list => list.isTemplate)
@@ -71,10 +86,10 @@ export const Dashboard = () => {
           <div className="flex gap-2 items-center">
             <button
               onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
-              className="w-10 h-10 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center text-xs font-bold"
+              className="w-10 h-10 flex items-center justify-center text-xl"
               title={locale === 'en' ? 'Mudar para Português' : 'Switch to English'}
             >
-              {locale === 'en' ? 'BR' : 'EN'}
+              {locale === 'pt-BR' ? '🇧🇷' : '🇺🇸'}
             </button>
             <button
               onClick={toggleDarkMode}
@@ -83,18 +98,31 @@ export const Dashboard = () => {
             >
               {isDark ? '☀️' : '🌙'}
             </button>
-            <button
-              onClick={handleExport}
-              className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded text-sm"
-            >
-              {t.export}
-            </button>
-            <button
-              onClick={handleImportClick}
-              className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded text-sm"
-            >
-              {t.import}
-            </button>
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="w-10 h-10 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold"
+                aria-label="Menu"
+              >
+                ⋮
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
+                  <button
+                    onClick={() => { handleExport(); setMenuOpen(false) }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    {t.export}
+                  </button>
+                  <button
+                    onClick={() => { handleImportClick(); setMenuOpen(false) }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    {t.import}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

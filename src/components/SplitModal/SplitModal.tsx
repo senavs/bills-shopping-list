@@ -79,6 +79,10 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
                       <span className="text-gray-700 dark:text-gray-200">{formatAmount(split.taxAmount)}</span>
                     </div>
                   )}
+                  <div className="flex justify-between text-sm font-bold pt-1">
+                    <span className="text-gray-900 dark:text-white">{t.total}</span>
+                    <span className="text-gray-900 dark:text-white">{formatAmount(split.total)}</span>
+                  </div>
                 </div>
               </div>
             ))
