@@ -98,6 +98,13 @@ export const Dashboard = () => {
             >
               {isDark ? '☀️' : '🌙'}
             </button>
+            <Link
+              to="/"
+              className="w-10 h-10 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center"
+              title="Home"
+            >
+              🏠
+            </Link>
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
