@@ -51,7 +51,7 @@ export const ListForm = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto p-4 max-w-2xl">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          {id ? 'Edit List' : 'Create List'}
+          {id ? (existingList?.isTemplate ? 'Edit Template' : 'Edit List') : 'Create List'}
         </h1>
 
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">

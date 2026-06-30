@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { List } from '../../types'
 
 interface TemplateCardProps {
@@ -11,11 +12,11 @@ export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCard
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border-l-4 border-green-500">
-      <div className="mb-3">
+      <Link to={`/lists/${template.id}`} className="block mb-3">
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="text-2xl">{icon}</span>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white hover:text-green-600 dark:hover:text-green-400">
               {template.name}
             </h3>
           </div>
@@ -28,7 +29,7 @@ export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCard
           {template.items.length} {template.items.length === 1 ? 'item' : 'items'}
           {template.sections.length > 0 && ` • ${template.sections.length} ${template.sections.length === 1 ? 'section' : 'sections'}`}
         </p>
-      </div>
+      </Link>
 
       <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
         <button
@@ -37,6 +38,12 @@ export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCard
         >
           Use Template
         </button>
+        <Link
+          to={`/lists/${template.id}/edit`}
+          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+        >
+          Edit
+        </Link>
         <button
           onClick={onDelete}
           className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"

@@ -10,6 +10,7 @@ interface SectionBlockProps {
   sectionIndex: number
   totalSections: number
   list: List
+  hideCheckbox?: boolean
   onUpdateSection: (sectionId: string, updates: Partial<Section>) => void
   onDeleteSection: (sectionId: string) => void
   onReorderSection: (fromIndex: number, toIndex: number) => void
@@ -26,7 +27,7 @@ interface SectionBlockProps {
 }
 
 export const SectionBlock = ({
-  section, sectionIndex, totalSections, list,
+  section, sectionIndex, totalSections, list, hideCheckbox,
   onUpdateSection, onDeleteSection, onReorderSection, onReorderItemInSection,
   onEditItem, onDeleteItem, onToggleSelected,
   onSectionDragStart, onSectionDragOver, onSectionDrop, onSectionDragEnd, isDragOver,
@@ -117,6 +118,7 @@ export const SectionBlock = ({
             totalItems={sectionItems.length}
             currency={list.currency}
             isDragOver={itemDragOver === idx}
+            hideCheckbox={hideCheckbox}
             onDragStart={() => handleItemDragStart(idx)}
             onDragOver={(e) => handleItemDragOver(e, idx)}
             onDrop={() => handleItemDrop(idx)}

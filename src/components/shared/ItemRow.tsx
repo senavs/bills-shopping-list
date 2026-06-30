@@ -6,6 +6,7 @@ interface ItemRowProps {
   totalItems: number
   currency: string
   isDragOver: boolean
+  hideCheckbox?: boolean
   onDragStart: () => void
   onDragOver: (e: React.DragEvent) => void
   onDrop: () => void
@@ -18,7 +19,7 @@ interface ItemRowProps {
 }
 
 export const ItemRow = ({
-  item, index, totalItems, currency, isDragOver,
+  item, index, totalItems, currency, isDragOver, hideCheckbox,
   onDragStart, onDragOver, onDrop, onDragEnd,
   onMoveUp, onMoveDown, onToggleSelected, onEdit, onDelete,
 }: ItemRowProps) => (
@@ -37,15 +38,17 @@ export const ItemRow = ({
       <button onClick={onMoveDown} disabled={index === totalItems - 1} aria-label={`Move ${item.name} down`} className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-2 leading-none">▼</button>
     </div>
 
-    <input
-      type="checkbox"
-      checked={item.selected}
-      onChange={(e) => onToggleSelected(e.target.checked)}
-      className="w-5 h-5 shrink-0"
-    />
+    {!hideCheckbox && (
+      <input
+        type="checkbox"
+        checked={item.selected}
+        onChange={(e) => onToggleSelected(e.target.checked)}
+        className="w-5 h-5 shrink-0"
+      />
+    )}
 
     <div className="flex-1 min-w-0">
-      <h3 className={`font-medium truncate ${item.selected ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+      <h3 className={`font-medium truncate ${!hideCheckbox && item.selected ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
         {item.name}
       </h3>
       <span className="text-sm text-gray-600 dark:text-gray-400">

@@ -103,6 +103,7 @@ export const ListDetail = () => {
 
   const assignedItemIds = new Set(list.sections.flatMap(s => s.itemIds))
   const unassignedItems = list.items.filter(i => !assignedItemIds.has(i.id))
+  const isTemplate = !!list.isTemplate
 
   const handleAddItem = (item: Omit<Item, 'id'>, sectionId: string) => {
     const newId = addItem(list.id, item)
@@ -165,11 +166,24 @@ export const ListDetail = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline text-sm mb-2 block">← Back</Link>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{list.name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{list.name}</h1>
+              {isTemplate && (
+                <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
+                  Template
+                </span>
+              )}
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {list.type === 'shopping' ? '🛒' : '🍽️'} {list.type} • {list.currency}
             </p>
           </div>
+          <Link
+            to={`/lists/${list.id}/edit`}
+            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+          >
+            Edit
+          </Link>
         </div>
 
         {isEmpty ? (
@@ -186,6 +200,7 @@ export const ListDetail = () => {
                 sectionIndex={sectionIndex}
                 totalSections={list.sections.length}
                 list={list}
+                hideCheckbox={isTemplate}
                 onUpdateSection={(sectionId, updates) => updateSection(list.id, sectionId, updates)}
                 onDeleteSection={(sectionId) => deleteSection(list.id, sectionId)}
                 onReorderSection={(from, to) => reorderSection(list.id, from, to)}
@@ -215,6 +230,7 @@ export const ListDetail = () => {
                 totalItems={unassignedItems.length}
                 currency={list.currency}
                 isDragOver={dragOverIndex === index}
+                hideCheckbox={isTemplate}
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={() => handleDrop(index)}
