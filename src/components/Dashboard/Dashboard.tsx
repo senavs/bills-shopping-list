@@ -194,7 +194,14 @@ export const Dashboard = () => {
         ) : (
           filteredLists.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-              {activeTab === 'active' ? t.noActiveLists : t.noArchivedLists}
+              <p>{activeTab === 'active' ? t.noActiveLists : t.noArchivedLists}</p>
+              {activeTab === 'active' && (
+                <p className="mt-3 text-sm">
+                  <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline">
+                    {t.landingHint} →
+                  </Link>
+                </p>
+              )}
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">

@@ -46,7 +46,7 @@ export const ListForm = () => {
       createList({ name: name.trim(), type, currency, taxPercentage: tax })
     }
     
-    navigate('/')
+    navigate('/app')
   }
 
   return (
@@ -138,7 +138,7 @@ export const ListForm = () => {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/app')}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
             >
               Cancel

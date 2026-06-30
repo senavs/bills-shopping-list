@@ -1,0 +1,122 @@
+import { useNavigate } from 'react-router-dom'
+import { useLanguage } from '../../contexts/LanguageContext'
+
+export const Landing = () => {
+  const { t } = useLanguage()
+  const navigate = useNavigate()
+
+  const handleGetStarted = () => {
+    localStorage.setItem('billbuddy_visited', 'true')
+    navigate('/app')
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 text-white overflow-y-auto">
+      {/* Hero Section */}
+      <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative">
+        <div className="text-6xl mb-6 animate-bounce-slow">
+          💰📋📱
+        </div>
+        <h1 className="text-5xl font-extrabold mb-4 tracking-tight">
+          BillBuddy
+        </h1>
+        <p className="text-xl text-blue-100 mb-8 max-w-md leading-relaxed">
+          {t.landingTagline}
+        </p>
+        <button
+          onClick={handleGetStarted}
+          className="px-8 py-4 bg-white text-blue-700 font-bold rounded-full text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200"
+        >
+          {t.landingCta} →
+        </button>
+        <div className="absolute bottom-8 text-blue-200 animate-bounce text-2xl">
+          ↓
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 px-6 bg-white text-gray-900">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            {t.landingWhyTitle}
+          </h2>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-blue-50 rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-4xl mb-3">📋</div>
+              <h3 className="font-bold text-lg mb-2">{t.landingFeature1Title}</h3>
+              <p className="text-sm text-gray-600">{t.landingFeature1Desc}</p>
+            </div>
+            <div className="bg-green-50 rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-4xl mb-3">💰</div>
+              <h3 className="font-bold text-lg mb-2">{t.landingFeature2Title}</h3>
+              <p className="text-sm text-gray-600">{t.landingFeature2Desc}</p>
+            </div>
+            <div className="bg-purple-50 rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-4xl mb-3">🌐</div>
+              <h3 className="font-bold text-lg mb-2">{t.landingFeature3Title}</h3>
+              <p className="text-sm text-gray-600">{t.landingFeature3Desc}</p>
+            </div>
+            <div className="bg-orange-50 rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-4xl mb-3">📱</div>
+              <h3 className="font-bold text-lg mb-2">{t.landingFeature4Title}</h3>
+              <p className="text-sm text-gray-600">{t.landingFeature4Desc}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it works Section */}
+      <section className="py-20 px-6 bg-gray-50 text-gray-900">
+        <div className="max-w-md mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            {t.landingHowTitle}
+          </h2>
+          <div className="space-y-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0">
+                1
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">{t.landingStep1Title}</h3>
+                <p className="text-gray-600 text-sm">{t.landingStep1Desc}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0">
+                2
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">{t.landingStep2Title}</h3>
+                <p className="text-gray-600 text-sm">{t.landingStep2Desc}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shrink-0">
+                3
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">{t.landingStep3Title}</h3>
+                <p className="text-gray-600 text-sm">{t.landingStep3Desc}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-20 px-6 bg-gradient-to-br from-blue-600 to-purple-700 text-center">
+        <h2 className="text-3xl font-bold mb-6">{t.landingReadyTitle}</h2>
+        <p className="text-blue-100 mb-8 text-lg">{t.landingReadyDesc}</p>
+        <button
+          onClick={handleGetStarted}
+          className="px-8 py-4 bg-white text-blue-700 font-bold rounded-full text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200"
+        >
+          {t.landingOpenApp} →
+        </button>
+        <p className="mt-12 text-blue-200 text-sm">
+          {t.landingMadeWith}
+        </p>
+      </section>
+    </div>
+  )
+}

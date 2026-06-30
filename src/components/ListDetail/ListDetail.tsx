@@ -101,7 +101,7 @@ export const ListDetail = () => {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 dark:text-gray-400 mb-4">{t.listNotFound}</p>
-          <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline">{t.backToDashboard}</Link>
+          <Link to="/app" className="text-blue-600 dark:text-blue-400 hover:underline">{t.backToDashboard}</Link>
         </div>
       </div>
     )
@@ -171,7 +171,7 @@ export const ListDetail = () => {
       <div className="container mx-auto p-4 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline text-sm mb-2 block">{t.back}</Link>
+            <Link to="/app" className="text-blue-600 dark:text-blue-400 hover:underline text-sm mb-2 block">{t.back}</Link>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{list.name}</h1>
               {isTemplate && (

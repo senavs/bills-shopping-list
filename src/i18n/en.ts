@@ -78,6 +78,31 @@ export const en = {
   confirm: 'Confirm',
   undo: 'Undo',
   sections: 'sections',
+  // Landing page
+  landingTagline: 'Split bills. Track shopping. Stay organized.',
+  landingCta: 'Get Started',
+  landingWhyTitle: 'Why BillBuddy?',
+  landingFeature1Title: 'Smart Lists',
+  landingFeature1Desc: 'Create and organize shopping lists with sections, templates, and drag-and-drop.',
+  landingFeature2Title: 'Bill Splitting',
+  landingFeature2Desc: 'Split any bill among friends fairly — assign items and see who owes what.',
+  landingFeature3Title: 'Multi-language',
+  landingFeature3Desc: 'English and Portuguese with auto-detection from your device.',
+  landingFeature4Title: 'Works Offline',
+  landingFeature4Desc: 'Install on your phone and use without internet. Your data stays on your device.',
+  landingHowTitle: 'How it works',
+  landingStep1Title: 'Create a list',
+  landingStep1Desc: 'Shopping, restaurant, or any expense — pick a type and currency.',
+  landingStep2Title: 'Add items & people',
+  landingStep2Desc: 'Track prices, quantities, and assign items to people.',
+  landingStep3Title: 'Split & share',
+  landingStep3Desc: 'See exactly who owes what — fair, clear, and instant.',
+  landingReadyTitle: 'Ready to get started?',
+  landingReadyDesc: 'No sign-up needed. Your data stays on your device.',
+  landingOpenApp: 'Open App',
+  landingMadeWith: 'Made with ❤️',
+  // Dashboard empty state
+  landingHint: 'New here? See what BillBuddy can do',
 }
 
 export type TranslationKeys = typeof en
