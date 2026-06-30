@@ -14,6 +14,7 @@ Offline-first web app for tracking expenses while shopping or dining out.
 - ✅ Fully offline - no backend required
 - ✅ Mobile-first responsive design
 - ✅ Data persisted in LocalStorage
+- ✅ PWA - installable on iOS and Android
 
 ## Tech Stack
 
@@ -21,6 +22,7 @@ Offline-first web app for tracking expenses while shopping or dining out.
 - Vite 4
 - Tailwind CSS 3
 - Vitest for testing
+- vite-plugin-pwa (service worker + web manifest)
 - LocalStorage for persistence
 - GitHub Pages deployment
 
@@ -35,22 +37,42 @@ npm run dev
 
 # Run tests
 npm test
+```
 
+## Build
+
+```bash
 # Build for production
 npm run build
 
-# Preview production build
+# Preview production build locally
 npm run preview
 ```
 
-## Deployment to GitHub Pages
+> **Note:** On Node 18, the build requires the crypto polyfill included in the repo. The `build` script already handles this automatically.
+
+## Deploy
 
 ```bash
-# Deploy to GitHub Pages
+# Build and deploy to GitHub Pages (runs predeploy → build automatically)
 npm run deploy
 ```
 
-This will build the project and deploy to the `gh-pages` branch.
+This will build the project and publish the `dist/` folder to the `gh-pages` branch. The app is available at:
+
+👉 https://senavs.github.io/bills-shopping-list/
+
+## Install on iOS (iPhone/iPad)
+
+This app is a Progressive Web App (PWA). You can install it on your iOS device and use it like a native app — no App Store needed.
+
+1. Open **Safari** on your iPhone or iPad
+2. Navigate to https://senavs.github.io/bills-shopping-list/
+3. Tap the **Share** button (square with an arrow pointing up)
+4. Scroll down and tap **Add to Home Screen**
+5. Tap **Add** in the top right corner
+
+The app will appear on your home screen with its own icon. It launches full-screen (no browser bar), works completely offline, and persists your data locally.
 
 ## Project Structure
 
