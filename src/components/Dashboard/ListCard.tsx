@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { List } from '../../types'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface ListCardProps {
   list: List
@@ -11,8 +12,9 @@ interface ListCardProps {
 }
 
 export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, onSaveAsTemplate }: ListCardProps) => {
+  const { t } = useLanguage()
   const icon = list.type === 'shopping' ? '🛒' : '🍽️'
-  
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
       <Link to={`/lists/${list.id}`} className="block mb-3">
@@ -25,51 +27,51 @@ export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, 
           </div>
           <span className="text-sm text-gray-500 dark:text-gray-400">{list.currency}</span>
         </div>
-        
+
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          {list.items.length} {list.items.length === 1 ? 'item' : 'items'}
+          {list.items.length} {list.items.length === 1 ? t.item : t.items}
         </p>
       </Link>
-      
+
       <div className="flex gap-2 flex-wrap pt-3 border-t border-gray-200 dark:border-gray-700">
         <Link
           to={`/lists/${list.id}/edit`}
           className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
-          Edit
+          {t.edit}
         </Link>
         {!list.archived ? (
           <button
             onClick={onArchive}
             className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           >
-            Archive
+            {t.archive}
           </button>
         ) : (
           <button
             onClick={onUnarchive}
             className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
           >
-            Unarchive
+            {t.unarchive}
           </button>
         )}
         <button
           onClick={onDuplicate}
           className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
-          Duplicate
+          {t.duplicate}
         </button>
         <button
           onClick={onSaveAsTemplate}
           className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
         >
-          Template
+          {t.template}
         </button>
         <button
           onClick={onDelete}
           className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
         >
-          Delete
+          {t.delete}
         </button>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { useLanguage } from '../../contexts/LanguageContext'
+
 interface ConfirmDialogProps {
   isOpen: boolean
   title: string
@@ -7,6 +9,7 @@ interface ConfirmDialogProps {
 }
 
 export const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel }: ConfirmDialogProps) => {
+  const { t } = useLanguage()
   if (!isOpen) return null
 
   return (
@@ -19,13 +22,13 @@ export const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel }: C
             onClick={onCancel}
             className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
           >
-            Cancel
+            {t.cancel}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded"
           >
-            Delete
+            {t.confirm}
           </button>
         </div>
       </div>

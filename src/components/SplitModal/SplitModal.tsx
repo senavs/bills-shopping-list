@@ -1,5 +1,6 @@
 import type { List } from '../../types'
 import { calcSplit } from '../../lib/calculations'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface SplitModalProps {
   list: List
@@ -7,6 +8,7 @@ interface SplitModalProps {
 }
 
 export const SplitModal = ({ list, onClose }: SplitModalProps) => {
+  const { t } = useLanguage()
   const splits = calcSplit(list)
   const currency = list.currency === 'BRL' ? 'R$' : '$'
 
@@ -55,7 +57,7 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
                       <span className="text-gray-600 dark:text-gray-300 truncate mr-2">
                         {item.name}
                         {item.shared && (
-                          <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">(split)</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">({t.split})</span>
                         )}
                       </span>
                       <span className="text-gray-700 dark:text-gray-200 shrink-0">
@@ -68,12 +70,12 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
                 {/* Subtotal and tax */}
                 <div className="border-t border-gray-200 dark:border-gray-600 pt-2 space-y-1">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">Subtotal</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t.subtotal}</span>
                     <span className="text-gray-700 dark:text-gray-200">{formatAmount(split.subtotal)}</span>
                   </div>
                   {split.taxAmount > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">Tax ({list.taxPercentage}%)</span>
+                      <span className="text-gray-500 dark:text-gray-400">{t.tax} ({list.taxPercentage}%)</span>
                       <span className="text-gray-700 dark:text-gray-200">{formatAmount(split.taxAmount)}</span>
                     </div>
                   )}
@@ -86,7 +88,7 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
           {splits.length > 0 && (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <div className="flex justify-between font-semibold text-gray-900 dark:text-white">
-                <span>Grand Total</span>
+                <span>{t.grandTotal}</span>
                 <span>{formatAmount(splits.reduce((sum, s) => sum + s.total, 0))}</span>
               </div>
             </div>

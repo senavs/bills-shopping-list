@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Person } from '../../types'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface PeopleManagerProps {
   people: Person[]
@@ -8,6 +9,7 @@ interface PeopleManagerProps {
 }
 
 export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleManagerProps) => {
+  const { t } = useLanguage()
   const [newName, setNewName] = useState('')
   const [isExpanded, setIsExpanded] = useState(people.length > 0)
 
@@ -26,7 +28,7 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
         className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
       >
         <span>{isExpanded ? '▼' : '▶'}</span>
-        <span>People ({people.length})</span>
+        <span>{t.people} ({people.length})</span>
       </button>
 
       {isExpanded && (
@@ -56,7 +58,7 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Add person..."
+              placeholder={t.addPerson}
               className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
             />
             <button
@@ -64,7 +66,7 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
               disabled={!newName.trim()}
               className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add
+              {t.add}
             </button>
           </form>
         </div>

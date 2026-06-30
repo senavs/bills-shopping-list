@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { ListForm } from './ListForm'
+import { LanguageProvider } from '../../contexts/LanguageContext'
 import * as useListsModule from '../../hooks/useLists'
 import type { List } from '../../types'
 
@@ -51,7 +52,7 @@ describe('ListForm', () => {
   const renderForm = () => {
     return render(
       <BrowserRouter>
-        <ListForm />
+        <LanguageProvider><ListForm /></LanguageProvider>
       </BrowserRouter>
     )
   }

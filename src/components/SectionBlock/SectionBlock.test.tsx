@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { SectionBlock } from './SectionBlock'
+import { LanguageProvider } from '../../contexts/LanguageContext'
 import type { List, Section } from '../../types'
 
 afterEach(cleanup)
@@ -38,44 +39,43 @@ const defaultProps = {
 
 describe('SectionBlock', () => {
   it('renders section name', () => {
-    render(<SectionBlock {...defaultProps} />)
+    render(<LanguageProvider><SectionBlock {...defaultProps} /></LanguageProvider>)
     expect(screen.getByText(/dairy/i)).toBeDefined()
   })
 
   it('renders items when not collapsed', () => {
-    render(<SectionBlock {...defaultProps} />)
+    render(<LanguageProvider><SectionBlock {...defaultProps} /></LanguageProvider>)
     expect(screen.getByText('Apple')).toBeDefined()
     expect(screen.getByText('Banana')).toBeDefined()
   })
 
   it('hides items when collapsed', () => {
-    render(<SectionBlock {...defaultProps} section={{ ...section, collapsed: true }} />)
+    render(<LanguageProvider><SectionBlock {...defaultProps} section={{ ...section, collapsed: true }} /></LanguageProvider>)
     expect(screen.queryByText('Apple')).toBeNull()
     expect(screen.queryByText('Banana')).toBeNull()
   })
 
   it('calls onUpdateSection with collapsed toggle', () => {
     const onUpdateSection = vi.fn()
-    render(<SectionBlock {...defaultProps} onUpdateSection={onUpdateSection} />)
+    render(<LanguageProvider><SectionBlock {...defaultProps} onUpdateSection={onUpdateSection} /></LanguageProvider>)
     fireEvent.click(screen.getByLabelText('Collapse section'))
     expect(onUpdateSection).toHaveBeenCalledWith('s1', { collapsed: true })
   })
 
   it('shows delete confirm dialog and calls onDeleteSection', () => {
     const onDeleteSection = vi.fn()
-    render(<SectionBlock {...defaultProps} onDeleteSection={onDeleteSection} />)
+    render(<LanguageProvider><SectionBlock {...defaultProps} onDeleteSection={onDeleteSection} /></LanguageProvider>)
     // Section header Delete is first; item rows also have Delete buttons
     fireEvent.click(screen.getAllByText('Delete')[0])
     expect(screen.getByText(/delete "dairy"/i)).toBeDefined()
     // ConfirmDialog Delete button is the last Delete button in the DOM
-    const deleteButtons = screen.getAllByRole('button', { name: /^delete$/i })
-    fireEvent.click(deleteButtons[deleteButtons.length - 1])
+    fireEvent.click(screen.getByText('Confirm'))
     expect(onDeleteSection).toHaveBeenCalledWith('s1')
   })
 
   it('shows rename form and calls onUpdateSection with new name', () => {
     const onUpdateSection = vi.fn()
-    render(<SectionBlock {...defaultProps} onUpdateSection={onUpdateSection} />)
+    render(<LanguageProvider><SectionBlock {...defaultProps} onUpdateSection={onUpdateSection} /></LanguageProvider>)
     fireEvent.click(screen.getByText('Rename'))
     fireEvent.change(screen.getByPlaceholderText('Section name'), { target: { value: 'Produce' } })
     fireEvent.click(screen.getByText('Save'))

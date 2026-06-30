@@ -3,12 +3,13 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { Dashboard } from './Dashboard'
 import { DarkModeProvider } from '../../contexts/DarkModeContext'
+import { LanguageProvider } from '../../contexts/LanguageContext'
 import * as useListsModule from '../../hooks/useLists'
 import type { List } from '../../types'
 
 vi.mock('../../hooks/useLists')
 
-const renderDashboard = () => render(<BrowserRouter><DarkModeProvider><Dashboard /></DarkModeProvider></BrowserRouter>)
+const renderDashboard = () => render(<BrowserRouter><LanguageProvider><DarkModeProvider><Dashboard /></DarkModeProvider></LanguageProvider></BrowserRouter>)
 
 describe('Dashboard', () => {
   const mockUseLists = {
@@ -85,7 +86,7 @@ describe('Dashboard', () => {
 
     renderDashboard()
     fireEvent.click(screen.getAllByText('Delete')[0])
-    fireEvent.click(screen.getAllByText('Delete')[1]) // Confirm button
+    fireEvent.click(screen.getByText('Confirm')) // Confirm button
     
     expect(mockUseLists.deleteList).toHaveBeenCalledWith('1')
   })

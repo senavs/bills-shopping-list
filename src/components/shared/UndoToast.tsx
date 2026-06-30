@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface UndoToastProps {
   message: string
@@ -8,6 +9,7 @@ interface UndoToastProps {
 }
 
 export const UndoToast = ({ message, duration = 5000, onUndo, onDismiss }: UndoToastProps) => {
+  const { t } = useLanguage()
   const [progress, setProgress] = useState(100)
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export const UndoToast = ({ message, duration = 5000, onUndo, onDismiss }: UndoT
             onClick={onUndo}
             className="text-blue-400 hover:text-blue-300 font-semibold text-sm shrink-0"
           >
-            Undo
+            {t.undo}
           </button>
         </div>
         <div className="h-1 bg-gray-600">

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { List } from '../../types'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface TemplateCardProps {
   template: List
@@ -8,6 +9,7 @@ interface TemplateCardProps {
 }
 
 export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCardProps) => {
+  const { t } = useLanguage()
   const icon = template.type === 'shopping' ? '🛒' : '🍽️'
 
   return (
@@ -21,13 +23,13 @@ export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCard
             </h3>
           </div>
           <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
-            Template
+            {t.template}
           </span>
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          {template.items.length} {template.items.length === 1 ? 'item' : 'items'}
-          {template.sections.length > 0 && ` • ${template.sections.length} ${template.sections.length === 1 ? 'section' : 'sections'}`}
+          {template.items.length} {template.items.length === 1 ? t.item : t.items}
+          {template.sections.length > 0 && ` • ${template.sections.length} ${t.sections}`}
         </p>
       </Link>
 
@@ -36,19 +38,19 @@ export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCard
           onClick={onUseTemplate}
           className="text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
         >
-          Use Template
+          {t.useTemplate}
         </button>
         <Link
           to={`/lists/${template.id}/edit`}
           className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
-          Edit
+          {t.edit}
         </Link>
         <button
           onClick={onDelete}
           className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
         >
-          Delete
+          {t.delete}
         </button>
       </div>
     </div>

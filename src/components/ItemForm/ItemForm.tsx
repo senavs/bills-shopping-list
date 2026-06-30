@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { Item, Section, Person } from '../../types'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface ItemFormProps {
   item?: Item
@@ -11,6 +12,7 @@ interface ItemFormProps {
 }
 
 export const ItemForm = ({ item, sections = [], people = [], initialSectionId = '', onSubmit, onCancel }: ItemFormProps) => {
+  const { t } = useLanguage()
   const [name, setName] = useState(item?.name || '')
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1')
   const [unitPrice, setUnitPrice] = useState(item?.unitPrice.toString() || '0')
@@ -35,7 +37,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
     e.preventDefault()
 
     if (!name.trim()) {
-      setError('Name is required')
+      setError(t.nameRequired)
       return
     }
 
@@ -43,12 +45,12 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
     const price = parseFloat(unitPrice)
 
     if (isNaN(qty) || qty < 0) {
-      setError('Quantity must be 0 or greater')
+      setError(t.quantityError)
       return
     }
 
     if (isNaN(price) || price < 0) {
-      setError('Price must be 0 or greater')
+      setError(t.priceError)
       return
     }
 
@@ -67,7 +69,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          {item ? 'Edit Item' : 'Add Item'}
+          {item ? t.editItem : t.addItemTitle}
         </h3>
 
         <form onSubmit={handleSubmit}>
@@ -86,7 +88,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="e.g., Milk"
+              placeholder={t.itemNamePlaceholder}
               required
             />
           </div>
@@ -187,7 +189,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 onChange={(e) => setSectionId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
-                <option value="">No section</option>
+                <option value="">{t.noSection}</option>
                 {sections.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
@@ -207,7 +209,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded"
             >
-              {item ? 'Save' : 'Add'}
+              {item ? t.save : t.add}
             </button>
           </div>
         </form>

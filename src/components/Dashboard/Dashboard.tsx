@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { useDarkMode } from '../../contexts/DarkModeContext'
+import { useLanguage } from '../../contexts/LanguageContext'
 import { ListCard } from './ListCard'
 import { TemplateCard } from './TemplateCard'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
@@ -10,6 +11,7 @@ import { exportData, importData } from '../../lib/importExport'
 export const Dashboard = () => {
   const { lists, archiveList, unarchiveList, deleteList, duplicateList, saveAsTemplate, createFromTemplate, deleteTemplate } = useLists()
   const { isDark, toggleDarkMode } = useDarkMode()
+  const { locale, setLocale, t } = useLanguage()
   const [activeTab, setActiveTab] = useState<'active' | 'archived' | 'templates'>('active')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deleteTemplateConfirm, setDeleteTemplateConfirm] = useState<string | null>(null)
@@ -19,7 +21,7 @@ export const Dashboard = () => {
   const regularLists = lists.filter(list => !list.isTemplate)
   const templates = lists.filter(list => list.isTemplate)
 
-  const filteredLists = regularLists.filter(list => 
+  const filteredLists = regularLists.filter(list =>
     activeTab === 'active' ? !list.archived : list.archived
   )
 
@@ -50,10 +52,10 @@ export const Dashboard = () => {
       localStorage.setItem('app', JSON.stringify(data))
       window.location.reload()
     } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'Import failed')
+      setImportError(error instanceof Error ? error.message : t.importFailed)
       setTimeout(() => setImportError(null), 3000)
     }
-    
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -64,9 +66,16 @@ export const Dashboard = () => {
       <div className="container mx-auto p-4 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Bills & Shopping List
+            {t.appTitle}
           </h1>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <button
+              onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
+              className="w-10 h-10 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center text-xs font-bold"
+              title={locale === 'en' ? 'Mudar para Português' : 'Switch to English'}
+            >
+              {locale === 'en' ? 'BR' : 'EN'}
+            </button>
             <button
               onClick={toggleDarkMode}
               className="w-10 h-10 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center"
@@ -78,13 +87,13 @@ export const Dashboard = () => {
               onClick={handleExport}
               className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded text-sm"
             >
-              Export
+              {t.export}
             </button>
             <button
               onClick={handleImportClick}
               className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700 rounded text-sm"
             >
-              Import
+              {t.import}
             </button>
           </div>
         </div>
@@ -112,7 +121,7 @@ export const Dashboard = () => {
                 : 'text-gray-600 dark:text-gray-400'
             }`}
           >
-            Active
+            {t.active}
           </button>
           <button
             onClick={() => setActiveTab('archived')}
@@ -122,7 +131,7 @@ export const Dashboard = () => {
                 : 'text-gray-600 dark:text-gray-400'
             }`}
           >
-            Archived
+            {t.archived}
           </button>
           <button
             onClick={() => setActiveTab('templates')}
@@ -132,15 +141,15 @@ export const Dashboard = () => {
                 : 'text-gray-600 dark:text-gray-400'
             }`}
           >
-            Templates{templates.length > 0 && ` (${templates.length})`}
+            {t.templates}{templates.length > 0 && ` (${templates.length})`}
           </button>
         </div>
 
         {activeTab === 'templates' ? (
           templates.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-              <p className="mb-2">No templates yet</p>
-              <p className="text-sm">Save any list as a template to reuse it later</p>
+              <p className="mb-2">{t.noTemplates}</p>
+              <p className="text-sm">{t.noTemplatesHint}</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
@@ -157,7 +166,7 @@ export const Dashboard = () => {
         ) : (
           filteredLists.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-              No {activeTab} lists yet
+              {activeTab === 'active' ? t.noActiveLists : t.noArchivedLists}
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
@@ -186,16 +195,16 @@ export const Dashboard = () => {
 
       <ConfirmDialog
         isOpen={deleteConfirm !== null}
-        title="Delete List"
-        message="Are you sure you want to delete this list? This action cannot be undone."
+        title={t.deleteList}
+        message={t.deleteListMessage}
         onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
         onCancel={() => setDeleteConfirm(null)}
       />
 
       <ConfirmDialog
         isOpen={deleteTemplateConfirm !== null}
-        title="Delete Template"
-        message="Are you sure you want to delete this template? This action cannot be undone."
+        title={t.deleteTemplate}
+        message={t.deleteTemplateMessage}
         onConfirm={() => deleteTemplateConfirm && handleDeleteTemplate(deleteTemplateConfirm)}
         onCancel={() => setDeleteTemplateConfirm(null)}
       />

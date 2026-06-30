@@ -9,6 +9,7 @@ import { ItemRow } from '../shared/ItemRow'
 import { UndoToast } from '../shared/UndoToast'
 import { PeopleManager } from '../PeopleManager/PeopleManager'
 import { SplitModal } from '../SplitModal/SplitModal'
+import { useLanguage } from '../../contexts/LanguageContext'
 import type { Item } from '../../types'
 
 interface PendingDelete {
@@ -25,6 +26,7 @@ export const ListDetail = () => {
     addSection, updateSection, deleteSection, reorderSection, reorderItemInSection,
     addPerson, removePerson,
   } = useLists()
+  const { t } = useLanguage()
   const [showItemForm, setShowItemForm] = useState(false)
   const [showSectionForm, setShowSectionForm] = useState(false)
   const [showSplitModal, setShowSplitModal] = useState(false)
@@ -98,8 +100,8 @@ export const ListDetail = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">List not found</p>
-          <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline">Back to Dashboard</Link>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{t.listNotFound}</p>
+          <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline">{t.backToDashboard}</Link>
         </div>
       </div>
     )
@@ -169,7 +171,7 @@ export const ListDetail = () => {
       <div className="container mx-auto p-4 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline text-sm mb-2 block">← Back</Link>
+            <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline text-sm mb-2 block">{t.back}</Link>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{list.name}</h1>
               {isTemplate && (
@@ -219,7 +221,7 @@ export const ListDetail = () => {
 
         {isEmpty ? (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-            No items yet. Tap the + button to add one.
+            {t.noItemsYet}
           </div>
         ) : (
           <div className="space-y-2 mb-32">
@@ -293,15 +295,15 @@ export const ListDetail = () => {
           <button
             onClick={() => setShowSectionForm(true)}
             className="w-11 h-11 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 flex items-center justify-center text-lg"
-            aria-label="New section"
-            title="New section"
+            aria-label={t.newSection}
+            title={t.newSection}
           >
             ☰
           </button>
           <button
             onClick={() => setShowItemForm(true)}
             className="w-11 h-11 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center text-xl"
-            aria-label="Add item"
+            aria-label={t.addItem}
           >
             +
           </button>
