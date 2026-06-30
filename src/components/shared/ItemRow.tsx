@@ -1,4 +1,6 @@
 import type { Item, Person } from '../../types'
+import { formatCurrency } from '../../lib/format'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface ItemRowProps {
   item: Item
@@ -24,6 +26,8 @@ export const ItemRow = ({
   onDragStart, onDragOver, onDrop, onDragEnd,
   onMoveUp, onMoveDown, onToggleSelected, onEdit, onDelete,
 }: ItemRowProps) => {
+  const { locale } = useLanguage()
+  const fmt = (amount: number) => formatCurrency(amount, currency, locale)
   const assignedPeople = (item.assignedTo || [])
     .map(id => people.find(p => p.id === id))
     .filter((p): p is Person => !!p)
@@ -58,7 +62,7 @@ export const ItemRow = ({
           {item.name}
         </h3>
         <span className="text-sm text-gray-600 dark:text-gray-400">
-          {item.quantity} × {currency === 'BRL' ? 'R$' : '$'} {item.unitPrice.toFixed(2)} = <span className="font-bold">{currency === 'BRL' ? 'R$' : '$'} {(item.quantity * item.unitPrice).toFixed(2)}</span>
+          {item.quantity} × {fmt(item.unitPrice)} = <span className="font-bold">{fmt(item.quantity * item.unitPrice)}</span>
         </span>
 
         {/* Assignment badges */}

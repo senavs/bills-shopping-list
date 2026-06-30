@@ -1,5 +1,6 @@
 import type { List } from '../../types'
 import { calcSplit } from '../../lib/calculations'
+import { formatCurrency } from '../../lib/format'
 import { useLanguage } from '../../contexts/LanguageContext'
 
 interface SplitModalProps {
@@ -8,11 +9,10 @@ interface SplitModalProps {
 }
 
 export const SplitModal = ({ list, onClose }: SplitModalProps) => {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
   const splits = calcSplit(list)
-  const currency = list.currency === 'BRL' ? 'R$' : '$'
 
-  const formatAmount = (amount: number) => `${currency} ${amount.toFixed(2)}`
+  const formatAmount = (amount: number) => formatCurrency(amount, list.currency, locale)
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">

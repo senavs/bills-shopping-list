@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { Item, Section, Person } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { parseLocaleNumber } from '../../lib/format'
 
 interface ItemFormProps {
   item?: Item
@@ -41,8 +42,8 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
       return
     }
 
-    const qty = parseFloat(quantity)
-    const price = parseFloat(unitPrice)
+    const qty = parseLocaleNumber(quantity)
+    const price = parseLocaleNumber(unitPrice)
 
     if (isNaN(qty) || qty < 0) {
       setError(t.quantityError)
@@ -99,11 +100,10 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 Quantity
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                min="0"
-                step="0.01"
                 required
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
@@ -114,11 +114,10 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 Unit Price
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={unitPrice}
                 onChange={(e) => setUnitPrice(e.target.value)}
-                min="0"
-                step="0.01"
                 required
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />

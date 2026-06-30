@@ -1,5 +1,6 @@
 import type { List } from '../../types'
 import { calcTotals } from '../../lib/calculations'
+import { formatCurrency } from '../../lib/format'
 import { useLanguage } from '../../contexts/LanguageContext'
 
 interface TotalsBarProps {
@@ -7,16 +8,10 @@ interface TotalsBarProps {
 }
 
 export const TotalsBar = ({ list }: TotalsBarProps) => {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
   const totals = calcTotals(list)
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: list.currency,
-      minimumFractionDigits: 2,
-    }).format(amount)
-  }
+  const fmt = (amount: number) => formatCurrency(amount, list.currency, locale)
 
   const taxAmount = totals.totalAllWithTax - totals.totalAll
 
@@ -27,28 +22,28 @@ export const TotalsBar = ({ list }: TotalsBarProps) => {
           <div>
             <div className="text-xs text-gray-500 dark:text-gray-400">{t.subtotal}</div>
             <div className="text-lg font-semibold text-gray-900 dark:text-white">
-              {formatCurrency(totals.totalAll)}
+              {fmt(totals.totalAll)}
             </div>
           </div>
 
           <div>
             <div className="text-xs text-gray-500 dark:text-gray-400">{t.tax} ({list.taxPercentage}%)</div>
             <div className="text-lg font-semibold text-gray-900 dark:text-white">
-              {formatCurrency(taxAmount)}
+              {fmt(taxAmount)}
             </div>
           </div>
 
           <div>
             <div className="text-xs text-gray-500 dark:text-gray-400">{t.selectedTotal}</div>
             <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-              {formatCurrency(totals.totalSelected)}
+              {fmt(totals.totalSelected)}
             </div>
           </div>
 
           <div>
             <div className="text-xs text-gray-500 dark:text-gray-400">{t.total}</div>
             <div className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totals.totalAllWithTax)}
+              {fmt(totals.totalAllWithTax)}
             </div>
           </div>
         </div>
