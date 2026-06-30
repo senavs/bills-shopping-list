@@ -8,27 +8,27 @@ import { ListForm } from './components/ListForm/ListForm'
 import { ListDetail } from './components/ListDetail/ListDetail'
 
 /**
- * On first visit: show Landing at /
- * On return visit (has localStorage flag): redirect / to /app only on initial app load.
- * If user explicitly navigates to / (e.g., Home button), always show Landing.
+ * On first visit ever: show Landing at /
+ * On return visit (fresh tab/window open): redirect to /app
+ * On in-app navigation to / (Home button, hint link): show Landing
+ * 
+ * Uses sessionStorage to distinguish fresh open vs in-app navigation.
+ * sessionStorage is cleared when the tab/window closes.
  */
 const HomeRoute = () => {
   const visited = localStorage.getItem('billbuddy_visited')
-  const cameFromApp = sessionStorage.getItem('billbuddy_in_session')
+  const isActiveSession = sessionStorage.getItem('billbuddy_in_session')
 
-  // If user already has an active session (navigated within the app), show Landing
-  if (cameFromApp) {
-    return <Landing />
+  if (!isActiveSession) {
+    // First render in this tab session — mark it active
+    sessionStorage.setItem('billbuddy_in_session', 'true')
+    // If returning user, redirect to app
+    if (visited) {
+      return <Navigate to="/app" replace />
+    }
   }
 
-  // First load of this session: mark session active
-  sessionStorage.setItem('billbuddy_in_session', 'true')
-
-  // If they've visited before, redirect to app on fresh open
-  if (visited) {
-    return <Navigate to="/app" replace />
-  }
-
+  // Either first-time user or in-app navigation to /
   return <Landing />
 }
 
