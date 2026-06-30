@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { ItemForm } from '../ItemForm/ItemForm'
@@ -6,7 +6,15 @@ import { TotalsBar } from '../TotalsBar/TotalsBar'
 import { SectionBlock } from '../SectionBlock/SectionBlock'
 import { SectionForm } from '../SectionForm/SectionForm'
 import { ItemRow } from '../shared/ItemRow'
+import { UndoToast } from '../shared/UndoToast'
 import type { Item } from '../../types'
+
+interface PendingDelete {
+  listId: string
+  item: Item
+  index: number
+  sectionId: string | null
+}
 
 export const ListDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -19,10 +27,68 @@ export const ListDetail = () => {
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [sectionDragOver, setSectionDragOver] = useState<number | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null)
   const dragIndexRef = useRef<number | null>(null)
   const sectionDragRef = useRef<number | null>(null)
 
   const list = lists.find(l => l.id === id)
+
+  const handleDeleteItem = useCallback((itemId: string) => {
+    if (!list) return
+
+    // Store item info for potential undo
+    const itemIndex = list.items.findIndex(i => i.id === itemId)
+    const item = list.items[itemIndex]
+    if (!item) return
+
+    const sectionId = list.sections.find(s => s.itemIds.includes(itemId))?.id ?? null
+
+    // Delete immediately for responsive UI
+    deleteItem(list.id, itemId)
+
+    // Store pending delete for undo
+    setPendingDelete({ listId: list.id, item, index: itemIndex, sectionId })
+  }, [list, deleteItem])
+
+  const handleUndo = useCallback(() => {
+    if (!pendingDelete) return
+
+    const { listId, item, index, sectionId } = pendingDelete
+
+    // Re-add the item (addItem generates a new ID, so we need to use updateList directly)
+    // Instead, we add the item back and then fix the section
+    const newId = addItem(listId, {
+      name: item.name,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      selected: item.selected,
+      includeInTax: item.includeInTax,
+    })
+
+    // Move item to its original position
+    const currentList = lists.find(l => l.id === listId)
+    if (currentList) {
+      const currentIndex = currentList.items.length // it was just appended at the end
+      if (index < currentIndex) {
+        reorderItem(listId, currentIndex, index)
+      }
+    }
+
+    // Restore section membership
+    if (sectionId) {
+      const currentList2 = lists.find(l => l.id === listId)
+      const section = currentList2?.sections.find(s => s.id === sectionId)
+      if (section) {
+        updateSection(listId, sectionId, { itemIds: [...section.itemIds, newId] })
+      }
+    }
+
+    setPendingDelete(null)
+  }, [pendingDelete, lists, addItem, reorderItem, updateSection])
+
+  const handleDismissToast = useCallback(() => {
+    setPendingDelete(null)
+  }, [])
 
   if (!list) {
     return (
@@ -125,7 +191,7 @@ export const ListDetail = () => {
                 onReorderSection={(from, to) => reorderSection(list.id, from, to)}
                 onReorderItemInSection={(sectionId, from, to) => reorderItemInSection(list.id, sectionId, from, to)}
                 onEditItem={setEditingItem}
-                onDeleteItem={(itemId) => deleteItem(list.id, itemId)}
+                onDeleteItem={handleDeleteItem}
                 onToggleSelected={(itemId, selected) => updateItem(list.id, itemId, { selected })}
                 onSectionDragStart={handleSectionDragStart}
                 onSectionDragOver={handleSectionDragOver}
@@ -167,7 +233,7 @@ export const ListDetail = () => {
                 }}
                 onToggleSelected={(selected) => updateItem(list.id, item.id, { selected })}
                 onEdit={() => setEditingItem(item)}
-                onDelete={() => deleteItem(list.id, item.id)}
+                onDelete={() => handleDeleteItem(item.id)}
               />
             ))}
           </div>
@@ -194,6 +260,14 @@ export const ListDetail = () => {
       </div>
 
       <TotalsBar list={list} />
+
+      {pendingDelete && (
+        <UndoToast
+          message={`"${pendingDelete.item.name}" deleted`}
+          onUndo={handleUndo}
+          onDismiss={handleDismissToast}
+        />
+      )}
 
       {showItemForm && <ItemForm sections={list.sections} onSubmit={handleAddItem} onCancel={() => setShowItemForm(false)} />}
       {editingItem && (
