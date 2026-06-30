@@ -6,7 +6,7 @@
   "homepage": "https://senavs.github.io/bills-shopping-list/",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && node --require ./crypto-polyfill.cjs ./node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "test": "vitest",
     "predeploy": "npm run build",
@@ -33,6 +33,7 @@
     "tailwindcss": "^3.4.19",
     "typescript": "^6.0.3",
     "vite": "^4.5.14",
+    "vite-plugin-pwa": "^0.17.5",
     "vitest": "^1.6.1"
   }
 }
