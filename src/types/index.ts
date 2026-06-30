@@ -5,6 +5,7 @@ export interface Item {
   unitPrice: number;
   selected: boolean;
   includeInTax: boolean;
+  assignedTo?: string[];  // person IDs; empty/undefined = shared by all
 }
 
 export interface Section {
@@ -12,6 +13,11 @@ export interface Section {
   name: string;
   itemIds: string[];
   collapsed: boolean;
+}
+
+export interface Person {
+  id: string;
+  name: string;
 }
 
 export interface List {
@@ -24,6 +30,7 @@ export interface List {
   sections: Section[];
   archived: boolean;
   isTemplate?: boolean;
+  people?: Person[];
 }
 
 export interface AppState {

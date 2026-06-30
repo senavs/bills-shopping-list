@@ -13,6 +13,8 @@ interface ListsContextType {
   saveAsTemplate: (id: string) => void
   createFromTemplate: (templateId: string) => void
   deleteTemplate: (id: string) => void
+  addPerson: (listId: string, name: string) => void
+  removePerson: (listId: string, personId: string) => void
   addItem: (listId: string, item: Omit<Item, 'id'>) => string
   updateItem: (listId: string, itemId: string, updates: Partial<Item>) => void
   deleteItem: (listId: string, itemId: string) => void
@@ -127,6 +129,24 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     setLists(prev => prev.filter(l => l.id !== id))
   }
 
+  const addPerson = (listId: string, name: string) => {
+    updateListById(listId, l => ({
+      ...l,
+      people: [...(l.people || []), { id: crypto.randomUUID(), name }],
+    }))
+  }
+
+  const removePerson = (listId: string, personId: string) => {
+    updateListById(listId, l => ({
+      ...l,
+      people: (l.people || []).filter(p => p.id !== personId),
+      items: l.items.map(item => ({
+        ...item,
+        assignedTo: (item.assignedTo || []).filter(id => id !== personId),
+      })),
+    }))
+  }
+
   const addItem = (listId: string, item: Omit<Item, 'id'>): string => {
     const id = crypto.randomUUID()
     updateListById(listId, l => ({ ...l, items: [...l.items, { ...item, id }] }))
@@ -201,6 +221,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     <ListsContext.Provider value={{
       lists, createList, updateList, deleteList, archiveList, unarchiveList, duplicateList,
       saveAsTemplate, createFromTemplate, deleteTemplate,
+      addPerson, removePerson,
       addItem, updateItem, deleteItem, reorderItem,
       addSection, updateSection, deleteSection, reorderSection, reorderItemInSection,
     }}>

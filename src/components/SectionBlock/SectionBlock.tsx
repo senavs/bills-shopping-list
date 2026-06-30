@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import type { Section, Item, List } from '../../types'
+import type { Section, Item, List, Person } from '../../types'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { SectionForm } from '../SectionForm/SectionForm'
 import { SectionItemsModal } from '../SectionItemsModal/SectionItemsModal'
@@ -11,6 +11,7 @@ interface SectionBlockProps {
   totalSections: number
   list: List
   hideCheckbox?: boolean
+  people?: Person[]
   onUpdateSection: (sectionId: string, updates: Partial<Section>) => void
   onDeleteSection: (sectionId: string) => void
   onReorderSection: (fromIndex: number, toIndex: number) => void
@@ -27,7 +28,7 @@ interface SectionBlockProps {
 }
 
 export const SectionBlock = ({
-  section, sectionIndex, totalSections, list, hideCheckbox,
+  section, sectionIndex, totalSections, list, hideCheckbox, people,
   onUpdateSection, onDeleteSection, onReorderSection, onReorderItemInSection,
   onEditItem, onDeleteItem, onToggleSelected,
   onSectionDragStart, onSectionDragOver, onSectionDrop, onSectionDragEnd, isDragOver,
@@ -119,6 +120,7 @@ export const SectionBlock = ({
             currency={list.currency}
             isDragOver={itemDragOver === idx}
             hideCheckbox={hideCheckbox}
+            people={people}
             onDragStart={() => handleItemDragStart(idx)}
             onDragOver={(e) => handleItemDragOver(e, idx)}
             onDrop={() => handleItemDrop(idx)}

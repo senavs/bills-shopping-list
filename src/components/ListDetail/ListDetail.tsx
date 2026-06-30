@@ -7,6 +7,8 @@ import { SectionBlock } from '../SectionBlock/SectionBlock'
 import { SectionForm } from '../SectionForm/SectionForm'
 import { ItemRow } from '../shared/ItemRow'
 import { UndoToast } from '../shared/UndoToast'
+import { PeopleManager } from '../PeopleManager/PeopleManager'
+import { SplitModal } from '../SplitModal/SplitModal'
 import type { Item } from '../../types'
 
 interface PendingDelete {
@@ -21,9 +23,11 @@ export const ListDetail = () => {
   const {
     lists, addItem, updateItem, deleteItem, reorderItem,
     addSection, updateSection, deleteSection, reorderSection, reorderItemInSection,
+    addPerson, removePerson,
   } = useLists()
   const [showItemForm, setShowItemForm] = useState(false)
   const [showSectionForm, setShowSectionForm] = useState(false)
+  const [showSplitModal, setShowSplitModal] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [sectionDragOver, setSectionDragOver] = useState<number | null>(null)
@@ -178,13 +182,32 @@ export const ListDetail = () => {
               {list.type === 'shopping' ? '🛒' : '🍽️'} {list.type} • {list.currency}
             </p>
           </div>
-          <Link
-            to={`/lists/${list.id}/edit`}
-            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-          >
-            Edit
-          </Link>
+          <div className="flex flex-col items-end gap-1">
+            {(list.people || []).length > 0 && !isTemplate && (
+              <button
+                onClick={() => setShowSplitModal(true)}
+                className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium"
+              >
+                View Split
+              </button>
+            )}
+            <Link
+              to={`/lists/${list.id}/edit`}
+              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+            >
+              Edit
+            </Link>
+          </div>
         </div>
+
+        {/* People manager - always visible for non-templates */}
+        {!isTemplate && (
+          <PeopleManager
+            people={list.people || []}
+            onAddPerson={(name) => addPerson(list.id, name)}
+            onRemovePerson={(personId) => removePerson(list.id, personId)}
+          />
+        )}
 
         {isEmpty ? (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
@@ -201,6 +224,7 @@ export const ListDetail = () => {
                 totalSections={list.sections.length}
                 list={list}
                 hideCheckbox={isTemplate}
+                people={list.people || []}
                 onUpdateSection={(sectionId, updates) => updateSection(list.id, sectionId, updates)}
                 onDeleteSection={(sectionId) => deleteSection(list.id, sectionId)}
                 onReorderSection={(from, to) => reorderSection(list.id, from, to)}
@@ -231,6 +255,7 @@ export const ListDetail = () => {
                 currency={list.currency}
                 isDragOver={dragOverIndex === index}
                 hideCheckbox={isTemplate}
+                people={list.people || []}
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={() => handleDrop(index)}
@@ -285,11 +310,12 @@ export const ListDetail = () => {
         />
       )}
 
-      {showItemForm && <ItemForm sections={list.sections} onSubmit={handleAddItem} onCancel={() => setShowItemForm(false)} />}
+      {showItemForm && <ItemForm sections={list.sections} people={list.people || []} onSubmit={handleAddItem} onCancel={() => setShowItemForm(false)} />}
       {editingItem && (
         <ItemForm
           item={editingItem}
           sections={list.sections}
+          people={list.people || []}
           initialSectionId={list.sections.find(s => s.itemIds.includes(editingItem.id))?.id ?? ''}
           onSubmit={handleEditItem}
           onCancel={() => setEditingItem(null)}
@@ -300,6 +326,10 @@ export const ListDetail = () => {
           onSubmit={(name) => { addSection(list.id, name); setShowSectionForm(false) }}
           onCancel={() => setShowSectionForm(false)}
         />
+      )}
+
+      {showSplitModal && (
+        <SplitModal list={list} onClose={() => setShowSplitModal(false)} />
       )}
     </div>
   )

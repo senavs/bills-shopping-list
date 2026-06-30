@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react'
-import type { Item, Section } from '../../types'
+import type { Item, Section, Person } from '../../types'
 
 interface ItemFormProps {
   item?: Item
   sections?: Pick<Section, 'id' | 'name'>[]
+  people?: Person[]
   initialSectionId?: string
   onSubmit: (item: Omit<Item, 'id'>, sectionId: string) => void
   onCancel: () => void
 }
 
-export const ItemForm = ({ item, sections = [], initialSectionId = '', onSubmit, onCancel }: ItemFormProps) => {
+export const ItemForm = ({ item, sections = [], people = [], initialSectionId = '', onSubmit, onCancel }: ItemFormProps) => {
   const [name, setName] = useState(item?.name || '')
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1')
   const [unitPrice, setUnitPrice] = useState(item?.unitPrice.toString() || '0')
   const [includeInTax, setIncludeInTax] = useState(item?.includeInTax ?? true)
   const [selected, setSelected] = useState(item?.selected ?? false)
   const [sectionId, setSectionId] = useState(initialSectionId)
+  const [assignedTo, setAssignedTo] = useState<string[]>(item?.assignedTo || [])
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -25,6 +27,7 @@ export const ItemForm = ({ item, sections = [], initialSectionId = '', onSubmit,
       setUnitPrice(item.unitPrice.toString())
       setIncludeInTax(item.includeInTax)
       setSelected(item.selected)
+      setAssignedTo(item.assignedTo || [])
     }
   }, [item])
 
@@ -49,12 +52,20 @@ export const ItemForm = ({ item, sections = [], initialSectionId = '', onSubmit,
       return
     }
 
-    onSubmit({ name: name.trim(), quantity: qty, unitPrice: price, selected, includeInTax }, sectionId)
+    onSubmit({ name: name.trim(), quantity: qty, unitPrice: price, selected, includeInTax, assignedTo }, sectionId)
+  }
+
+  const togglePerson = (personId: string) => {
+    setAssignedTo(prev =>
+      prev.includes(personId)
+        ? prev.filter(id => id !== personId)
+        : [...prev, personId]
+    )
   }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg p-6 w-full sm:max-w-md">
+      <div className="bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           {item ? 'Edit Item' : 'Add Item'}
         </h3>
@@ -137,6 +148,33 @@ export const ItemForm = ({ item, sections = [], initialSectionId = '', onSubmit,
               Selected 🛒
             </label>
           </div>
+
+          {people.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Assign to people
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                Leave empty to share among all
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {people.map(person => (
+                  <button
+                    key={person.id}
+                    type="button"
+                    onClick={() => togglePerson(person.id)}
+                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                      assignedTo.includes(person.id)
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+                    }`}
+                  >
+                    {person.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {sections.length > 0 && (
             <div className="mb-4">

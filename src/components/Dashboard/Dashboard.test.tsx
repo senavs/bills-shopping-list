@@ -20,6 +20,8 @@ describe('Dashboard', () => {
     saveAsTemplate: vi.fn(),
     createFromTemplate: vi.fn(),
     deleteTemplate: vi.fn(),
+    addPerson: vi.fn(),
+    removePerson: vi.fn(),
     createList: vi.fn(),
     updateList: vi.fn(),
     addItem: vi.fn(),

@@ -27,6 +27,8 @@ describe('ListForm', () => {
     saveAsTemplate: vi.fn(),
     createFromTemplate: vi.fn(),
     deleteTemplate: vi.fn(),
+    addPerson: vi.fn(),
+    removePerson: vi.fn(),
     addItem: vi.fn(),
     updateItem: vi.fn(),
     deleteItem: vi.fn(),
