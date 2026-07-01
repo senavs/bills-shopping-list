@@ -290,7 +290,7 @@ export const ListDetail = () => {
           </div>
         )}
 
-        {/* FABs — stacked above TotalsBar */}
+        {/* FABs - stacked above TotalsBar */}
         <div className="fixed bottom-6 right-4 flex flex-col gap-2 z-10">
           <button
             onClick={() => setShowSectionForm(true)}

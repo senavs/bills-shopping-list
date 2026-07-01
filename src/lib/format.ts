@@ -50,7 +50,7 @@ export const parseLocaleNumber = (value: string): number => {
     // Comma is the decimal separator (e.g., "1.234,56" or "12,50")
     normalized = trimmed.replace(/\./g, '').replace(',', '.')
   } else {
-    // No separator or only one type — just replace comma with dot
+    // No separator or only one type - just replace comma with dot
     normalized = trimmed.replace(',', '.')
   }
 

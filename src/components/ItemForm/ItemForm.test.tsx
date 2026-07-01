@@ -22,7 +22,7 @@ const fillAndSubmit = (name = 'Milk') => {
   fireEvent.submit(input.closest('form')!)
 }
 
-describe('ItemForm — selected checkbox', () => {
+describe('ItemForm - selected checkbox', () => {
   it('renders the Selected checkbox', () => {
     render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
     expect(screen.getByLabelText(/selected/i)).toBeDefined()
@@ -63,7 +63,7 @@ describe('ItemForm — selected checkbox', () => {
   })
 })
 
-describe('ItemForm — section dropdown', () => {
+describe('ItemForm - section dropdown', () => {
   it('does not render section dropdown when no sections provided', () => {
     render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
     expect(screen.queryByLabelText(/section/i)).toBeNull()

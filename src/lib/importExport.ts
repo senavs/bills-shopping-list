@@ -51,7 +51,7 @@ export const validateImportData = (data: unknown): data is AppState => {
     })
     if (!itemsValid) return false
 
-    // Validate sections (optional field — missing means no sections)
+    // Validate sections (optional field - missing means no sections)
     if (l.sections !== undefined) {
       if (!Array.isArray(l.sections)) return false
       return (l.sections as unknown[]).every((sec: unknown) => {

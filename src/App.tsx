@@ -20,7 +20,7 @@ const HomeRoute = () => {
   const isActiveSession = sessionStorage.getItem('billbuddy_in_session')
 
   if (!isActiveSession) {
-    // First render in this tab session — mark it active
+    // First render in this tab session - mark it active
     sessionStorage.setItem('billbuddy_in_session', 'true')
     // If returning user, redirect to app
     if (visited) {
