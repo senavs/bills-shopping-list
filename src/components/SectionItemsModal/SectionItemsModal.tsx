@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Item } from '../../types'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface SectionItemsModalProps {
   allItems: Item[]
@@ -10,6 +11,7 @@ interface SectionItemsModalProps {
 }
 
 export const SectionItemsModal = ({ allItems, assignedItemIds, unavailableItemIds, onSave, onCancel }: SectionItemsModalProps) => {
+  const { t } = useLanguage()
   const [selected, setSelected] = useState<Set<string>>(new Set(assignedItemIds))
 
   const availableItems = allItems.filter(i => !unavailableItemIds.includes(i.id))
@@ -25,9 +27,9 @@ export const SectionItemsModal = ({ allItems, assignedItemIds, unavailableItemId
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg p-6 w-full sm:max-w-md">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Assign Items to Section</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.assignItemsToSection}</h3>
         {availableItems.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">No available items.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{t.noAvailableItems}</p>
         ) : (
           <ul className="mb-4 max-h-64 overflow-y-auto space-y-2">
             {availableItems.map(item => (
@@ -48,10 +50,10 @@ export const SectionItemsModal = ({ allItems, assignedItemIds, unavailableItemId
         )}
         <div className="flex gap-3 justify-end">
           <button type="button" onClick={onCancel} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-            Cancel
+            {t.cancel}
           </button>
           <button onClick={() => onSave([...selected])} className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded">
-            Save
+            {t.save}
           </button>
         </div>
       </div>

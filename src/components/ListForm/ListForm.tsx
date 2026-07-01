@@ -65,7 +65,7 @@ export const ListForm = () => {
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Name *
+              {t.name} *
             </label>
             <input
               type="text"
@@ -79,7 +79,7 @@ export const ListForm = () => {
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Type *
+              {t.type} *
             </label>
             <div className="flex gap-4">
               <label className="flex items-center">
@@ -90,7 +90,7 @@ export const ListForm = () => {
                   onChange={(e) => setType(e.target.value as 'shopping')}
                   className="mr-2"
                 />
-                <span className="text-gray-900 dark:text-white">🛒 Shopping</span>
+                <span className="text-gray-900 dark:text-white">🛒 {t.shopping}</span>
               </label>
               <label className="flex items-center">
                 <input
@@ -100,14 +100,14 @@ export const ListForm = () => {
                   onChange={(e) => setType(e.target.value as 'restaurant')}
                   className="mr-2"
                 />
-                <span className="text-gray-900 dark:text-white">🍽️ Restaurant</span>
+                <span className="text-gray-900 dark:text-white">🍽️ {t.restaurant}</span>
               </label>
             </div>
           </div>
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Currency *
+              {t.currency} *
             </label>
             <select
               value={currency}
@@ -121,7 +121,7 @@ export const ListForm = () => {
 
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Tax/Tip Percentage
+              {t.taxTipPercentage}
             </label>
             <input
               type="number"
@@ -141,7 +141,7 @@ export const ListForm = () => {
               onClick={() => navigate('/app')}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
             >
-              Cancel
+              {t.cancel}
             </button>
             <button
               type="submit"

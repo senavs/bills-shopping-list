@@ -19,7 +19,7 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
       <div className="bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg w-full sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Bill Split
+            {t.billSplit}
           </h3>
           <button
             onClick={onClose}
@@ -33,7 +33,7 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
         <div className="p-4 space-y-4">
           {splits.length === 0 ? (
             <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-              Add people to this list to see the split
+              {t.addPeopleToSplit}
             </p>
           ) : (
             splits.map(split => (

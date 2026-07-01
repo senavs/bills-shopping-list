@@ -82,7 +82,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Name *
+              {t.name} *
             </label>
             <input
               type="text"
@@ -97,7 +97,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Quantity
+                {t.quantity}
               </label>
               <input
                 type="text"
@@ -111,7 +111,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Unit Price
+                {t.unitPrice}
               </label>
               <input
                 type="text"
@@ -133,7 +133,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
               className="w-4 h-4"
             />
             <label htmlFor="includeInTax" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              Include in Tax/Tip 🧾
+              {t.includeInTax} 🧾
             </label>
           </div>
 
@@ -146,17 +146,17 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
               className="w-4 h-4"
             />
             <label htmlFor="selected" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              Selected 🛒
+              {t.selected} 🛒
             </label>
           </div>
 
           {people.length > 0 && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Assign to people
+                {t.assignToPeople}
               </label>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                Leave empty to share among all
+                {t.leaveEmptyToShare}
               </p>
               <div className="flex flex-wrap gap-2">
                 {people.map(person => (
@@ -180,7 +180,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
           {sections.length > 0 && (
             <div className="mb-4">
               <label htmlFor="sectionId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Section
+                {t.section}
               </label>
               <select
                 id="sectionId"
@@ -202,7 +202,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
               onClick={onCancel}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
             >
-              Cancel
+              {t.cancel}
             </button>
             <button
               type="submit"

@@ -80,6 +80,11 @@ export const ptBR: TranslationKeys = {
   confirm: 'Confirmar',
   undo: 'Desfazer',
   sections: 'seções',
+  create: 'Criar',
+  renameSection: 'Renomear Seção',
+  sectionNamePlaceholder: 'Nome da seção',
+  assignItemsToSection: 'Atribuir Itens à Seção',
+  noAvailableItems: 'Nenhum item disponível.',
   // Landing page
   landingTagline: 'Divida contas. Organize compras. Simplifique.',
   landingCta: 'Começar',

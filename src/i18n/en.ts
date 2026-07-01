@@ -78,6 +78,11 @@ export const en = {
   confirm: 'Confirm',
   undo: 'Undo',
   sections: 'sections',
+  create: 'Create',
+  renameSection: 'Rename Section',
+  sectionNamePlaceholder: 'Section name',
+  assignItemsToSection: 'Assign Items to Section',
+  noAvailableItems: 'No available items.',
   // Landing page
   landingTagline: 'Split bills. Track shopping. Stay organized.',
   landingCta: 'Get Started',

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface SectionFormProps {
   initialName?: string
@@ -7,13 +8,14 @@ interface SectionFormProps {
 }
 
 export const SectionForm = ({ initialName = '', onSubmit, onCancel }: SectionFormProps) => {
+  const { t } = useLanguage()
   const [name, setName] = useState(initialName)
   const [error, setError] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const trimmed = name.trim()
-    if (!trimmed) { setError('Name is required'); return }
+    if (!trimmed) { setError(t.nameRequired); return }
     onSubmit(trimmed)
   }
 
@@ -21,7 +23,7 @@ export const SectionForm = ({ initialName = '', onSubmit, onCancel }: SectionFor
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg p-6 w-full sm:max-w-md">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          {initialName ? 'Rename Section' : 'New Section'}
+          {initialName ? t.renameSection : t.newSection}
         </h3>
         <form onSubmit={handleSubmit}>
           {error && (
@@ -34,15 +36,15 @@ export const SectionForm = ({ initialName = '', onSubmit, onCancel }: SectionFor
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
-            placeholder="Section name"
+            placeholder={t.sectionNamePlaceholder}
             autoFocus
           />
           <div className="flex gap-3 justify-end">
             <button type="button" onClick={onCancel} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-              Cancel
+              {t.cancel}
             </button>
             <button type="submit" className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded">
-              {initialName ? 'Save' : 'Create'}
+              {initialName ? t.save : t.create}
             </button>
           </div>
         </form>

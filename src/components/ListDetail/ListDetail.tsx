@@ -181,7 +181,7 @@ export const ListDetail = () => {
               )}
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {list.type === 'shopping' ? '🛒' : '🍽️'} {list.type} • {list.currency}
+              {list.type === 'shopping' ? '🛒' : '🍽️'} {list.type === 'shopping' ? t.shopping : t.restaurant} • {list.currency}
             </p>
           </div>
           <div className="flex items-center gap-2">

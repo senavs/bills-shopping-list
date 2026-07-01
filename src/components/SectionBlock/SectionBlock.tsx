@@ -4,6 +4,7 @@ import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { SectionForm } from '../SectionForm/SectionForm'
 import { SectionItemsModal } from '../SectionItemsModal/SectionItemsModal'
 import { ItemRow } from '../shared/ItemRow'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface SectionBlockProps {
   section: Section
@@ -33,6 +34,7 @@ export const SectionBlock = ({
   onEditItem, onDeleteItem, onToggleSelected,
   onSectionDragStart, onSectionDragOver, onSectionDrop, onSectionDragEnd, isDragOver,
 }: SectionBlockProps) => {
+  const { t } = useLanguage()
   const [showRename, setShowRename] = useState(false)
   const [showItemsModal, setShowItemsModal] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -105,9 +107,9 @@ export const SectionBlock = ({
           </span>
         </span>
 
-        <button onClick={() => setShowItemsModal(true)} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">Edit</button>
-        <button onClick={() => setShowRename(true)} className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-sm">Rename</button>
-        <button onClick={() => setShowConfirm(true)} className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm">Delete</button>
+        <button onClick={() => setShowItemsModal(true)} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">{t.edit}</button>
+        <button onClick={() => setShowRename(true)} className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-sm">{t.rename}</button>
+        <button onClick={() => setShowConfirm(true)} className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm">{t.delete}</button>
       </div>
 
       {/* Section items */}
@@ -148,8 +150,8 @@ export const SectionBlock = ({
 
       <ConfirmDialog
         isOpen={showConfirm}
-        title="Delete Section"
-        message={`Delete "${section.name}"? Items will not be deleted.`}
+        title={t.deleteSection}
+        message={`${t.delete} "${section.name}"? ${t.deleteSectionMsg}`}
         onConfirm={() => { onDeleteSection(section.id); setShowConfirm(false) }}
         onCancel={() => setShowConfirm(false)}
       />

@@ -26,7 +26,7 @@ export const ItemRow = ({
   onDragStart, onDragOver, onDrop, onDragEnd,
   onMoveUp, onMoveDown, onToggleSelected, onEdit, onDelete,
 }: ItemRowProps) => {
-  const { locale } = useLanguage()
+  const { locale, t } = useLanguage()
   const fmt = (amount: number) => formatCurrency(amount, currency, locale)
   const assignedPeople = (item.assignedTo || [])
     .map(id => people.find(p => p.id === id))
@@ -70,7 +70,7 @@ export const ItemRow = ({
           <div className="flex flex-wrap gap-1 mt-1">
             {assignedPeople.length === 0 ? (
               <span className="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded">
-                👥 Shared
+                👥 {t.shared}
               </span>
             ) : (
               assignedPeople.map(person => (
@@ -88,8 +88,8 @@ export const ItemRow = ({
 
       <div className="flex flex-col items-end gap-1 shrink-0">
         <div className="flex gap-2">
-          <button onClick={onEdit} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">Edit</button>
-          <button onClick={onDelete} className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm">Delete</button>
+          <button onClick={onEdit} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">{t.edit}</button>
+          <button onClick={onDelete} className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm">{t.delete}</button>
         </div>
         {item.includeInTax && <span title="Taxed" className="text-sm">🧾</span>}
       </div>
