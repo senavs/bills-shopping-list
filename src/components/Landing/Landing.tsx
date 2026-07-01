@@ -43,7 +43,7 @@ export const Landing = () => {
   return (
     <div ref={containerRef} className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 text-white overflow-y-auto">
       {/* Language toggle - top right */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <button
           onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
           className="w-12 h-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center text-2xl hover:bg-opacity-30 transition-all shadow-lg"
