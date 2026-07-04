@@ -11,7 +11,6 @@ import { PeopleManager } from '../PeopleManager/PeopleManager'
 import { SplitModal } from '../SplitModal/SplitModal'
 import { SortableContainer } from '../shared/SortableContainer'
 import { useLanguage } from '../../contexts/LanguageContext'
-import { formatCurrency } from '../../lib/format'
 import type { Item } from '../../types'
 
 interface PendingDelete {
@@ -26,16 +25,15 @@ export const ListDetail = () => {
   const {
     lists, addItem, updateItem, deleteItem, reorderItem,
     addSection, updateSection, deleteSection, reorderSection, reorderItemInSection,
-    addPerson, removePerson,
+    addPerson, removePerson, duplicateItem,
   } = useLists()
-  const { t, locale } = useLanguage()
+  const { t } = useLanguage()
   const [showItemForm, setShowItemForm] = useState(false)
   const [defaultSectionId, setDefaultSectionId] = useState('')
   const [showSectionForm, setShowSectionForm] = useState(false)
   const [showSplitModal, setShowSplitModal] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null)
-  const [showCopied, setShowCopied] = useState(false)
 
   const list = lists.find(l => l.id === id)
 
@@ -87,56 +85,6 @@ export const ListDetail = () => {
   const handleDismissToast = useCallback(() => {
     setPendingDelete(null)
   }, [])
-
-  const handleCopyList = useCallback(async () => {
-    if (!list) return
-
-    const lines: string[] = [list.name, '']
-
-    const assignedItemIds = new Set(list.sections.flatMap(s => s.itemIds))
-
-    for (const section of list.sections) {
-      lines.push(`[${section.name}]`)
-      for (const itemId of section.itemIds) {
-        const item = list.items.find(i => i.id === itemId)
-        if (item) {
-          const total = formatCurrency(item.quantity * item.unitPrice, list.currency, locale)
-          lines.push(`- ${item.name} (x${item.quantity}) ${total}`)
-        }
-      }
-      lines.push('')
-    }
-
-    const unassigned = list.items.filter(i => !assignedItemIds.has(i.id))
-    if (unassigned.length > 0) {
-      if (list.sections.length > 0) {
-        lines.push(`[${t.otherItems}]`)
-      }
-      for (const item of unassigned) {
-        const total = formatCurrency(item.quantity * item.unitPrice, list.currency, locale)
-        lines.push(`- ${item.name} (x${item.quantity}) ${total}`)
-      }
-      lines.push('')
-    }
-
-    const text = lines.join('\n').trim()
-
-    try {
-      await navigator.clipboard.writeText(text)
-      setShowCopied(true)
-      setTimeout(() => setShowCopied(false), 2000)
-    } catch {
-      // Fallback for older browsers
-      const textarea = document.createElement('textarea')
-      textarea.value = text
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
-      setShowCopied(true)
-      setTimeout(() => setShowCopied(false), 2000)
-    }
-  }, [list, locale, t])
 
   if (!list) {
     return (
@@ -228,17 +176,6 @@ export const ListDetail = () => {
                 </svg>
               </button>
             )}
-            <button
-              onClick={handleCopyList}
-              className="w-11 h-11 flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
-              title={t.copyList}
-              aria-label={t.copyList}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                <path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" />
-                <path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" />
-              </svg>
-            </button>
             <Link
               to={`/lists/${list.id}/edit`}
               className="w-11 h-11 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -284,6 +221,7 @@ export const ListDetail = () => {
                   onReorderItemInSection={(sectionId, from, to) => reorderItemInSection(list.id, sectionId, from, to)}
                   onEditItem={setEditingItem}
                   onDeleteItem={handleDeleteItem}
+                  onDuplicateItem={(itemId) => duplicateItem(list.id, itemId)}
                   onToggleSelected={(itemId, selected) => updateItem(list.id, itemId, { selected })}
                   onAddItem={() => { setDefaultSectionId(section.id); setShowItemForm(true) }}
                 />
@@ -310,6 +248,7 @@ export const ListDetail = () => {
                   onToggleSelected={(selected) => updateItem(list.id, item.id, { selected })}
                   onEdit={() => setEditingItem(item)}
                   onDelete={() => handleDeleteItem(item.id)}
+                  onDuplicate={() => duplicateItem(list.id, item.id)}
                 />
               ))}
             </SortableContainer>
@@ -367,12 +306,6 @@ export const ListDetail = () => {
 
       {showSplitModal && (
         <SplitModal list={list} onClose={() => setShowSplitModal(false)} />
-      )}
-
-      {showCopied && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-800 dark:bg-gray-700 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
-          {t.listCopied}
-        </div>
       )}
     </div>
   )

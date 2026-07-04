@@ -26,6 +26,7 @@ const defaultProps = {
   onReorderItemInSection: vi.fn(),
   onEditItem: vi.fn(),
   onDeleteItem: vi.fn(),
+  onDuplicateItem: vi.fn(),
   onToggleSelected: vi.fn(),
 }
 

@@ -16,11 +16,12 @@ interface ItemRowProps {
   onToggleSelected: (selected: boolean) => void
   onEdit: () => void
   onDelete: () => void
+  onDuplicate: () => void
 }
 
 export const ItemRow = ({
   item, currency, hideCheckbox, people = [],
-  onToggleSelected, onEdit, onDelete,
+  onToggleSelected, onEdit, onDelete, onDuplicate,
 }: ItemRowProps) => {
   const { locale, t } = useLanguage()
   const fmt = (amount: number) => formatCurrency(amount, currency, locale)
@@ -46,6 +47,7 @@ export const ItemRow = ({
 
   const actions: BottomSheetAction[] = [
     { id: 'edit', label: t.edit, icon: '✏️', onAction: () => onEdit() },
+    { id: 'duplicate', label: t.duplicateItem, icon: '📋', onAction: () => onDuplicate() },
     { id: 'delete', label: t.delete, icon: '🗑️', variant: 'destructive', onAction: () => setConfirmDelete(true) },
   ]
 

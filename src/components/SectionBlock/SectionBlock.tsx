@@ -21,6 +21,7 @@ interface SectionBlockProps {
   onReorderItemInSection: (sectionId: string, fromIndex: number, toIndex: number) => void
   onEditItem: (item: Item) => void
   onDeleteItem: (itemId: string) => void
+  onDuplicateItem: (itemId: string) => void
   onToggleSelected: (itemId: string, selected: boolean) => void
   onAddItem?: () => void
 }
@@ -28,7 +29,7 @@ interface SectionBlockProps {
 export const SectionBlock = ({
   section, list, hideCheckbox, people,
   onUpdateSection, onDeleteSection, onReorderItemInSection,
-  onEditItem, onDeleteItem, onToggleSelected, onAddItem,
+  onEditItem, onDeleteItem, onDuplicateItem, onToggleSelected, onAddItem,
 }: SectionBlockProps) => {
   const { t } = useLanguage()
   const [showRename, setShowRename] = useState(false)
@@ -153,6 +154,7 @@ export const SectionBlock = ({
                 onToggleSelected={(selected) => onToggleSelected(item.id, selected)}
                 onEdit={() => onEditItem(item)}
                 onDelete={() => onDeleteItem(item.id)}
+                onDuplicate={() => onDuplicateItem(item.id)}
               />
             ))}
           </SortableContainer>

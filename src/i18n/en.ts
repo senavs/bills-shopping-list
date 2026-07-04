@@ -125,6 +125,7 @@ export const en = {
   openList: 'Open',
   copyList: 'Copy List',
   listCopied: 'List copied to clipboard',
+  duplicateItem: 'Duplicate Item',
   useTemplateTitle: 'Use Template',
   useTemplateMessage: 'A new list will be created from this template.',
   useTemplateConfirm: 'Use Template',

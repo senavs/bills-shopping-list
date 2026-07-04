@@ -26,6 +26,7 @@ describe('Dashboard', () => {
     createList: vi.fn(),
     updateList: vi.fn(),
     addItem: vi.fn(),
+    duplicateItem: vi.fn(),
     updateItem: vi.fn(),
     deleteItem: vi.fn(),
     reorderItem: vi.fn(),

@@ -16,6 +16,7 @@ interface ListsContextType {
   addPerson: (listId: string, name: string) => void
   removePerson: (listId: string, personId: string) => void
   addItem: (listId: string, item: Omit<Item, 'id'>) => string
+  duplicateItem: (listId: string, itemId: string) => void
   updateItem: (listId: string, itemId: string, updates: Partial<Item>) => void
   deleteItem: (listId: string, itemId: string) => void
   reorderItem: (listId: string, fromIndex: number, toIndex: number) => void
@@ -153,6 +154,27 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     return id
   }
 
+  const duplicateItem = (listId: string, itemId: string) => {
+    updateListById(listId, l => {
+      const itemIndex = l.items.findIndex(i => i.id === itemId)
+      if (itemIndex === -1) return l
+      const original = l.items[itemIndex]
+      const newId = crypto.randomUUID()
+      const duplicate = { ...original, id: newId, selected: false }
+      const items = [...l.items]
+      items.splice(itemIndex + 1, 0, duplicate)
+      // If the item is in a section, insert the duplicate right after it in that section too
+      const sections = l.sections.map(s => {
+        const idx = s.itemIds.indexOf(itemId)
+        if (idx === -1) return s
+        const itemIds = [...s.itemIds]
+        itemIds.splice(idx + 1, 0, newId)
+        return { ...s, itemIds }
+      })
+      return { ...l, items, sections }
+    })
+  }
+
   const updateItem = (listId: string, itemId: string, updates: Partial<Item>) => {
     updateListById(listId, l => ({ ...l, items: l.items.map(i => i.id === itemId ? { ...i, ...updates } : i) }))
   }
@@ -222,7 +244,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
       lists, createList, updateList, deleteList, archiveList, unarchiveList, duplicateList,
       saveAsTemplate, createFromTemplate, deleteTemplate,
       addPerson, removePerson,
-      addItem, updateItem, deleteItem, reorderItem,
+      addItem, duplicateItem, updateItem, deleteItem, reorderItem,
       addSection, updateSection, deleteSection, reorderSection, reorderItemInSection,
     }}>
       {children}

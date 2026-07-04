@@ -127,6 +127,7 @@ export const ptBR: TranslationKeys = {
   openList: 'Abrir',
   copyList: 'Copiar Lista',
   listCopied: 'Lista copiada para a area de transferencia',
+  duplicateItem: 'Duplicar Item',
   useTemplateTitle: 'Usar Modelo',
   useTemplateMessage: 'Uma nova lista sera criada a partir deste modelo.',
   useTemplateConfirm: 'Usar Modelo',
