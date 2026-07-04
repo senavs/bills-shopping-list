@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useScrollLock } from '../../hooks/useScrollLock'
 
 interface SectionFormProps {
   initialName?: string
@@ -9,6 +10,7 @@ interface SectionFormProps {
 
 export const SectionForm = ({ initialName = '', onSubmit, onCancel }: SectionFormProps) => {
   const { t } = useLanguage()
+  useScrollLock(true)
   const [name, setName] = useState(initialName)
   const [error, setError] = useState('')
 

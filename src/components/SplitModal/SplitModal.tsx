@@ -2,6 +2,7 @@ import type { List } from '../../types'
 import { calcSplit } from '../../lib/calculations'
 import { formatCurrency } from '../../lib/format'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useScrollLock } from '../../hooks/useScrollLock'
 
 interface SplitModalProps {
   list: List
@@ -10,6 +11,7 @@ interface SplitModalProps {
 
 export const SplitModal = ({ list, onClose }: SplitModalProps) => {
   const { t, locale } = useLanguage()
+  useScrollLock(true)
   const splits = calcSplit(list)
 
   const formatAmount = (amount: number) => formatCurrency(amount, list.currency, locale)

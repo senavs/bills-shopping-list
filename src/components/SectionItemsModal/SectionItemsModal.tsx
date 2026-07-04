@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Item } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useScrollLock } from '../../hooks/useScrollLock'
 
 interface SectionItemsModalProps {
   allItems: Item[]
@@ -12,6 +13,7 @@ interface SectionItemsModalProps {
 
 export const SectionItemsModal = ({ allItems, assignedItemIds, unavailableItemIds, onSave, onCancel }: SectionItemsModalProps) => {
   const { t } = useLanguage()
+  useScrollLock(true)
   const [selected, setSelected] = useState<Set<string>>(new Set(assignedItemIds))
 
   const availableItems = allItems.filter(i => !unavailableItemIds.includes(i.id))

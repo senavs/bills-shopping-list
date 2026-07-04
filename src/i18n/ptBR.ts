@@ -110,4 +110,19 @@ export const ptBR: TranslationKeys = {
   landingMadeWith: 'Feito com ❤️',
   // Dashboard empty state
   landingHint: 'Novo aqui? Veja o que o BillBuddy pode fazer',
+  // Bottom sheet & confirmations
+  longPressHint: 'Segure para opções',
+  archiveListTitle: 'Arquivar Lista',
+  archiveListMessage: 'Esta lista será movida para a aba de arquivadas. Você pode desarquivar depois.',
+  archiveConfirm: 'Arquivar',
+  unarchiveListTitle: 'Desarquivar Lista',
+  unarchiveListMessage: 'Esta lista será movida de volta para a aba ativa.',
+  unarchiveConfirm: 'Desarquivar',
+  duplicateListTitle: 'Duplicar Lista',
+  duplicateListMessage: 'Uma cópia desta lista será criada com todos os itens.',
+  duplicateConfirm: 'Duplicar',
+  saveAsTemplateTitle: 'Salvar como Modelo',
+  saveAsTemplateMessage: 'Esta lista será salva como um modelo reutilizável.',
+  templateConfirm: 'Salvar Modelo',
+  openList: 'Abrir',
 }

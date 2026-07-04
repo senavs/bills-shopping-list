@@ -108,6 +108,21 @@ export const en = {
   landingMadeWith: 'Made with ❤️',
   // Dashboard empty state
   landingHint: 'New here? See what BillBuddy can do',
+  // Bottom sheet & confirmations
+  longPressHint: 'Hold for options',
+  archiveListTitle: 'Archive List',
+  archiveListMessage: 'This list will be moved to the archived tab. You can unarchive it later.',
+  archiveConfirm: 'Archive',
+  unarchiveListTitle: 'Unarchive List',
+  unarchiveListMessage: 'This list will be moved back to the active tab.',
+  unarchiveConfirm: 'Unarchive',
+  duplicateListTitle: 'Duplicate List',
+  duplicateListMessage: 'A copy of this list will be created with all items.',
+  duplicateConfirm: 'Duplicate',
+  saveAsTemplateTitle: 'Save as Template',
+  saveAsTemplateMessage: 'This list will be saved as a reusable template.',
+  templateConfirm: 'Save Template',
+  openList: 'Open',
 }
 
 export type TranslationKeys = typeof en

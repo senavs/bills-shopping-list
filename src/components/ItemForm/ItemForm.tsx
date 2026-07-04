@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import type { Item, Section, Person } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { parseLocaleNumber } from '../../lib/format'
+import { useScrollLock } from '../../hooks/useScrollLock'
 
 interface ItemFormProps {
   item?: Item
@@ -14,6 +15,7 @@ interface ItemFormProps {
 
 export const ItemForm = ({ item, sections = [], people = [], initialSectionId = '', onSubmit, onCancel }: ItemFormProps) => {
   const { t } = useLanguage()
+  useScrollLock(true)
   const [name, setName] = useState(item?.name || '')
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1')
   const [unitPrice, setUnitPrice] = useState(item?.unitPrice.toString() || '0')
