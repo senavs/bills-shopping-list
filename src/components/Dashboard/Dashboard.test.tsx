@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { Dashboard } from './Dashboard'
 import { DarkModeProvider } from '../../contexts/DarkModeContext'
@@ -65,29 +65,43 @@ describe('Dashboard', () => {
     expect(screen.getByText('Groceries')).toBeDefined()
   })
 
-  it('shows delete confirmation dialog', () => {
+  it('opens bottom sheet and shows delete option via more button', async () => {
     mockUseLists.lists = [
       { id: '1', name: 'Test', type: 'shopping', currency: 'USD', taxPercentage: 0, items: [], sections: [], archived: false },
     ]
     vi.spyOn(useListsModule, 'useLists').mockReturnValue(mockUseLists)
 
     renderDashboard()
-    const deleteBtn = screen.getAllByText('Delete')[0]
-    fireEvent.click(deleteBtn)
-    
-    expect(screen.getByText('Delete List')).toBeDefined()
+
+    // Click the ⋮ (more options) button on the card
+    const moreBtn = screen.getByLabelText('More options')
+    await act(async () => { fireEvent.click(moreBtn) })
+
+    // BottomSheet should show with Delete action
+    expect(screen.getByText('Delete')).toBeDefined()
   })
 
-  it('calls deleteList when confirmed', () => {
+  it('calls deleteList when confirmed via bottom sheet', async () => {
     mockUseLists.lists = [
       { id: '1', name: 'Test', type: 'shopping', currency: 'USD', taxPercentage: 0, items: [], sections: [], archived: false },
     ]
     vi.spyOn(useListsModule, 'useLists').mockReturnValue(mockUseLists)
 
     renderDashboard()
-    fireEvent.click(screen.getAllByText('Delete')[0])
-    fireEvent.click(screen.getByText('Confirm')) // Confirm button
-    
+
+    // Open bottom sheet via ⋮ button
+    const moreBtn = screen.getByLabelText('More options')
+    await act(async () => { fireEvent.click(moreBtn) })
+
+    // Click Delete action in the bottom sheet
+    await act(async () => { fireEvent.click(screen.getByText('Delete')) })
+
+    // Confirm dialog should appear
+    expect(screen.getByText('Delete List')).toBeDefined()
+
+    // Confirm deletion
+    await act(async () => { fireEvent.click(screen.getByText('Confirm')) })
+
     expect(mockUseLists.deleteList).toHaveBeenCalledWith('1')
   })
 })
