@@ -69,8 +69,8 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto scroll-touch shadow-xl">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           {item ? t.editItem : t.addItemTitle}
         </h3>

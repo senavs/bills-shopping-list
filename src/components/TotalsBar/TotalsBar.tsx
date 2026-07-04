@@ -16,8 +16,8 @@ export const TotalsBar = ({ list }: TotalsBarProps) => {
   const taxAmount = totals.totalAllWithTax - totals.totalAll
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
-      <div className="container mx-auto p-4 max-w-4xl">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
+      <div className="container mx-auto px-4 py-3 max-w-4xl">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
             <div className="text-xs text-gray-500 dark:text-gray-400">{t.subtotal}</div>

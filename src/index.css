@@ -18,7 +18,7 @@
 }
 
 @layer base {
-  /* iOS PWA safe area: prevent content from being covered by status bar (camera, battery, time) */
+  /* iOS PWA safe area */
   html {
     background-color: #f9fafb; /* gray-50 */
   }
@@ -32,6 +32,32 @@
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+
+  /* Smooth dark mode transitions */
+  * {
+    transition-property: background-color, border-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: ease-in-out;
+  }
+
+  /* Exclude elements that already define their own transitions */
+  [class*="transition-"] {
+    transition-property: revert;
+    transition-duration: revert;
+    transition-timing-function: revert;
+  }
+}
+
+@layer utilities {
+  /* Prevent overscroll bounce on scrollable containers */
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+
+  /* iOS momentum scrolling */
+  .scroll-touch {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
