@@ -22,12 +22,13 @@ interface SectionBlockProps {
   onEditItem: (item: Item) => void
   onDeleteItem: (itemId: string) => void
   onToggleSelected: (itemId: string, selected: boolean) => void
+  onAddItem?: () => void
 }
 
 export const SectionBlock = ({
   section, list, hideCheckbox, people,
   onUpdateSection, onDeleteSection, onReorderItemInSection,
-  onEditItem, onDeleteItem, onToggleSelected,
+  onEditItem, onDeleteItem, onToggleSelected, onAddItem,
 }: SectionBlockProps) => {
   const { t } = useLanguage()
   const [showRename, setShowRename] = useState(false)
@@ -107,6 +108,19 @@ export const SectionBlock = ({
             ({sectionItems.length})
           </span>
         </span>
+
+        {/* Add item to this section */}
+        {onAddItem && (
+          <button
+            onClick={onAddItem}
+            className="w-9 h-9 flex items-center justify-center rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            aria-label="Add item to section"
+          >
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+            </svg>
+          </button>
+        )}
 
         {/* 3-dots menu button */}
         <button

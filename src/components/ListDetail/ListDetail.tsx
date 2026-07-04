@@ -29,6 +29,7 @@ export const ListDetail = () => {
   } = useLists()
   const { t } = useLanguage()
   const [showItemForm, setShowItemForm] = useState(false)
+  const [defaultSectionId, setDefaultSectionId] = useState('')
   const [showSectionForm, setShowSectionForm] = useState(false)
   const [showSplitModal, setShowSplitModal] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
@@ -221,6 +222,7 @@ export const ListDetail = () => {
                   onEditItem={setEditingItem}
                   onDeleteItem={handleDeleteItem}
                   onToggleSelected={(itemId, selected) => updateItem(list.id, itemId, { selected })}
+                  onAddItem={() => { setDefaultSectionId(section.id); setShowItemForm(true) }}
                 />
               ))}
             </SortableContainer>
@@ -262,7 +264,7 @@ export const ListDetail = () => {
             ☰
           </button>
           <button
-            onClick={() => setShowItemForm(true)}
+            onClick={() => { setDefaultSectionId(''); setShowItemForm(true) }}
             className="bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center text-2xl transition-all"
             style={{ width: '52px', height: '52px' }}
             aria-label={t.addItem}
@@ -282,7 +284,7 @@ export const ListDetail = () => {
         />
       )}
 
-      {showItemForm && <ItemForm sections={list.sections} people={list.people || []} onSubmit={handleAddItem} onCancel={() => setShowItemForm(false)} />}
+      {showItemForm && <ItemForm sections={list.sections} people={list.people || []} initialSectionId={defaultSectionId} onSubmit={handleAddItem} onCancel={() => setShowItemForm(false)} />}
       {editingItem && (
         <ItemForm
           item={editingItem}
