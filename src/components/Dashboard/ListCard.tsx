@@ -73,7 +73,7 @@ export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, 
   return (
     <>
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] cursor-pointer relative select-none"
+        className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] cursor-pointer relative select-none border-l-4 ${list.archived ? 'border-red-500' : 'border-blue-500'}`}
         {...handlers}
       >
         <Link

@@ -44,7 +44,7 @@ export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCard
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 relative">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 border-l-4 border-green-500 relative">
         <Link to={`/lists/${template.id}`} className="block">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-3">
@@ -53,9 +53,6 @@ export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCard
                 {template.name}
               </h3>
             </div>
-            <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
-              {t.template}
-            </span>
           </div>
 
           <p className="text-sm text-gray-600 dark:text-gray-300">

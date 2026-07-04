@@ -156,7 +156,7 @@ export const Dashboard = () => {
             onClick={() => setActiveTab('archived')}
             className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
               activeTab === 'archived'
-                ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
+                ? 'border-b-2 border-red-600 text-red-600 dark:text-red-400'
                 : 'text-gray-600 dark:text-gray-400'
             }`}
           >
