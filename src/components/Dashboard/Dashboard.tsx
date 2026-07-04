@@ -83,24 +83,24 @@ export const Dashboard = () => {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {t.appTitle}
           </h1>
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-3 items-center">
             <button
               onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
-              className="w-10 h-10 flex items-center justify-center text-xl"
+              className="w-12 h-12 flex items-center justify-center text-xl rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title={locale === 'en' ? 'Mudar para Português' : 'Switch to English'}
             >
               {locale === 'pt-BR' ? '🇧🇷' : '🇺🇸'}
             </button>
             <button
               onClick={toggleDarkMode}
-              className="w-10 h-10 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center"
+              className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
               title={isDark ? 'Light mode' : 'Dark mode'}
             >
               {isDark ? '☀️' : '🌙'}
             </button>
             <Link
               to="/"
-              className="w-10 h-10 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center"
+              className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
               title="Home"
             >
               🏠
@@ -108,22 +108,22 @@ export const Dashboard = () => {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="w-10 h-10 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold"
+                className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold transition-colors"
                 aria-label="Menu"
               >
                 ⋮
               </button>
               {menuOpen && (
-                <div className="absolute right-0 top-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
+                <div className="absolute right-0 top-14 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 z-50 min-w-[160px]">
                   <button
                     onClick={() => { handleExport(); setMenuOpen(false) }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full text-left px-4 py-3 min-h-[44px] text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     {t.export}
                   </button>
                   <button
                     onClick={() => { handleImportClick(); setMenuOpen(false) }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full text-left px-4 py-3 min-h-[44px] text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     {t.import}
                   </button>
@@ -150,7 +150,7 @@ export const Dashboard = () => {
         <div className="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setActiveTab('active')}
-            className={`pb-2 px-1 ${
+            className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
               activeTab === 'active'
                 ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
                 : 'text-gray-600 dark:text-gray-400'
@@ -160,7 +160,7 @@ export const Dashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab('archived')}
-            className={`pb-2 px-1 ${
+            className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
               activeTab === 'archived'
                 ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
                 : 'text-gray-600 dark:text-gray-400'
@@ -170,7 +170,7 @@ export const Dashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab('templates')}
-            className={`pb-2 px-1 ${
+            className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
               activeTab === 'templates'
                 ? 'border-b-2 border-green-600 text-green-600 dark:text-green-400'
                 : 'text-gray-600 dark:text-gray-400'
@@ -229,7 +229,7 @@ export const Dashboard = () => {
 
         <Link
           to="/lists/new"
-          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center text-2xl z-10"
+          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center text-2xl z-10 transition-all"
         >
           +
         </Link>

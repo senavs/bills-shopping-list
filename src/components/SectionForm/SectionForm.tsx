@@ -37,15 +37,15 @@ export const SectionForm = ({ initialName = '', onSubmit, onCancel }: SectionFor
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
             placeholder={t.sectionNamePlaceholder}
             autoFocus
           />
           <div className="flex gap-3 justify-end">
-            <button type="button" onClick={onCancel} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <button type="button" onClick={onCancel} className="px-5 py-3 min-h-[44px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
               {t.cancel}
             </button>
-            <button type="submit" className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded">
+            <button type="submit" className="px-5 py-3 min-h-[44px] bg-blue-600 text-white hover:bg-blue-700 rounded-xl transition-colors">
               {initialName ? t.save : t.create}
             </button>
           </div>

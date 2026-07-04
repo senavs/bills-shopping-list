@@ -38,12 +38,12 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
               {people.map(person => (
                 <span
                   key={person.id}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
                 >
                   {person.name}
                   <button
                     onClick={() => onRemovePerson(person.id)}
-                    className="ml-1 text-blue-600 dark:text-blue-300 hover:text-red-600 dark:hover:text-red-400 font-bold"
+                    className="ml-1 w-7 h-7 flex items-center justify-center text-blue-600 dark:text-blue-300 hover:text-red-600 dark:hover:text-red-400 font-bold rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
                     aria-label={`Remove ${person.name}`}
                   >
                     ×

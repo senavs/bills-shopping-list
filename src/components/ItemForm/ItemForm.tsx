@@ -90,7 +90,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder={t.itemNamePlaceholder}
               required
             />
@@ -107,7 +107,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
 
@@ -121,7 +121,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 value={unitPrice}
                 onChange={(e) => setUnitPrice(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
           </div>
@@ -188,7 +188,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 id="sectionId"
                 value={sectionId}
                 onChange={(e) => setSectionId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">{t.noSection}</option>
                 {sections.map(s => (
@@ -202,13 +202,13 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+              className="px-5 py-3 min-h-[44px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
             >
               {t.cancel}
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded"
+              className="px-5 py-3 min-h-[44px] bg-blue-600 text-white hover:bg-blue-700 rounded-xl transition-colors"
             >
               {item ? t.save : t.add}
             </button>
