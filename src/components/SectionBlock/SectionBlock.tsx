@@ -1,51 +1,57 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { Section, Item, List, Person } from '../../types'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { SectionForm } from '../SectionForm/SectionForm'
 import { SectionItemsModal } from '../SectionItemsModal/SectionItemsModal'
 import { ItemRow } from '../shared/ItemRow'
+import { SortableContainer } from '../shared/SortableContainer'
+import { DragHandle } from '../shared/DragHandle'
 import { useLanguage } from '../../contexts/LanguageContext'
 
 interface SectionBlockProps {
   section: Section
-  sectionIndex: number
-  totalSections: number
   list: List
   hideCheckbox?: boolean
   people?: Person[]
   onUpdateSection: (sectionId: string, updates: Partial<Section>) => void
   onDeleteSection: (sectionId: string) => void
-  onReorderSection: (fromIndex: number, toIndex: number) => void
   onReorderItemInSection: (sectionId: string, fromIndex: number, toIndex: number) => void
   onEditItem: (item: Item) => void
   onDeleteItem: (itemId: string) => void
   onToggleSelected: (itemId: string, selected: boolean) => void
-  // drag-and-drop for section reorder
-  onSectionDragStart: (index: number) => void
-  onSectionDragOver: (e: React.DragEvent, index: number) => void
-  onSectionDrop: (toIndex: number) => void
-  onSectionDragEnd: () => void
-  isDragOver: boolean
 }
 
 export const SectionBlock = ({
-  section, sectionIndex, totalSections, list, hideCheckbox, people,
-  onUpdateSection, onDeleteSection, onReorderSection, onReorderItemInSection,
+  section, list, hideCheckbox, people,
+  onUpdateSection, onDeleteSection, onReorderItemInSection,
   onEditItem, onDeleteItem, onToggleSelected,
-  onSectionDragStart, onSectionDragOver, onSectionDrop, onSectionDragEnd, isDragOver,
 }: SectionBlockProps) => {
   const { t } = useLanguage()
   const [showRename, setShowRename] = useState(false)
   const [showItemsModal, setShowItemsModal] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-  const [itemDragOver, setItemDragOver] = useState<number | null>(null)
-  const itemDragRef = useRef<number | null>(null)
+
+  // Section is sortable (draggable by its handle)
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: section.id })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
 
   const sectionItems = section.itemIds
     .map(id => list.items.find(i => i.id === id))
     .filter((i): i is Item => !!i)
 
-  // Items in other sections (unavailable for this section's modal)
   const unavailableItemIds = list.sections
     .filter(s => s.id !== section.id)
     .flatMap(s => s.itemIds)
@@ -60,42 +66,29 @@ export const SectionBlock = ({
     setShowRename(false)
   }
 
-  const handleItemDragStart = (index: number) => { itemDragRef.current = index }
-  const handleItemDragOver = (e: React.DragEvent, index: number) => { e.preventDefault(); setItemDragOver(index) }
-  const handleItemDrop = (toIndex: number) => {
-    if (itemDragRef.current !== null && itemDragRef.current !== toIndex) {
-      onReorderItemInSection(section.id, itemDragRef.current, toIndex)
-    }
-    itemDragRef.current = null
-    setItemDragOver(null)
+  const handleItemReorder = (fromIndex: number, toIndex: number) => {
+    onReorderItemInSection(section.id, fromIndex, toIndex)
   }
-  const handleItemDragEnd = () => { itemDragRef.current = null; setItemDragOver(null) }
 
   return (
-    <>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`${isDragging ? 'opacity-50 z-50' : ''}`}
+    >
       {/* Section header row */}
       <div
-        draggable
-        onDragStart={() => onSectionDragStart(sectionIndex)}
-        onDragOver={(e) => onSectionDragOver(e, sectionIndex)}
-        onDrop={() => onSectionDrop(sectionIndex)}
-        onDragEnd={onSectionDragEnd}
-        className={`flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg border-l-4 border-blue-500 transition-opacity ${isDragOver ? 'opacity-50 border-2 border-blue-400' : 'opacity-100'}`}
+        className={`flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl border-l-4 border-blue-500 transition-all ${
+          isDragging ? 'shadow-lg ring-2 ring-blue-400/50' : ''
+        }`}
       >
-        {/* Desktop drag handle */}
-        <span className="hidden sm:inline cursor-grab text-gray-400 dark:text-gray-500 select-none text-lg leading-none" aria-hidden="true">⠿</span>
-
-        {/* Mobile reorder buttons */}
-        <div className="flex sm:hidden flex-col gap-0.5">
-          <button onClick={() => onReorderSection(sectionIndex, sectionIndex - 1)} disabled={sectionIndex === 0} aria-label="Move section up" className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-1 leading-none">▲</button>
-          <button onClick={() => onReorderSection(sectionIndex, sectionIndex + 1)} disabled={sectionIndex === totalSections - 1} aria-label="Move section down" className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-1 leading-none">▼</button>
-        </div>
+        <DragHandle listeners={listeners} attributes={attributes} />
 
         {/* Collapse toggle */}
         <button
           onClick={() => onUpdateSection(section.id, { collapsed: !section.collapsed })}
           aria-label={section.collapsed ? 'Expand section' : 'Collapse section'}
-          className="text-gray-500 dark:text-gray-400 text-sm"
+          className="w-9 h-9 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
         >
           {section.collapsed ? '▶' : '▼'}
         </button>
@@ -107,34 +100,48 @@ export const SectionBlock = ({
           </span>
         </span>
 
-        <button onClick={() => setShowItemsModal(true)} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">{t.edit}</button>
-        <button onClick={() => setShowRename(true)} className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-sm">{t.rename}</button>
-        <button onClick={() => setShowConfirm(true)} className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm">{t.delete}</button>
+        <button
+          onClick={() => setShowItemsModal(true)}
+          className="min-h-[44px] px-3 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors text-sm font-medium"
+        >
+          {t.edit}
+        </button>
+        <button
+          onClick={() => setShowRename(true)}
+          className="min-h-[44px] px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm font-medium"
+        >
+          {t.rename}
+        </button>
+        <button
+          onClick={() => setShowConfirm(true)}
+          className="min-h-[44px] px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium"
+        >
+          {t.delete}
+        </button>
       </div>
 
-      {/* Section items */}
-      {!section.collapsed && sectionItems.map((item, idx) => (
-        <div key={item.id} className="pl-6">
-          <ItemRow
-            item={item}
-            index={idx}
-            totalItems={sectionItems.length}
-            currency={list.currency}
-            isDragOver={itemDragOver === idx}
-            hideCheckbox={hideCheckbox}
-            people={people}
-            onDragStart={() => handleItemDragStart(idx)}
-            onDragOver={(e) => handleItemDragOver(e, idx)}
-            onDrop={() => handleItemDrop(idx)}
-            onDragEnd={handleItemDragEnd}
-            onMoveUp={() => onReorderItemInSection(section.id, idx, idx - 1)}
-            onMoveDown={() => onReorderItemInSection(section.id, idx, idx + 1)}
-            onToggleSelected={(selected) => onToggleSelected(item.id, selected)}
-            onEdit={() => onEditItem(item)}
-            onDelete={() => onDeleteItem(item.id)}
-          />
+      {/* Section items with dnd-kit */}
+      {!section.collapsed && sectionItems.length > 0 && (
+        <div className="pl-4 mt-1 space-y-1">
+          <SortableContainer
+            items={sectionItems.map(i => i.id)}
+            onReorder={handleItemReorder}
+          >
+            {sectionItems.map((item) => (
+              <ItemRow
+                key={item.id}
+                item={item}
+                currency={list.currency}
+                hideCheckbox={hideCheckbox}
+                people={people}
+                onToggleSelected={(selected) => onToggleSelected(item.id, selected)}
+                onEdit={() => onEditItem(item)}
+                onDelete={() => onDeleteItem(item.id)}
+              />
+            ))}
+          </SortableContainer>
         </div>
-      ))}
+      )}
 
       {showRename && <SectionForm initialName={section.name} onSubmit={handleRename} onCancel={() => setShowRename(false)} />}
 
@@ -155,6 +162,6 @@ export const SectionBlock = ({
         onConfirm={() => { onDeleteSection(section.id); setShowConfirm(false) }}
         onCancel={() => setShowConfirm(false)}
       />
-    </>
+    </div>
   )
 }

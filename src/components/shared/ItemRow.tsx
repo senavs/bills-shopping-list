@@ -1,30 +1,23 @@
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { Item, Person } from '../../types'
 import { formatCurrency } from '../../lib/format'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { DragHandle } from './DragHandle'
 
 interface ItemRowProps {
   item: Item
-  index: number
-  totalItems: number
   currency: string
-  isDragOver: boolean
   hideCheckbox?: boolean
   people?: Person[]
-  onDragStart: () => void
-  onDragOver: (e: React.DragEvent) => void
-  onDrop: () => void
-  onDragEnd: () => void
-  onMoveUp: () => void
-  onMoveDown: () => void
   onToggleSelected: (selected: boolean) => void
   onEdit: () => void
   onDelete: () => void
 }
 
 export const ItemRow = ({
-  item, index, totalItems, currency, isDragOver, hideCheckbox, people = [],
-  onDragStart, onDragOver, onDrop, onDragEnd,
-  onMoveUp, onMoveDown, onToggleSelected, onEdit, onDelete,
+  item, currency, hideCheckbox, people = [],
+  onToggleSelected, onEdit, onDelete,
 }: ItemRowProps) => {
   const { locale, t } = useLanguage()
   const fmt = (amount: number) => formatCurrency(amount, currency, locale)
@@ -32,29 +25,39 @@ export const ItemRow = ({
     .map(id => people.find(p => p.id === id))
     .filter((p): p is Person => !!p)
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
   return (
     <div
-      draggable
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      onDragEnd={onDragEnd}
-      className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow flex items-center gap-3 transition-opacity ${isDragOver ? 'opacity-50 border-2 border-blue-400' : 'opacity-100'}`}
+      ref={setNodeRef}
+      style={style}
+      className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-3 transition-shadow ${
+        isDragging ? 'shadow-lg ring-2 ring-blue-400/50 opacity-90 z-50' : ''
+      }`}
     >
-      <span className="hidden sm:inline cursor-grab text-gray-400 dark:text-gray-500 select-none text-lg leading-none" aria-hidden="true">⠿</span>
-
-      <div className="flex sm:hidden flex-col gap-0.5">
-        <button onClick={onMoveUp} disabled={index === 0} aria-label={`Move ${item.name} up`} className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-2 leading-none">▲</button>
-        <button onClick={onMoveDown} disabled={index === totalItems - 1} aria-label={`Move ${item.name} down`} className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-20 text-xl p-2 leading-none">▼</button>
-      </div>
+      <DragHandle listeners={listeners} attributes={attributes} />
 
       {!hideCheckbox && (
-        <input
-          type="checkbox"
-          checked={item.selected}
-          onChange={(e) => onToggleSelected(e.target.checked)}
-          className="w-5 h-5 shrink-0"
-        />
+        <label className="flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={item.selected}
+            onChange={(e) => onToggleSelected(e.target.checked)}
+            className="w-5 h-5"
+          />
+        </label>
       )}
 
       <div className="flex-1 min-w-0">
@@ -87,9 +90,19 @@ export const ItemRow = ({
       </div>
 
       <div className="flex flex-col items-end gap-1 shrink-0">
-        <div className="flex gap-2">
-          <button onClick={onEdit} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">{t.edit}</button>
-          <button onClick={onDelete} className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm">{t.delete}</button>
+        <div className="flex gap-1">
+          <button
+            onClick={onEdit}
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors text-sm font-medium"
+          >
+            {t.edit}
+          </button>
+          <button
+            onClick={onDelete}
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium"
+          >
+            {t.delete}
+          </button>
         </div>
         {item.includeInTax && <span title="Taxed" className="text-sm">🧾</span>}
       </div>
