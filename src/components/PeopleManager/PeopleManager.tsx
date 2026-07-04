@@ -11,7 +11,7 @@ interface PeopleManagerProps {
 export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleManagerProps) => {
   const { t } = useLanguage()
   const [newName, setNewName] = useState('')
-  const [isExpanded, setIsExpanded] = useState(people.length > 0)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
