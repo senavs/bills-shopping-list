@@ -125,4 +125,6 @@ export const ptBR: TranslationKeys = {
   saveAsTemplateMessage: 'Esta lista será salva como um modelo reutilizável.',
   templateConfirm: 'Salvar Modelo',
   openList: 'Abrir',
+  copyList: 'Copiar Lista',
+  listCopied: 'Lista copiada para a area de transferencia',
 }
