@@ -123,6 +123,8 @@ export const en = {
   saveAsTemplateMessage: 'This list will be saved as a reusable template.',
   templateConfirm: 'Save Template',
   openList: 'Open',
+  copyList: 'Copy List',
+  listCopied: 'List copied to clipboard',
 }
 
 export type TranslationKeys = typeof en
