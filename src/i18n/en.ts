@@ -125,6 +125,11 @@ export const en = {
   openList: 'Open',
   copyList: 'Copy List',
   listCopied: 'List copied to clipboard',
+  useTemplateTitle: 'Use Template',
+  useTemplateMessage: 'A new list will be created from this template.',
+  useTemplateConfirm: 'Use Template',
+  deleteItemTitle: 'Delete Item',
+  deleteItemMessage: 'Are you sure you want to delete this item? This action cannot be undone.',
 }
 
 export type TranslationKeys = typeof en
