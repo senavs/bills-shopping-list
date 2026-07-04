@@ -13,7 +13,6 @@ export const Dashboard = () => {
   const { isDark, toggleDarkMode } = useDarkMode()
   const { locale, setLocale, t } = useLanguage()
   const [activeTab, setActiveTab] = useState<'active' | 'archived' | 'templates'>('active')
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deleteTemplateConfirm, setDeleteTemplateConfirm] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -39,11 +38,6 @@ export const Dashboard = () => {
   const filteredLists = regularLists.filter(list =>
     activeTab === 'active' ? !list.archived : list.archived
   )
-
-  const handleDelete = (id: string) => {
-    deleteList(id)
-    setDeleteConfirm(null)
-  }
 
   const handleDeleteTemplate = (id: string) => {
     deleteTemplate(id)
@@ -218,7 +212,7 @@ export const Dashboard = () => {
                   list={list}
                   onArchive={() => archiveList(list.id)}
                   onUnarchive={() => unarchiveList(list.id)}
-                  onDelete={() => setDeleteConfirm(list.id)}
+                  onDelete={() => deleteList(list.id)}
                   onDuplicate={() => duplicateList(list.id)}
                   onSaveAsTemplate={() => saveAsTemplate(list.id)}
                 />
@@ -234,14 +228,6 @@ export const Dashboard = () => {
           +
         </Link>
       </div>
-
-      <ConfirmDialog
-        isOpen={deleteConfirm !== null}
-        title={t.deleteList}
-        message={t.deleteListMessage}
-        onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
-        onCancel={() => setDeleteConfirm(null)}
-      />
 
       <ConfirmDialog
         isOpen={deleteTemplateConfirm !== null}
