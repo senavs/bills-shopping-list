@@ -92,6 +92,7 @@ export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, 
 
           <p className="text-sm text-gray-600 dark:text-gray-300">
             {list.items.length} {list.items.length === 1 ? t.item : t.items}
+            {list.sections.length > 0 && ` • ${list.sections.length} ${t.sections}`}
           </p>
         </Link>
 
