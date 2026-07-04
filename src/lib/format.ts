@@ -17,14 +17,19 @@ export const formatNumber = (value: number, locale: Locale, decimals = 2): strin
 }
 
 /**
- * Format a currency amount with locale-appropriate formatting.
- * pt-BR: R$ 1.234,56
- * en: $1,234.56
+ * Format a currency amount with currency-appropriate formatting.
+ * BRL always uses comma as decimal separator: R$ 1.234,56
+ * USD always uses dot as decimal separator: $1,234.56
+ * The currency determines the format, not the app language.
  */
-export const formatCurrency = (amount: number, currency: string, locale: Locale): string => {
-  const symbol = currency === 'BRL' ? 'R$' : '$'
-  const formatted = formatNumber(amount, locale)
-  return `${symbol} ${formatted}`
+export const formatCurrency = (amount: number, currency: string, _locale?: Locale): string => {
+  const currencyLocale = currency === 'BRL' ? 'pt-BR' : 'en-US'
+  return new Intl.NumberFormat(currencyLocale, {
+    style: 'currency',
+    currency: currency === 'BRL' ? 'BRL' : 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount)
 }
 
 /**
