@@ -248,7 +248,7 @@ export const ListDetail = () => {
         )}
 
         {/* FABs - positioned above TotalsBar */}
-        <div className="fixed bottom-2 right-4 flex items-center gap-2 z-10">
+        <div className="fixed bottom-2 right-4 flex flex-col items-center gap-2 z-10">
           <button
             onClick={() => setShowSectionForm(true)}
             className="w-11 h-11 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 active:shadow-md flex items-center justify-center text-lg transition-all"
@@ -259,7 +259,7 @@ export const ListDetail = () => {
           </button>
           <button
             onClick={() => setShowItemForm(true)}
-            className="w-13 h-13 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center text-2xl transition-all"
+            className="bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center text-2xl transition-all"
             style={{ width: '52px', height: '52px' }}
             aria-label={t.addItem}
           >
