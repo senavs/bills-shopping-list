@@ -141,7 +141,7 @@ export const ListDetail = () => {
   const isEmpty = list.items.length === 0 && list.sections.length === 0
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-44">
       <div className="container mx-auto p-4 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -247,8 +247,8 @@ export const ListDetail = () => {
           </div>
         )}
 
-        {/* FABs */}
-        <div className="fixed bottom-28 right-4 flex flex-col gap-3 z-10">
+        {/* FABs - positioned above TotalsBar */}
+        <div className="fixed bottom-[88px] right-4 flex flex-col gap-2 z-10">
           <button
             onClick={() => setShowSectionForm(true)}
             className="w-12 h-12 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 active:shadow-md flex items-center justify-center text-lg transition-all"
