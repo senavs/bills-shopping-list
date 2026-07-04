@@ -84,11 +84,10 @@ export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, 
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-3">
               <span className="text-2xl">{icon}</span>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white pr-8">
                 {list.name}
               </h3>
             </div>
-            <span className="text-sm text-gray-500 dark:text-gray-400">{list.currency}</span>
           </div>
 
           <p className="text-sm text-gray-600 dark:text-gray-300">

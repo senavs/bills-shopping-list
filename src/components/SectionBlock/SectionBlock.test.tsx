@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react'
 import { SectionBlock } from './SectionBlock'
 import { LanguageProvider } from '../../contexts/LanguageContext'
 import type { List, Section } from '../../types'
@@ -20,21 +20,13 @@ const section: Section = { id: 's1', name: 'Dairy', itemIds: ['a', 'b'], collaps
 
 const defaultProps = {
   section,
-  sectionIndex: 0,
-  totalSections: 1,
   list: { ...list, sections: [section] },
   onUpdateSection: vi.fn(),
   onDeleteSection: vi.fn(),
-  onReorderSection: vi.fn(),
   onReorderItemInSection: vi.fn(),
   onEditItem: vi.fn(),
   onDeleteItem: vi.fn(),
   onToggleSelected: vi.fn(),
-  onSectionDragStart: vi.fn(),
-  onSectionDragOver: vi.fn(),
-  onSectionDrop: vi.fn(),
-  onSectionDragEnd: vi.fn(),
-  isDragOver: false,
 }
 
 describe('SectionBlock', () => {
@@ -62,21 +54,35 @@ describe('SectionBlock', () => {
     expect(onUpdateSection).toHaveBeenCalledWith('s1', { collapsed: true })
   })
 
-  it('shows delete confirm dialog and calls onDeleteSection', () => {
+  it('shows delete confirm dialog via bottom sheet and calls onDeleteSection', async () => {
     const onDeleteSection = vi.fn()
     render(<LanguageProvider><SectionBlock {...defaultProps} onDeleteSection={onDeleteSection} /></LanguageProvider>)
-    // Section header Delete is first; item rows also have Delete buttons
-    fireEvent.click(screen.getAllByText('Delete')[0])
+
+    // Open the section options bottom sheet
+    await act(async () => { fireEvent.click(screen.getByLabelText('Section options')) })
+
+    // Click Delete action in the bottom sheet
+    const deleteButtons = screen.getAllByText('Delete')
+    // The last 'Delete' in the BottomSheet actions (first ones may be from item rows)
+    await act(async () => { fireEvent.click(deleteButtons[deleteButtons.length - 1]) })
+
+    // ConfirmDialog should appear
     expect(screen.getByText(/delete "dairy"/i)).toBeDefined()
-    // ConfirmDialog Delete button is the last Delete button in the DOM
-    fireEvent.click(screen.getByText('Confirm'))
+    await act(async () => { fireEvent.click(screen.getByText('Confirm')) })
     expect(onDeleteSection).toHaveBeenCalledWith('s1')
   })
 
-  it('shows rename form and calls onUpdateSection with new name', () => {
+  it('shows rename form via bottom sheet and calls onUpdateSection with new name', async () => {
     const onUpdateSection = vi.fn()
     render(<LanguageProvider><SectionBlock {...defaultProps} onUpdateSection={onUpdateSection} /></LanguageProvider>)
-    fireEvent.click(screen.getByText('Rename'))
+
+    // Open the section options bottom sheet
+    await act(async () => { fireEvent.click(screen.getByLabelText('Section options')) })
+
+    // Click Rename action in the bottom sheet
+    await act(async () => { fireEvent.click(screen.getByText('Rename')) })
+
+    // Fill rename form
     fireEvent.change(screen.getByPlaceholderText('Section name'), { target: { value: 'Produce' } })
     fireEvent.click(screen.getByText('Save'))
     expect(onUpdateSection).toHaveBeenCalledWith('s1', { name: 'Produce' })

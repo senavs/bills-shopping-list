@@ -8,6 +8,7 @@ import { SectionItemsModal } from '../SectionItemsModal/SectionItemsModal'
 import { ItemRow } from '../shared/ItemRow'
 import { SortableContainer } from '../shared/SortableContainer'
 import { DragHandle } from '../shared/DragHandle'
+import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { useLanguage } from '../../contexts/LanguageContext'
 
 interface SectionBlockProps {
@@ -32,6 +33,7 @@ export const SectionBlock = ({
   const [showRename, setShowRename] = useState(false)
   const [showItemsModal, setShowItemsModal] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showSheet, setShowSheet] = useState(false)
 
   // Section is sortable (draggable by its handle)
   const {
@@ -70,6 +72,12 @@ export const SectionBlock = ({
     onReorderItemInSection(section.id, fromIndex, toIndex)
   }
 
+  const sectionActions: BottomSheetAction[] = [
+    { id: 'edit-items', label: t.edit, icon: '📝', onAction: () => setShowItemsModal(true) },
+    { id: 'rename', label: t.rename, icon: '✏️', onAction: () => setShowRename(true) },
+    { id: 'delete', label: t.delete, icon: '🗑️', variant: 'destructive', onAction: () => setShowConfirm(true) },
+  ]
+
   return (
     <div
       ref={setNodeRef}
@@ -100,23 +108,17 @@ export const SectionBlock = ({
           </span>
         </span>
 
+        {/* 3-dots menu button */}
         <button
-          onClick={() => setShowItemsModal(true)}
-          className="min-h-[44px] px-3 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors text-sm font-medium"
+          onClick={() => setShowSheet(true)}
+          className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          aria-label="Section options"
         >
-          {t.edit}
-        </button>
-        <button
-          onClick={() => setShowRename(true)}
-          className="min-h-[44px] px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm font-medium"
-        >
-          {t.rename}
-        </button>
-        <button
-          onClick={() => setShowConfirm(true)}
-          className="min-h-[44px] px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium"
-        >
-          {t.delete}
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+            <circle cx="10" cy="4" r="2" />
+            <circle cx="10" cy="10" r="2" />
+            <circle cx="10" cy="16" r="2" />
+          </svg>
         </button>
       </div>
 
@@ -142,6 +144,13 @@ export const SectionBlock = ({
           </SortableContainer>
         </div>
       )}
+
+      <BottomSheet
+        isOpen={showSheet}
+        title={section.name}
+        actions={sectionActions}
+        onClose={() => setShowSheet(false)}
+      />
 
       {showRename && <SectionForm initialName={section.name} onSubmit={handleRename} onCancel={() => setShowRename(false)} />}
 
