@@ -43,14 +43,14 @@ export const ItemRow = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-3 transition-shadow ${
+      className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-1.5 transition-shadow ${
         isDragging ? 'shadow-lg ring-2 ring-blue-400/50 opacity-90 z-50' : ''
       }`}
     >
       <DragHandle listeners={listeners} attributes={attributes} />
 
       {!hideCheckbox && (
-        <label className="flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer">
+        <label className="flex items-center justify-center w-9 h-9 shrink-0 cursor-pointer">
           <input
             type="checkbox"
             checked={item.selected}
@@ -60,7 +60,7 @@ export const ItemRow = ({
         </label>
       )}
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 ml-1">
         <h3 className={`font-medium truncate ${!hideCheckbox && item.selected ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
           {item.name}
         </h3>

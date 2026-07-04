@@ -11,7 +11,7 @@ export const DragHandle = ({ listeners, attributes, className, ...props }: DragH
   return (
     <button
       type="button"
-      className={`flex items-center justify-center w-10 h-10 min-w-[40px] cursor-grab active:cursor-grabbing text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 touch-none rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${className || ''}`}
+      className={`flex items-center justify-center w-8 h-10 min-w-[32px] cursor-grab active:cursor-grabbing text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 touch-none rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${className || ''}`}
       aria-label="Drag to reorder"
       {...attributes}
       {...listeners}
