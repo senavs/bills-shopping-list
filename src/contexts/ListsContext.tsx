@@ -160,7 +160,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
       if (itemIndex === -1) return l
       const original = l.items[itemIndex]
       const newId = crypto.randomUUID()
-      const duplicate = { ...original, id: newId, selected: false }
+      const duplicate = { ...original, id: newId, selected: false, name: `${original.name} (copy)` }
       const items = [...l.items]
       items.splice(itemIndex + 1, 0, duplicate)
       // If the item is in a section, insert the duplicate right after it in that section too

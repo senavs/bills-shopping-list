@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import type { List } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { formatCurrency } from '../../lib/format'
 import { useLongPress } from '../../hooks/useLongPress'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
@@ -16,9 +17,10 @@ interface ListCardProps {
 }
 
 export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, onSaveAsTemplate }: ListCardProps) => {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
   const navigate = useNavigate()
   const icon = list.type === 'shopping' ? '🛒' : '🍽️'
+  const total = list.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
   const [showSheet, setShowSheet] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'archive' | 'unarchive' | 'duplicate' | 'template' | 'delete' | null>(null)
 
@@ -93,6 +95,7 @@ export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, 
           <p className="text-sm text-gray-600 dark:text-gray-300">
             {list.items.length} {list.items.length === 1 ? t.item : t.items}
             {list.sections.length > 0 && ` • ${list.sections.length} ${t.sections}`}
+            {' • '}{formatCurrency(total, list.currency, locale)}
           </p>
         </Link>
 
