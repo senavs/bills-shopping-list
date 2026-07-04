@@ -6,6 +6,7 @@ import { formatCurrency } from '../../lib/format'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { DragHandle } from './DragHandle'
 import { BottomSheet, type BottomSheetAction } from './BottomSheet'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface ItemRowProps {
   item: Item
@@ -27,6 +28,7 @@ export const ItemRow = ({
     .map(id => people.find(p => p.id === id))
     .filter((p): p is Person => !!p)
   const [showSheet, setShowSheet] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const {
     attributes,
@@ -44,7 +46,7 @@ export const ItemRow = ({
 
   const actions: BottomSheetAction[] = [
     { id: 'edit', label: t.edit, icon: '✏️', onAction: () => onEdit() },
-    { id: 'delete', label: t.delete, icon: '🗑️', variant: 'destructive', onAction: () => onDelete() },
+    { id: 'delete', label: t.delete, icon: '🗑️', variant: 'destructive', onAction: () => setConfirmDelete(true) },
   ]
 
   return (
@@ -117,6 +119,16 @@ export const ItemRow = ({
         title={item.name}
         actions={actions}
         onClose={() => setShowSheet(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        title={t.deleteItemTitle}
+        message={t.deleteItemMessage}
+        variant="destructive"
+        confirmLabel={t.confirm}
+        onConfirm={() => { setConfirmDelete(false); onDelete() }}
+        onCancel={() => setConfirmDelete(false)}
       />
     </>
   )

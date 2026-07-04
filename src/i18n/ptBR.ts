@@ -127,4 +127,9 @@ export const ptBR: TranslationKeys = {
   openList: 'Abrir',
   copyList: 'Copiar Lista',
   listCopied: 'Lista copiada para a area de transferencia',
+  useTemplateTitle: 'Usar Modelo',
+  useTemplateMessage: 'Uma nova lista sera criada a partir deste modelo.',
+  useTemplateConfirm: 'Usar Modelo',
+  deleteItemTitle: 'Excluir Item',
+  deleteItemMessage: 'Tem certeza que deseja excluir este item? Esta acao nao pode ser desfeita.',
 }
