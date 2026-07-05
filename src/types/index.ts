@@ -23,7 +23,7 @@ export interface Person {
 export interface List {
   id: string;
   name: string;
-  type: 'shopping' | 'restaurant';
+  type: 'shopping' | 'restaurant' | 'bar';
   currency: 'BRL' | 'USD';
   taxPercentage: number;
   items: Item[];

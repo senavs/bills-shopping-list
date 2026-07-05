@@ -33,6 +33,7 @@ export const en = {
   type: 'Type',
   shopping: 'Shopping',
   restaurant: 'Restaurant',
+  bar: 'Pub',
   currency: 'Currency',
   taxTipPercentage: 'Tax/Tip Percentage',
   saveChanges: 'Save Changes',

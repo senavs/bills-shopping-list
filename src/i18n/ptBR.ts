@@ -35,6 +35,7 @@ export const ptBR: TranslationKeys = {
   type: 'Tipo',
   shopping: 'Compras',
   restaurant: 'Restaurante',
+  bar: 'Bar',
   currency: 'Moeda',
   taxTipPercentage: 'Porcentagem de Taxa/Gorjeta',
   saveChanges: 'Salvar Alterações',
