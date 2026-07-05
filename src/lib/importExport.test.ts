@@ -37,4 +37,9 @@ describe('validateImportData', () => {
     expect(validateImportData(null)).toBe(false)
     expect(validateImportData({ lists: 'bad' })).toBe(false)
   })
+
+  it('accepts list with bar type', () => {
+    const state = { lists: [{ ...validList, type: 'bar' as const }] }
+    expect(validateImportData(state)).toBe(true)
+  })
 })

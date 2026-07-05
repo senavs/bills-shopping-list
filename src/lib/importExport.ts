@@ -26,7 +26,7 @@ export const validateImportData = (data: unknown): data is AppState => {
     const isValidList = (
       typeof l.id === 'string' &&
       typeof l.name === 'string' &&
-      (l.type === 'shopping' || l.type === 'restaurant') &&
+      (l.type === 'shopping' || l.type === 'restaurant' || l.type === 'bar') &&
       (l.currency === 'BRL' || l.currency === 'USD') &&
       typeof l.taxPercentage === 'number' &&
       Array.isArray(l.items) &&
