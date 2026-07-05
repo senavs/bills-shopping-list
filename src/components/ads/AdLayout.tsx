@@ -12,8 +12,9 @@ interface AdLayoutProps {
  *
  * - Desktop browser (xl+ breakpoint, non-standalone): Two fixed vertical banners
  *   on the left and right sides of the viewport, flanking the centered content.
- * - Mobile / PWA standalone / smaller screens: A fixed bottom banner with
- *   safe-area padding for notched devices.
+ * - Mobile / PWA standalone / smaller screens: A non-fixed bottom banner that
+ *   sits below the page content in the normal document flow. The page's bottom
+ *   padding ensures the FAB and other fixed elements remain above the ad space.
  *
  * Always renders ad containers (with placeholders when not configured).
  */
@@ -22,7 +23,7 @@ export function AdLayout({ children }: AdLayoutProps) {
   const isStandalone = displayMode === 'standalone'
 
   return (
-    <>
+    <div className="relative min-h-screen">
       {children}
 
       {/* Desktop side banners - only in browser mode on xl+ screens */}
@@ -51,9 +52,10 @@ export function AdLayout({ children }: AdLayoutProps) {
         </>
       )}
 
-      {/* Mobile/tablet bottom banner - always visible below xl, or in standalone */}
+      {/* Mobile/tablet bottom banner - sits in normal document flow (not fixed)
+          so it doesn't cover the FAB, TotalsBar, or other fixed elements. */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center p-2 ${
+        className={`flex justify-center px-2 pb-2 ${
           isStandalone ? '' : 'xl:hidden'
         }`}
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
@@ -65,6 +67,6 @@ export function AdLayout({ children }: AdLayoutProps) {
           style={{ width: '100%', maxWidth: 728, height: 60 }}
         />
       </div>
-    </>
+    </div>
   )
 }

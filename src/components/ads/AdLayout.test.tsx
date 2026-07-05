@@ -119,4 +119,15 @@ describe('AdLayout', () => {
     const bottomBanner = container.querySelector('[data-testid="ad-bottom"]') as HTMLElement
     expect(bottomBanner.className).not.toContain('xl:hidden')
   })
+
+  it('bottom banner is not fixed positioned (does not overlay content)', () => {
+    const { container } = render(
+      <AdLayout>
+        <div>Content</div>
+      </AdLayout>
+    )
+
+    const bottomBanner = container.querySelector('[data-testid="ad-bottom"]') as HTMLElement
+    expect(bottomBanner.className).not.toContain('fixed')
+  })
 })
