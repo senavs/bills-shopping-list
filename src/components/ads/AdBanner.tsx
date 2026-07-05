@@ -38,8 +38,9 @@ export function AdBanner({ adSlot, adFormat, style, className = '', adClient }: 
   useEffect(() => {
     if (canShowAd && adRef.current && !isAdPushed.current) {
       try {
-        ((window as { adsbygoogle?: { push: (obj: object) => void } }).adsbygoogle =
-          (window as { adsbygoogle?: { push: (obj: object) => void } }).adsbygoogle || []).push({})
+        const adsbygoogle = (window as unknown as { adsbygoogle: object[] }).adsbygoogle || []
+        ;(window as unknown as { adsbygoogle: object[] }).adsbygoogle = adsbygoogle
+        adsbygoogle.push({})
         isAdPushed.current = true
       } catch (e) {
         // AdSense script not loaded or ad blocked — fail silently

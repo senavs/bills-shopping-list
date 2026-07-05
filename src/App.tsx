@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { ListsProvider } from './contexts/ListsContext'
 import { DarkModeProvider } from './contexts/DarkModeContext'
 import { LanguageProvider } from './contexts/LanguageContext'
@@ -6,6 +6,7 @@ import { Landing } from './components/Landing/Landing'
 import { Dashboard } from './components/Dashboard/Dashboard'
 import { ListForm } from './components/ListForm/ListForm'
 import { ListDetail } from './components/ListDetail/ListDetail'
+import { AdLayout } from './components/ads/AdLayout'
 
 /**
  * On first visit ever: show Landing at /
@@ -32,6 +33,13 @@ const HomeRoute = () => {
   return <Landing />
 }
 
+/** Layout wrapper that adds ad banners to app pages (not Landing) */
+const AppWithAds = () => (
+  <AdLayout>
+    <Outlet />
+  </AdLayout>
+)
+
 function App() {
   return (
     <LanguageProvider>
@@ -40,10 +48,12 @@ function App() {
           <HashRouter>
             <Routes>
               <Route path="/" element={<HomeRoute />} />
-              <Route path="/app" element={<Dashboard />} />
-              <Route path="/lists/new" element={<ListForm />} />
-              <Route path="/lists/:id" element={<ListDetail />} />
-              <Route path="/lists/:id/edit" element={<ListForm />} />
+              <Route element={<AppWithAds />}>
+                <Route path="/app" element={<Dashboard />} />
+                <Route path="/lists/new" element={<ListForm />} />
+                <Route path="/lists/:id" element={<ListDetail />} />
+                <Route path="/lists/:id/edit" element={<ListForm />} />
+              </Route>
             </Routes>
           </HashRouter>
         </ListsProvider>
