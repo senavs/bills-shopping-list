@@ -8,7 +8,7 @@
  */
 
 /** Your AdSense publisher ID (e.g., 'ca-pub-1234567890123456') */
-export const AD_CLIENT = ''
+export const AD_CLIENT = 'ca-pub-4545953737931283'
 
 /** Ad slot IDs for each placement */
 export const AD_SLOTS = {
