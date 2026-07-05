@@ -15,7 +15,7 @@ interface TemplateCardProps {
 export const TemplateCard = ({ template, activeTab, onUseTemplate, onDelete }: TemplateCardProps) => {
   const { t } = useLanguage()
   const navigate = useNavigate()
-  const icon = template.type === 'shopping' ? '🛒' : '🍽️'
+  const icon = { shopping: '🛒', restaurant: '🍽️', bar: '🍻' }[template.type] || '🛒'
   const [showSheet, setShowSheet] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'useTemplate' | 'delete' | null>(null)
 

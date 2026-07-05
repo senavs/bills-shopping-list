@@ -20,7 +20,7 @@ interface ListCardProps {
 export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, onDuplicate, onSaveAsTemplate }: ListCardProps) => {
   const { t, locale } = useLanguage()
   const navigate = useNavigate()
-  const icon = list.type === 'shopping' ? '🛒' : '🍽️'
+  const icon = { shopping: '🛒', restaurant: '🍽️', bar: '🍻' }[list.type] || '🛒'
   const total = list.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
   const [showSheet, setShowSheet] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'archive' | 'unarchive' | 'duplicate' | 'template' | 'delete' | null>(null)
