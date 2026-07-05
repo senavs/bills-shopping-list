@@ -147,7 +147,7 @@ export const ListDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-28">
       {/* Sticky header: back button + list name + actions */}
-      <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md">
+      <div className="sticky z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md" style={{ top: 'env(safe-area-inset-top)' }}>
         <div className="container mx-auto px-4 pt-4 pb-3 max-w-4xl">
           <div className="flex items-center justify-between">
             <div>
