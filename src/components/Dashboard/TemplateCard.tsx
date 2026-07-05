@@ -7,11 +7,12 @@ import { ConfirmDialog } from '../shared/ConfirmDialog'
 
 interface TemplateCardProps {
   template: List
+  activeTab: 'active' | 'archived' | 'templates'
   onUseTemplate: () => void
   onDelete: () => void
 }
 
-export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCardProps) => {
+export const TemplateCard = ({ template, activeTab, onUseTemplate, onDelete }: TemplateCardProps) => {
   const { t } = useLanguage()
   const navigate = useNavigate()
   const icon = template.type === 'shopping' ? '🛒' : '🍽️'
@@ -20,7 +21,7 @@ export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCard
 
   const actions: BottomSheetAction[] = [
     { id: 'useTemplate', label: t.useTemplate, icon: '📋', onAction: () => setConfirmAction('useTemplate') },
-    { id: 'edit', label: t.edit, icon: '✏️', onAction: () => navigate(`/lists/${template.id}/edit`) },
+    { id: 'edit', label: t.edit, icon: '✏️', onAction: () => navigate(`/lists/${template.id}/edit`, { state: { activeTab, from: '/app' } }) },
     { id: 'delete', label: t.delete, icon: '🗑️', variant: 'destructive' as const, onAction: () => setConfirmAction('delete') },
   ]
 
@@ -45,7 +46,7 @@ export const TemplateCard = ({ template, onUseTemplate, onDelete }: TemplateCard
   return (
     <>
       <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 border-l-4 border-green-500 relative">
-        <Link to={`/lists/${template.id}`} className="block">
+        <Link to={`/lists/${template.id}`} state={{ activeTab, from: '/app' }} className="block">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-3">
               <span className="text-2xl">{icon}</span>

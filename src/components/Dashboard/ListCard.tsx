@@ -9,6 +9,7 @@ import { ConfirmDialog } from '../shared/ConfirmDialog'
 
 interface ListCardProps {
   list: List
+  activeTab: 'active' | 'archived' | 'templates'
   onArchive: () => void
   onUnarchive: () => void
   onDelete: () => void
@@ -16,7 +17,7 @@ interface ListCardProps {
   onSaveAsTemplate: () => void
 }
 
-export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, onSaveAsTemplate }: ListCardProps) => {
+export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, onDuplicate, onSaveAsTemplate }: ListCardProps) => {
   const { t, locale } = useLanguage()
   const navigate = useNavigate()
   const icon = list.type === 'shopping' ? '🛒' : '🍽️'
@@ -37,8 +38,8 @@ export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, 
   }
 
   const actions: BottomSheetAction[] = [
-    { id: 'open', label: t.openList, icon: '📋', onAction: () => navigate(`/lists/${list.id}`) },
-    { id: 'edit', label: t.edit, icon: '✏️', onAction: () => navigate(`/lists/${list.id}/edit`) },
+    { id: 'open', label: t.openList, icon: '📋', onAction: () => navigate(`/lists/${list.id}`, { state: { activeTab, from: '/app' } }) },
+    { id: 'edit', label: t.edit, icon: '✏️', onAction: () => navigate(`/lists/${list.id}/edit`, { state: { activeTab, from: '/app' } }) },
     { id: 'duplicate', label: t.duplicate, icon: '📑', onAction: () => setConfirmAction('duplicate') },
     { id: 'template', label: t.template, icon: '📌', onAction: () => setConfirmAction('template') },
     ...(!list.archived
@@ -80,6 +81,7 @@ export const ListCard = ({ list, onArchive, onUnarchive, onDelete, onDuplicate, 
       >
         <Link
           to={`/lists/${list.id}`}
+          state={{ activeTab, from: '/app' }}
           className="block"
           onClick={handleCardClick}
         >

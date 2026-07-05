@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { useDarkMode } from '../../contexts/DarkModeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
@@ -12,7 +12,9 @@ export const Dashboard = () => {
   const { lists, archiveList, unarchiveList, deleteList, duplicateList, saveAsTemplate, createFromTemplate, deleteTemplate } = useLists()
   const { isDark, toggleDarkMode } = useDarkMode()
   const { locale, setLocale, t } = useLanguage()
-  const [activeTab, setActiveTab] = useState<'active' | 'archived' | 'templates'>('active')
+  const location = useLocation()
+  const locationState = location.state as { activeTab?: 'active' | 'archived' | 'templates' } | null
+  const [activeTab, setActiveTab] = useState<'active' | 'archived' | 'templates'>(locationState?.activeTab || 'active')
   const [deleteTemplateConfirm, setDeleteTemplateConfirm] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -186,6 +188,7 @@ export const Dashboard = () => {
                 <TemplateCard
                   key={template.id}
                   template={template}
+                  activeTab={activeTab}
                   onUseTemplate={() => createFromTemplate(template.id)}
                   onDelete={() => setDeleteTemplateConfirm(template.id)}
                 />
@@ -210,6 +213,7 @@ export const Dashboard = () => {
                 <ListCard
                   key={list.id}
                   list={list}
+                  activeTab={activeTab}
                   onArchive={() => archiveList(list.id)}
                   onUnarchive={() => unarchiveList(list.id)}
                   onDelete={() => deleteList(list.id)}
@@ -223,6 +227,7 @@ export const Dashboard = () => {
 
         <Link
           to="/lists/new"
+          state={{ activeTab, from: '/app' }}
           className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center text-2xl z-10 transition-all"
         >
           +

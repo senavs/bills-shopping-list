@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { useLanguage } from '../../contexts/LanguageContext'
 
 export const ListForm = () => {
   const navigate = useNavigate()
   const { id } = useParams()
+  const location = useLocation()
+  const locationState = location.state as { activeTab?: 'active' | 'archived' | 'templates'; from?: string } | null
   const { lists, createList, updateList } = useLists()
   const { t, isBR } = useLanguage()
   
@@ -25,6 +27,16 @@ export const ListForm = () => {
       setTaxPercentage(existingList.taxPercentage.toString())
     }
   }, [existingList])
+
+  const navigateBack = () => {
+    // If we came from a list detail page, go back there with state preserved
+    if (locationState?.from && locationState.from.startsWith('/lists/')) {
+      navigate(locationState.from, { state: { activeTab: locationState?.activeTab, from: '/app' } })
+    } else {
+      // Otherwise go back to dashboard with the correct tab
+      navigate('/app', { state: { activeTab: locationState?.activeTab } })
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,7 +58,7 @@ export const ListForm = () => {
       createList({ name: name.trim(), type, currency, taxPercentage: tax })
     }
     
-    navigate('/app')
+    navigateBack()
   }
 
   return (
@@ -138,7 +150,7 @@ export const ListForm = () => {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => navigate('/app')}
+              onClick={() => navigateBack()}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
             >
               {t.cancel}
