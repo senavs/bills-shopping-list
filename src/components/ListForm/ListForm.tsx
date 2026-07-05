@@ -14,7 +14,7 @@ export const ListForm = () => {
   const existingList = id ? lists.find(l => l.id === id) : null
   
   const [name, setName] = useState(existingList?.name || '')
-  const [type, setType] = useState<'shopping' | 'restaurant'>(existingList?.type || 'shopping')
+  const [type, setType] = useState<'shopping' | 'restaurant' | 'bar'>(existingList?.type || 'shopping')
   const [currency, setCurrency] = useState<'BRL' | 'USD'>(existingList?.currency || (isBR ? 'BRL' : 'USD'))
   const [taxPercentage, setTaxPercentage] = useState(existingList?.taxPercentage.toString() || '0')
   const [error, setError] = useState('')
@@ -90,31 +90,19 @@ export const ListForm = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="list-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t.type} *
             </label>
-            <div className="flex gap-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="shopping"
-                  checked={type === 'shopping'}
-                  onChange={(e) => setType(e.target.value as 'shopping')}
-                  className="mr-2"
-                />
-                <span className="text-gray-900 dark:text-white">🛒 {t.shopping}</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="restaurant"
-                  checked={type === 'restaurant'}
-                  onChange={(e) => setType(e.target.value as 'restaurant')}
-                  className="mr-2"
-                />
-                <span className="text-gray-900 dark:text-white">🍽️ {t.restaurant}</span>
-              </label>
-            </div>
+            <select
+              id="list-type"
+              value={type}
+              onChange={(e) => setType(e.target.value as 'shopping' | 'restaurant' | 'bar')}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="shopping">🛒 {t.shopping}</option>
+              <option value="restaurant">🍽️ {t.restaurant}</option>
+              <option value="bar">🍻 {t.bar}</option>
+            </select>
           </div>
 
           <div className="mb-4">

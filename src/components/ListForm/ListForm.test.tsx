@@ -97,10 +97,37 @@ describe('ListForm', () => {
     })
   })
 
-  it('allows selecting restaurant type', () => {
-    renderForm()
-    const restaurantRadio = screen.getByLabelText(/Restaurant/)
-    fireEvent.click(restaurantRadio)
-    expect(restaurantRadio).toHaveProperty('checked', true)
+  it('allows selecting restaurant type via dropdown', () => {
+    const { container } = renderForm()
+    const select = container.querySelector('select#list-type')!
+    fireEvent.change(select, { target: { value: 'restaurant' } })
+
+    const nameInput = screen.getByPlaceholderText('e.g., Weekly Groceries')
+    fireEvent.change(nameInput, { target: { value: 'Dinner' } })
+    fireEvent.submit(container.querySelector('form')!)
+
+    expect(mockUseLists.createList).toHaveBeenCalledWith({
+      name: 'Dinner',
+      type: 'restaurant',
+      currency: 'USD',
+      taxPercentage: 0,
+    })
+  })
+
+  it('allows selecting bar type via dropdown', () => {
+    const { container } = renderForm()
+    const select = container.querySelector('select#list-type')!
+    fireEvent.change(select, { target: { value: 'bar' } })
+
+    const nameInput = screen.getByPlaceholderText('e.g., Weekly Groceries')
+    fireEvent.change(nameInput, { target: { value: 'Friday Night' } })
+    fireEvent.submit(container.querySelector('form')!)
+
+    expect(mockUseLists.createList).toHaveBeenCalledWith({
+      name: 'Friday Night',
+      type: 'bar',
+      currency: 'USD',
+      taxPercentage: 0,
+    })
   })
 })
