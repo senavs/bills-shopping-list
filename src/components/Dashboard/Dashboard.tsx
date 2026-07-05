@@ -74,61 +74,100 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
-      <div className="container mx-auto p-4 max-w-4xl">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {t.appTitle}
-          </h1>
-          <div className="flex gap-3 items-center">
-            <button
-              onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
-              className="w-12 h-12 flex items-center justify-center text-xl rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title={locale === 'en' ? 'Mudar para Português' : 'Switch to English'}
-            >
-              {locale === 'pt-BR' ? '🇧🇷' : '🇺🇸'}
-            </button>
-            <button
-              onClick={toggleDarkMode}
-              className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
-              title={isDark ? 'Light mode' : 'Dark mode'}
-            >
-              {isDark ? '☀️' : '🌙'}
-            </button>
-            <Link
-              to="/"
-              className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
-              title="Home"
-            >
-              🏠
-            </Link>
-            <div className="relative" ref={menuRef}>
+      {/* Sticky header: title + tabs */}
+      <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md">
+        <div className="container mx-auto px-4 pt-4 max-w-4xl">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {t.appTitle}
+            </h1>
+            <div className="flex gap-3 items-center">
               <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold transition-colors"
-                aria-label="Menu"
+                onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
+                className="w-12 h-12 flex items-center justify-center text-xl rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                title={locale === 'en' ? 'Mudar para Português' : 'Switch to English'}
               >
-                ⋮
+                {locale === 'pt-BR' ? '🇧🇷' : '🇺🇸'}
               </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-14 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 z-50 min-w-[160px]">
-                  <button
-                    onClick={() => { handleExport(); setMenuOpen(false) }}
-                    className="w-full text-left px-4 py-3 min-h-[44px] text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    {t.export}
-                  </button>
-                  <button
-                    onClick={() => { handleImportClick(); setMenuOpen(false) }}
-                    className="w-full text-left px-4 py-3 min-h-[44px] text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    {t.import}
-                  </button>
-                </div>
-              )}
+              <button
+                onClick={toggleDarkMode}
+                className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
+                title={isDark ? 'Light mode' : 'Dark mode'}
+              >
+                {isDark ? '☀️' : '🌙'}
+              </button>
+              <Link
+                to="/"
+                className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
+                title="Home"
+              >
+                🏠
+              </Link>
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold transition-colors"
+                  aria-label="Menu"
+                >
+                  ⋮
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 top-14 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 z-50 min-w-[160px]">
+                    <button
+                      onClick={() => { handleExport(); setMenuOpen(false) }}
+                      className="w-full text-left px-4 py-3 min-h-[44px] text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      {t.export}
+                    </button>
+                    <button
+                      onClick={() => { handleImportClick(); setMenuOpen(false) }}
+                      className="w-full text-left px-4 py-3 min-h-[44px] text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      {t.import}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
+          <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setActiveTab('active')}
+              className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
+                activeTab === 'active'
+                  ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              {t.active}
+            </button>
+            <button
+              onClick={() => setActiveTab('archived')}
+              className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
+                activeTab === 'archived'
+                  ? 'border-b-2 border-red-600 text-red-600 dark:text-red-400'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              {t.archived}
+            </button>
+            <button
+              onClick={() => setActiveTab('templates')}
+              className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
+                activeTab === 'templates'
+                  ? 'border-b-2 border-green-600 text-green-600 dark:text-green-400'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              {t.templates}{templates.length > 0 && ` (${templates.length})`}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Scrollable content */}
+      <div className="container mx-auto px-4 pt-4 max-w-4xl">
         <input
           ref={fileInputRef}
           type="file"
@@ -142,39 +181,6 @@ export const Dashboard = () => {
             {importError}
           </div>
         )}
-
-        <div className="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => setActiveTab('active')}
-            className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
-              activeTab === 'active'
-                ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
-                : 'text-gray-600 dark:text-gray-400'
-            }`}
-          >
-            {t.active}
-          </button>
-          <button
-            onClick={() => setActiveTab('archived')}
-            className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
-              activeTab === 'archived'
-                ? 'border-b-2 border-red-600 text-red-600 dark:text-red-400'
-                : 'text-gray-600 dark:text-gray-400'
-            }`}
-          >
-            {t.archived}
-          </button>
-          <button
-            onClick={() => setActiveTab('templates')}
-            className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
-              activeTab === 'templates'
-                ? 'border-b-2 border-green-600 text-green-600 dark:text-green-400'
-                : 'text-gray-600 dark:text-gray-400'
-            }`}
-          >
-            {t.templates}{templates.length > 0 && ` (${templates.length})`}
-          </button>
-        </div>
 
         {activeTab === 'templates' ? (
           templates.length === 0 ? (
