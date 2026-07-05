@@ -7,6 +7,11 @@ vi.mock('../../hooks/useOnlineStatus', () => ({
   useOnlineStatus: vi.fn(() => true),
 }))
 
+// Mock adsConfig with empty AD_CLIENT for placeholder tests
+vi.mock('./adsConfig', () => ({
+  AD_CLIENT: '',
+}))
+
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
 const mockUseOnlineStatus = vi.mocked(useOnlineStatus)
 

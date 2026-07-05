@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { useDisplayMode } from '../../hooks/useDisplayMode'
 import { AdBanner } from './AdBanner'
-import { AD_SLOTS } from './adsConfig'
+import { AD_SLOTS, ADS_ENABLED } from './adsConfig'
 
 interface AdLayoutProps {
   children: ReactNode
@@ -9,6 +9,8 @@ interface AdLayoutProps {
 
 /**
  * Layout wrapper that positions ad banners around the app content.
+ *
+ * When ADS_ENABLED is false, renders only children with no ad placements.
  *
  * - Desktop browser (xl+ breakpoint, non-standalone): Two fixed vertical banners
  *   on the left and right sides of the viewport, flanking the centered content.
@@ -21,6 +23,10 @@ interface AdLayoutProps {
 export function AdLayout({ children }: AdLayoutProps) {
   const displayMode = useDisplayMode()
   const isStandalone = displayMode === 'standalone'
+
+  if (!ADS_ENABLED) {
+    return <>{children}</>
+  }
 
   return (
     <div className="relative min-h-screen">

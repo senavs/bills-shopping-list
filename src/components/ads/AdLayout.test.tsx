@@ -11,6 +11,12 @@ vi.mock('../../hooks/useDisplayMode', () => ({
   useDisplayMode: vi.fn(() => 'browser'),
 }))
 
+vi.mock('./adsConfig', () => ({
+  ADS_ENABLED: true,
+  AD_CLIENT: '',
+  AD_SLOTS: { sideLeft: '', sideRight: '', bottom: '' },
+}))
+
 import { useDisplayMode } from '../../hooks/useDisplayMode'
 const mockUseDisplayMode = vi.mocked(useDisplayMode)
 
