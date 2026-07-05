@@ -62,7 +62,7 @@ export const ListForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-safe">
       <div className="container mx-auto p-4 max-w-2xl">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
           {id ? (existingList?.isTemplate ? t.editTemplate : t.editList) : t.createList}

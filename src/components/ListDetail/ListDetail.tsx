@@ -91,7 +91,7 @@ export const ListDetail = () => {
 
   if (!list) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center pt-safe">
         <div className="text-center">
           <p className="text-gray-600 dark:text-gray-400 mb-4">{t.listNotFound}</p>
           <button onClick={() => navigate('/app', { state: { activeTab: locationState?.activeTab } })} className="text-blue-600 dark:text-blue-400 hover:underline">{t.backToDashboard}</button>
@@ -147,7 +147,7 @@ export const ListDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-28">
       {/* Sticky header: back button + list name + actions */}
-      <div className="sticky z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md" style={{ top: 'env(safe-area-inset-top)' }}>
+      <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md pt-safe">
         <div className="container mx-auto px-4 pt-4 pb-3 max-w-4xl">
           <div className="flex items-center justify-between">
             <div>

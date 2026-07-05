@@ -28,7 +28,6 @@
   }
 
   body {
-    padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
@@ -50,6 +49,11 @@
 }
 
 @layer utilities {
+  /* Safe area top padding - apply to page containers so their bg fills behind status bar */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
   /* Prevent overscroll bounce on scrollable containers */
   .overscroll-contain {
     overscroll-behavior: contain;

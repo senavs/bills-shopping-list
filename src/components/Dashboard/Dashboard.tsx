@@ -75,7 +75,7 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       {/* Sticky header: title + tabs */}
-      <div className="sticky z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md" style={{ top: 'env(safe-area-inset-top)' }}>
+      <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md pt-safe">
         <div className="container mx-auto px-4 pt-4 max-w-4xl">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
