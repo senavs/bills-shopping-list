@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import fc from 'fast-check'
-import type { Item, List, UnitType } from '../types'
+import type { List, UnitType } from '../types'
 import { UNIT_TYPES } from '../types'
 import { calcTotals } from './calculations'
 
@@ -32,7 +32,7 @@ describe('Property 6: UnitType does not affect calculations', () => {
     currency: fc.constantFrom('BRL', 'USD') as fc.Arbitrary<'BRL' | 'USD'>,
     taxPercentage: fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
     items: fc.array(itemArbitrary, { minLength: 1, maxLength: 10 }),
-    sections: fc.constant([]),
+    sections: fc.constant([] as { id: string; name: string; itemIds: string[]; collapsed: boolean }[]),
     archived: fc.boolean(),
   })
 

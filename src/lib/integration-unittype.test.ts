@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { loadState, saveState } from './storage'
 import { validateImportData, normalizeImportedState } from './importExport'
-import type { AppState, UnitType } from '../types'
+import type { AppState } from '../types'
 
 describe('Integration: unitType end-to-end flow', () => {
   beforeEach(() => {
@@ -180,7 +180,7 @@ describe('Integration: unitType end-to-end flow', () => {
     // Remove unitType from all items
     for (const list of parsed.lists) {
       for (const item of list.items) {
-        delete (item as Record<string, unknown>).unitType
+        delete (item as unknown as Record<string, unknown>).unitType
       }
     }
 
