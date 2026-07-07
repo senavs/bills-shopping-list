@@ -62,8 +62,10 @@ export const ListDetail = () => {
       name: item.name,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
+      unitType: item.unitType,
       selected: item.selected,
       includeInTax: item.includeInTax,
+      assignedTo: item.assignedTo,
     })
 
     const currentList = lists.find(l => l.id === listId)

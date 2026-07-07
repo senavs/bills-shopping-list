@@ -15,6 +15,22 @@
     "2.4 Write property tests for round-trip persistence (Property 3: UnitType round-trip persistence)": {
       "status": "passed",
       "lastRunTimestamp": 1783387338254
+    },
+    "4.3 Write property test for form pre-selection (Property 7: Form pre-selects current unitType on edit)": {
+      "status": "passed",
+      "lastRunTimestamp": 1783387993973
+    },
+    "4.4 Write property test for form submission (Property 8: Form submit includes selected unitType)": {
+      "status": "passed",
+      "lastRunTimestamp": 1783387994599
+    },
+    "7.2 Write property test for duplication (Property 2: UnitType preservation on duplication)": {
+      "status": "passed",
+      "lastRunTimestamp": 1783387995113
+    },
+    "7.3 Write property test for calculations invariance (Property 6: UnitType does not affect calculations)": {
+      "status": "passed",
+      "lastRunTimestamp": 1783387995550
     }
   },
   "executionHistory": {}
