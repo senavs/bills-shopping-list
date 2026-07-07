@@ -53,6 +53,7 @@ export const ptBR: TranslationKeys = {
   itemNamePlaceholder: 'ex: Leite',
   quantity: 'Quantidade',
   unitPrice: 'Preço Unitário',
+  unitType: 'Unidade',
   includeInTax: 'Incluir na Taxa/Gorjeta',
   selected: 'Selecionado',
   assignToPeople: 'Atribuir a pessoas',

@@ -1,8 +1,13 @@
+export type UnitType = 'unit' | 'kg' | 'lb' | 'g' | 'liter' | 'ml' | 'pack' | 'dozen' | 'oz';
+
+export const UNIT_TYPES: UnitType[] = ['unit', 'kg', 'lb', 'g', 'liter', 'ml', 'pack', 'dozen', 'oz'];
+
 export interface Item {
   id: string;
   name: string;
   quantity: number;
   unitPrice: number;
+  unitType?: UnitType;
   selected: boolean;
   includeInTax: boolean;
   assignedTo?: string[];  // person IDs; empty/undefined = shared by all

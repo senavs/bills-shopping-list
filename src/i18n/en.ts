@@ -51,6 +51,7 @@ export const en = {
   itemNamePlaceholder: 'e.g., Milk',
   quantity: 'Quantity',
   unitPrice: 'Unit Price',
+  unitType: 'Unit',
   includeInTax: 'Include in Tax/Tip',
   selected: 'Selected',
   assignToPeople: 'Assign to people',

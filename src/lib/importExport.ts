@@ -1,4 +1,4 @@
-import type { AppState } from '../types'
+import type { AppState, List } from '../types'
 
 export const exportData = (state: AppState): void => {
   const dataStr = JSON.stringify(state, null, 2)
@@ -69,6 +69,21 @@ export const validateImportData = (data: unknown): data is AppState => {
   })
 }
 
+/**
+ * Normalize imported state: ensure every item has a unitType field.
+ * Items missing unitType default to 'unit'.
+ */
+export const normalizeImportedState = (state: AppState): AppState => ({
+  ...state,
+  lists: state.lists.map((l: List) => ({
+    ...l,
+    items: l.items.map(item => ({
+      ...item,
+      unitType: item.unitType ?? 'unit',
+    })),
+  })),
+})
+
 export const importData = (file: File): Promise<AppState> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -77,7 +92,7 @@ export const importData = (file: File): Promise<AppState> => {
       try {
         const data = JSON.parse(e.target?.result as string)
         if (validateImportData(data)) {
-          resolve(data)
+          resolve(normalizeImportedState(data))
         } else {
           reject(new Error('Invalid data format'))
         }
