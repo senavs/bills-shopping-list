@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import type { Item, Section, Person } from '../../types'
+import type { Item, Section, Person, UnitType } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { parseLocaleNumber } from '../../lib/format'
+import { getUnitTypeOptions } from '../../lib/unitTypes'
 import { useScrollLock } from '../../hooks/useScrollLock'
 
 interface ItemFormProps {
@@ -14,10 +15,11 @@ interface ItemFormProps {
 }
 
 export const ItemForm = ({ item, sections = [], people = [], initialSectionId = '', onSubmit, onCancel }: ItemFormProps) => {
-  const { t } = useLanguage()
+  const { locale, t } = useLanguage()
   useScrollLock(true)
   const [name, setName] = useState(item?.name || '')
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1')
+  const [unitType, setUnitType] = useState<UnitType>(item?.unitType ?? 'unit')
   const [unitPrice, setUnitPrice] = useState(item?.unitPrice.toString() || '0')
   const [includeInTax, setIncludeInTax] = useState(item?.includeInTax ?? true)
   const [selected, setSelected] = useState(item?.selected ?? false)
@@ -29,6 +31,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
     if (item) {
       setName(item.name)
       setQuantity(item.quantity.toString())
+      setUnitType(item.unitType ?? 'unit')
       setUnitPrice(item.unitPrice.toString())
       setIncludeInTax(item.includeInTax)
       setSelected(item.selected)
@@ -57,7 +60,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
       return
     }
 
-    onSubmit({ name: name.trim(), quantity: qty, unitPrice: price, selected, includeInTax, assignedTo }, sectionId)
+    onSubmit({ name: name.trim(), quantity: qty, unitPrice: price, unitType, selected, includeInTax, assignedTo }, sectionId)
   }
 
   const togglePerson = (personId: string) => {
@@ -96,7 +99,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t.quantity}
@@ -109,6 +112,21 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 required
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t.unitType}
+              </label>
+              <select
+                value={unitType}
+                onChange={(e) => setUnitType(e.target.value as UnitType)}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                {getUnitTypeOptions(locale).map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </div>
 
             <div>

@@ -3,6 +3,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Item, Person } from '../../types'
 import { formatCurrency } from '../../lib/format'
+import { formatQuantityWithUnit } from '../../lib/unitTypes'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { DragHandle } from './DragHandle'
 import { BottomSheet, type BottomSheetAction } from './BottomSheet'
@@ -78,7 +79,7 @@ export const ItemRow = ({
             {item.name}
           </h3>
           <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-            {fmt(item.quantity * item.unitPrice)}
+            {formatQuantityWithUnit(item.quantity, item.unitType ?? 'unit', locale)} × {fmt(item.unitPrice)} = {fmt(item.quantity * item.unitPrice)}
           </span>
 
           {/* Assignment badges */}
