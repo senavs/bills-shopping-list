@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
-import { useDarkMode } from '../../contexts/DarkModeContext'
+import { useDarkMode, type ThemeMode } from '../../contexts/DarkModeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { ListCard } from './ListCard'
 import { TemplateCard } from './TemplateCard'
@@ -11,9 +11,11 @@ import { exportData, importData } from '../../lib/importExport'
 
 type Tab = 'active' | 'archived' | 'templates'
 
+const NEXT_THEME: Record<ThemeMode, ThemeMode> = { system: 'light', light: 'dark', dark: 'system' }
+
 export const Dashboard = () => {
   const { lists, archiveList, unarchiveList, deleteList, duplicateList, saveAsTemplate, createFromTemplate, deleteTemplate } = useLists()
-  const { isDark, toggleDarkMode } = useDarkMode()
+  const { mode, setMode, isDark } = useDarkMode()
   const { locale, setLocale, t } = useLanguage()
   const location = useLocation()
   const navigate = useNavigate()
@@ -36,8 +38,12 @@ export const Dashboard = () => {
     setDeleteTemplateConfirm(null)
   }
 
+  // Called straight from the tap so the share sheet keeps the user gesture
   const handleExport = () => {
-    exportData({ lists })
+    exportData({ lists }).catch(() => {
+      setImportError(t.exportFailed)
+      setTimeout(() => setImportError(null), 3000)
+    })
   }
 
   const handleImportClick = () => {
@@ -70,7 +76,12 @@ export const Dashboard = () => {
       icon: locale === 'en' ? '🇧🇷' : '🇺🇸',
       onAction: () => setLocale(locale === 'en' ? 'pt-BR' : 'en'),
     },
-    { id: 'theme', label: isDark ? t.lightMode : t.darkMode, icon: isDark ? '☀️' : '🌙', onAction: toggleDarkMode },
+    {
+      id: 'theme',
+      label: `${t.theme}: ${{ system: t.themeSystem, light: t.themeLight, dark: t.themeDark }[mode]}`,
+      icon: isDark ? '🌙' : '☀️',
+      onAction: () => setMode(NEXT_THEME[mode]),
+    },
     { id: 'export', label: t.export, icon: '📤', onAction: handleExport },
     { id: 'import', label: t.import, icon: '📥', onAction: handleImportClick },
     { id: 'about', label: t.aboutApp, icon: 'ℹ️', onAction: () => navigate('/') },
@@ -130,7 +141,7 @@ export const Dashboard = () => {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".json"
+          accept="application/json,.json"
           onChange={handleImportFile}
           className="hidden"
         />

@@ -12,8 +12,15 @@ vi.mock('./adsConfig', () => ({
   AD_CLIENT: '',
 }))
 
+// The real loader would fetch the AdSense script
+vi.mock('./loadAdSense', () => ({
+  loadAdSense: vi.fn(),
+}))
+
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
+import { loadAdSense } from './loadAdSense'
 const mockUseOnlineStatus = vi.mocked(useOnlineStatus)
+const mockLoadAdSense = vi.mocked(loadAdSense)
 
 describe('AdBanner', () => {
   beforeEach(() => {
@@ -49,6 +56,20 @@ describe('AdBanner', () => {
 
     const placeholder = container.querySelector('[data-testid="ad-placeholder"]')
     expect(placeholder).not.toBeNull()
+    expect(mockLoadAdSense).not.toHaveBeenCalled()
+  })
+
+  it('loads the AdSense script only once an ad can be shown', () => {
+    mockLoadAdSense.mockClear()
+    render(
+      <AdBanner
+        adSlot="1234567890"
+        adFormat="horizontal"
+        adClient="ca-pub-1234567890123456"
+        style={{ width: 320, height: 100 }}
+      />
+    )
+    expect(mockLoadAdSense).toHaveBeenCalledWith('ca-pub-1234567890123456')
   })
 
   it('renders placeholder with correct style', () => {

@@ -96,7 +96,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90dvh] flex flex-col overflow-hidden shadow-xl">
+      <div role="dialog" aria-modal="true" aria-label={item ? t.editItem : t.addItemTitle} className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90dvh] flex flex-col overflow-hidden shadow-xl">
         <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
           {/* iOS-style sheet header: stays visible above the keyboard while the body scrolls */}
           <div className="flex items-center justify-between gap-2 px-2 py-2 border-b border-gray-200 dark:border-gray-700 shrink-0">

@@ -28,7 +28,7 @@ export const SectionItemsModal = ({ allItems, assignedItemIds, unavailableItemId
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-xl">
+      <div role="dialog" aria-modal="true" aria-label={t.assignItemsToSection} className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-xl">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.assignItemsToSection}</h3>
         {availableItems.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{t.noAvailableItems}</p>

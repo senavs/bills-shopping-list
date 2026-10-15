@@ -34,6 +34,9 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t.billSplit}
         onClick={(e) => e.stopPropagation()}
         style={dragY > 0 ? { transform: `translateY(${dragY}px)` } : undefined}
         className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90dvh] pb-safe overflow-y-auto scroll-touch shadow-xl">

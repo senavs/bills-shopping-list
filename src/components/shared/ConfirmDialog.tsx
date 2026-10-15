@@ -24,6 +24,9 @@ export const ConfirmDialog = ({ isOpen, title, message, variant = 'destructive',
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]" onClick={onCancel}>
       <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-label={title}
         className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-xl animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >

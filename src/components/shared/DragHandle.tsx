@@ -1,6 +1,7 @@
 import type { DraggableAttributes } from '@dnd-kit/core'
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import type { HTMLAttributes } from 'react'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface DragHandleProps extends Omit<HTMLAttributes<HTMLButtonElement>, 'onPointerDown'> {
   listeners?: SyntheticListenerMap
@@ -8,11 +9,12 @@ interface DragHandleProps extends Omit<HTMLAttributes<HTMLButtonElement>, 'onPoi
 }
 
 export const DragHandle = ({ listeners, attributes, className, ...props }: DragHandleProps) => {
+  const { t } = useLanguage()
   return (
     <button
       type="button"
       className={`flex items-center justify-center w-8 h-10 min-w-[32px] cursor-grab active:cursor-grabbing text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 touch-none rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${className || ''}`}
-      aria-label="Drag to reorder"
+      aria-label={t.dragToReorder}
       {...attributes}
       {...listeners}
       {...props}

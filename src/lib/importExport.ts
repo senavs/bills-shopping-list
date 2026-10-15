@@ -1,12 +1,29 @@
 import type { AppState, List } from '../types'
 
-export const exportData = (state: AppState): void => {
+export const exportData = async (state: AppState): Promise<void> => {
   const dataStr = JSON.stringify(state, null, 2)
+  const fileName = `bills-shopping-${new Date().toISOString().split('T')[0]}.json`
+
+  // iOS standalone PWAs can't follow <a download>; the share sheet offers
+  // "Save to Files", AirDrop, messaging apps, etc.
+  if (typeof File !== 'undefined' && typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
+    const file = new File([dataStr], fileName, { type: 'application/json' })
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: fileName })
+      } catch (error) {
+        // The user closing the share sheet is not an error
+        if (!(error instanceof Error && error.name === 'AbortError')) throw error
+      }
+      return
+    }
+  }
+
   const blob = new Blob([dataStr], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = `bills-shopping-${new Date().toISOString().split('T')[0]}.json`
+  link.download = fileName
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)

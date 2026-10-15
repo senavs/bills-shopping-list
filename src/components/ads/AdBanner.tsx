@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
 import { AD_CLIENT } from './adsConfig'
+import { loadAdSense } from './loadAdSense'
 
 export interface AdBannerProps {
   /** AdSense ad slot ID */
@@ -37,6 +38,7 @@ export function AdBanner({ adSlot, adFormat, style, className = '', adClient }: 
 
   useEffect(() => {
     if (canShowAd && adRef.current && !isAdPushed.current) {
+      loadAdSense(resolvedClient)
       try {
         const adsbygoogle = (window as unknown as { adsbygoogle: object[] }).adsbygoogle || []
         ;(window as unknown as { adsbygoogle: object[] }).adsbygoogle = adsbygoogle

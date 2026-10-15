@@ -148,11 +148,15 @@ export const en = {
   sectionOptions: 'Section options',
   moreOptions: 'More options',
   settings: 'Settings',
-  lightMode: 'Light mode',
-  darkMode: 'Dark mode',
   aboutApp: 'About BillBuddy',
   removePerson: 'Remove {name}',
   close: 'Close',
+  dragToReorder: 'Drag to reorder',
+  exportFailed: 'Export failed',
+  theme: 'Theme',
+  themeSystem: 'System',
+  themeLight: 'Light',
+  themeDark: 'Dark',
 }
 
 export type TranslationKeys = typeof en
