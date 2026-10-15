@@ -93,7 +93,7 @@ export const ListDetail = () => {
 
   if (!list) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center pt-safe">
+      <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 flex items-center justify-center pt-safe">
         <div className="text-center">
           <p className="text-gray-600 dark:text-gray-400 mb-4">{t.listNotFound}</p>
           <button onClick={() => navigate('/app', { state: { activeTab: locationState?.activeTab } })} className="text-blue-600 dark:text-blue-400 hover:underline">{t.backToDashboard}</button>
@@ -147,7 +147,7 @@ export const ListDetail = () => {
   const isEmpty = list.items.length === 0 && list.sections.length === 0
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-28">
+    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 pb-28">
       {/* Sticky header: back button + list name + actions */}
       <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md pt-safe">
         <div className="container mx-auto px-4 pt-4 pb-3 max-w-4xl">
@@ -268,7 +268,10 @@ export const ListDetail = () => {
         )}
 
         {/* FABs - positioned above TotalsBar */}
-        <div className="fixed bottom-2 right-4 flex flex-col items-center gap-2 z-10">
+        <div
+          className="fixed right-safe flex flex-col items-center gap-2 z-10"
+          style={{ bottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
+        >
           <button
             onClick={() => setShowSectionForm(true)}
             className="w-11 h-11 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 active:shadow-md flex items-center justify-center text-lg transition-all"

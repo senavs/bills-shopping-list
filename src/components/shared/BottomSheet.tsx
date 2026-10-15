@@ -111,8 +111,6 @@ export const BottomSheet = ({ isOpen, title, actions, onClose }: BottomSheetProp
           ))}
         </div>
 
-        {/* Bottom safe area padding for iOS */}
-        <div className="h-6" />
       </div>
     </div>
   )

@@ -30,8 +30,12 @@ export const UndoToast = ({ message, duration = 5000, onUndo, onDismiss }: UndoT
     return () => clearInterval(timer)
   }, [duration, onDismiss])
 
+  // Sit above the TotalsBar when present, otherwise above the home indicator
   return (
-    <div className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-50 animate-slide-up">
+    <div
+      className="fixed left-safe right-safe sm:left-auto sm:w-80 z-50 animate-slide-up"
+      style={{ bottom: 'calc(max(var(--totals-bar-h, 0px), env(safe-area-inset-bottom)) + 0.75rem)' }}
+    >
       <div className="bg-gray-800 dark:bg-gray-700 text-white rounded-lg shadow-lg overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3">
           <span className="text-sm truncate mr-3">{message}</span>

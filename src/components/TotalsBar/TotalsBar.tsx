@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { List } from '../../types'
 import { calcTotals } from '../../lib/calculations'
 import { formatCurrency } from '../../lib/format'
@@ -14,10 +15,42 @@ export const TotalsBar = ({ list }: TotalsBarProps) => {
   const fmt = (amount: number) => formatCurrency(amount, list.currency, locale)
 
   const taxAmount = totals.totalAllWithTax - totals.totalAll
+  const barRef = useRef<HTMLDivElement>(null)
+
+  // Publish the bar height (safe area included) so other fixed elements, like
+  // the undo toast, can sit above it instead of overlapping it
+  useEffect(() => {
+    const el = barRef.current
+    if (!el) return
+    const root = document.documentElement
+    const update = () => root.style.setProperty('--totals-bar-h', `${el.offsetHeight}px`)
+    update()
+
+    if (typeof ResizeObserver === 'undefined') {
+      return () => root.style.removeProperty('--totals-bar-h')
+    }
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty('--totals-bar-h')
+    }
+  }, [])
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
-      <div className="container mx-auto px-4 py-3 pr-32 max-w-4xl">
+    <div
+      ref={barRef}
+      className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <div
+        className="container mx-auto py-3 max-w-4xl"
+        style={{
+          paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+          // Room for the FABs, which also shift by the right inset
+          paddingRight: 'calc(8rem + env(safe-area-inset-right))',
+        }}
+      >
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
             <div className="text-xs text-gray-500 dark:text-gray-400">{t.subtotal}</div>

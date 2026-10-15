@@ -73,7 +73,7 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 pb-20">
       {/* Sticky header: title + tabs */}
       <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md pt-safe">
         <div className="container mx-auto px-4 pt-4 max-w-4xl">
@@ -234,7 +234,11 @@ export const Dashboard = () => {
         <Link
           to="/lists/new"
           state={{ activeTab, from: '/app' }}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center text-2xl z-10 transition-all"
+          style={{
+            bottom: 'max(1.5rem, calc(0.5rem + env(safe-area-inset-bottom)))',
+            right: 'max(1.5rem, env(safe-area-inset-right))',
+          }}
+          className="fixed w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center text-2xl z-10 transition-all"
         >
           +
         </Link>
