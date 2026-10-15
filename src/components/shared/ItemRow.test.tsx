@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { ItemRow } from './ItemRow'
 import { LanguageProvider } from '../../contexts/LanguageContext'
 import type { Item } from '../../types'
@@ -76,5 +76,60 @@ describe('ItemRow - unit type display', () => {
     const item: Item = { ...baseItem, unitType: 'ml', quantity: 500 }
     renderItemRow(item)
     expect(screen.getByText(/500 ml/)).toBeDefined()
+  })
+})
+
+describe('ItemRow - interaction', () => {
+  const renderWith = (props: Partial<React.ComponentProps<typeof ItemRow>> = {}) => {
+    const handlers = {
+      onToggleSelected: vi.fn(),
+      onEdit: vi.fn(),
+      onDelete: vi.fn(),
+      onDuplicate: vi.fn(),
+    }
+    render(
+      <LanguageProvider>
+        <ItemRow item={baseItem} currency="USD" {...handlers} {...props} />
+      </LanguageProvider>
+    )
+    return handlers
+  }
+
+  it('toggles selection when the row is tapped', () => {
+    const { onToggleSelected } = renderWith()
+    fireEvent.click(screen.getByRole('checkbox'))
+    expect(onToggleSelected).toHaveBeenCalledWith(true)
+  })
+
+  it('exposes the selected state on the row checkbox', () => {
+    renderWith({ item: { ...baseItem, selected: true } })
+    expect(screen.getByRole('checkbox').getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('opens the editor when a template row is tapped', () => {
+    const { onEdit, onToggleSelected } = renderWith({ hideCheckbox: true })
+    fireEvent.click(screen.getByLabelText('Edit Rice'))
+    expect(onEdit).toHaveBeenCalled()
+    expect(onToggleSelected).not.toHaveBeenCalled()
+  })
+
+  it('deletes straight from the options sheet without a confirmation dialog', () => {
+    const { onDelete } = renderWith()
+    fireEvent.click(screen.getByLabelText('Item options'))
+    fireEvent.click(screen.getByText('Delete'))
+    expect(onDelete).toHaveBeenCalled()
+    expect(screen.queryByText('Confirm')).toBeNull()
+  })
+
+  it('hides the drag handle outside reorder mode', () => {
+    renderWith()
+    expect(screen.queryByLabelText('Drag to reorder')).toBeNull()
+  })
+
+  it('shows the drag handle and ignores taps in reorder mode', () => {
+    const { onToggleSelected } = renderWith({ reorderMode: true })
+    expect(screen.getByLabelText('Drag to reorder')).toBeDefined()
+    fireEvent.click(screen.getByRole('checkbox'))
+    expect(onToggleSelected).not.toHaveBeenCalled()
   })
 })

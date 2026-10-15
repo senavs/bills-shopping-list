@@ -37,6 +37,7 @@ export const ListDetail = () => {
   const [showSplitModal, setShowSplitModal] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null)
+  const [reorderMode, setReorderMode] = useState(false)
 
   const list = lists.find(l => l.id === id)
 
@@ -147,7 +148,10 @@ export const ListDetail = () => {
   const isEmpty = list.items.length === 0 && list.sections.length === 0
 
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 pb-28">
+    <div
+      className="min-h-dvh bg-gray-50 dark:bg-gray-900"
+      style={{ paddingBottom: 'calc(var(--totals-bar-h, 0px) + 1.5rem)' }}
+    >
       {/* Sticky header: back button + list name + actions */}
       <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md pt-safe">
         <div className="container mx-auto px-4 pt-4 pb-3 max-w-4xl">
@@ -162,7 +166,7 @@ export const ListDetail = () => {
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{list.name}</h1>
                 {isTemplate && (
                   <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
-                    Template
+                    {t.templateBadge}
                   </span>
                 )}
               </div>
@@ -171,12 +175,26 @@ export const ListDetail = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              {!isEmpty && (
+                <button
+                  type="button"
+                  onClick={() => setReorderMode(m => !m)}
+                  aria-pressed={reorderMode}
+                  className={`px-3 min-h-[44px] rounded-full text-sm font-semibold transition-colors ${
+                    reorderMode
+                      ? 'bg-blue-600 text-white'
+                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                  }`}
+                >
+                  {reorderMode ? t.done : t.reorder}
+                </button>
+              )}
               {(list.people || []).length > 0 && !isTemplate && (
                 <button
                   onClick={() => setShowSplitModal(true)}
                   className="w-11 h-11 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
-                  title="View Split"
-                  aria-label="View bill split"
+                  title={t.viewSplit}
+                  aria-label={t.viewSplit}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1.49 15.326a.78.78 0 01-.358-.442 3 3 0 014.308-3.516 6.484 6.484 0 00-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 01-2.07-.655zM16.44 15.98a4.97 4.97 0 002.07-.654.78.78 0 00.357-.442 3 3 0 00-4.308-3.517 6.484 6.484 0 011.907 3.96 2.32 2.32 0 01-.026.654zM18 8a2 2 0 11-4 0 2 2 0 014 0zM5.304 16.19a.844.844 0 01-.277-.71 5 5 0 019.947 0 .843.843 0 01-.277.71A6.975 6.975 0 0110 18a6.974 6.974 0 01-4.696-1.81z" />
@@ -187,8 +205,8 @@ export const ListDetail = () => {
                 to={`/lists/${list.id}/edit`}
                 state={{ activeTab: locationState?.activeTab, from: `/lists/${list.id}` }}
                 className="w-11 h-11 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                title="Edit list"
-                aria-label="Edit list"
+                title={t.editList}
+                aria-label={t.editList}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                   <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
@@ -215,7 +233,7 @@ export const ListDetail = () => {
             {t.noItemsYet}
           </div>
         ) : (
-          <div className="space-y-2 mb-32">
+          <div className="space-y-2">
             {/* Sections with dnd-kit */}
             <SortableContainer
               items={list.sections.map(s => s.id)}
@@ -228,6 +246,7 @@ export const ListDetail = () => {
                   list={list}
                   hideCheckbox={isTemplate}
                   people={list.people || []}
+                  reorderMode={reorderMode}
                   onUpdateSection={(sectionId, updates) => updateSection(list.id, sectionId, updates)}
                   onDeleteSection={(sectionId) => deleteSection(list.id, sectionId)}
                   onReorderItemInSection={(sectionId, from, to) => reorderItemInSection(list.id, sectionId, from, to)}
@@ -257,6 +276,7 @@ export const ListDetail = () => {
                   currency={list.currency}
                   hideCheckbox={isTemplate}
                   people={list.people || []}
+                  reorderMode={reorderMode}
                   onToggleSelected={(selected) => updateItem(list.id, item.id, { selected })}
                   onEdit={() => setEditingItem(item)}
                   onDelete={() => handleDeleteItem(item.id)}
@@ -267,35 +287,22 @@ export const ListDetail = () => {
           </div>
         )}
 
-        {/* FABs - positioned above TotalsBar */}
-        <div
-          className="fixed right-safe flex flex-col items-center gap-2 z-10"
-          style={{ bottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
-        >
+        {!reorderMode && (
           <button
+            type="button"
             onClick={() => setShowSectionForm(true)}
-            className="w-11 h-11 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 active:shadow-md flex items-center justify-center text-lg transition-all"
-            aria-label={t.newSection}
-            title={t.newSection}
+            className="mt-4 px-1 min-h-[44px] text-blue-600 dark:text-blue-400 font-medium"
           >
-            ☰
+            + {t.newSection}
           </button>
-          <button
-            onClick={() => { setDefaultSectionId(''); setShowItemForm(true) }}
-            className="bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center text-2xl transition-all"
-            style={{ width: '52px', height: '52px' }}
-            aria-label={t.addItem}
-          >
-            +
-          </button>
-        </div>
+        )}
       </div>
 
-      <TotalsBar list={list} />
+      <TotalsBar list={list} onAddItem={() => { setDefaultSectionId(''); setShowItemForm(true) }} />
 
       {pendingDelete && (
         <UndoToast
-          message={`"${pendingDelete.item.name}" deleted`}
+          message={t.itemDeleted.replace('{name}', pendingDelete.item.name)}
           onUndo={handleUndo}
           onDismiss={handleDismissToast}
         />

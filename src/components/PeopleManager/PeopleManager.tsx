@@ -25,9 +25,10 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
     <div className="mb-4">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        aria-expanded={isExpanded}
+        className="flex items-center gap-2 min-h-[44px] pr-3 text-sm font-medium text-gray-700 dark:text-gray-300"
       >
-        <span>{isExpanded ? '▼' : '▶'}</span>
+        <span aria-hidden="true" className={`inline-block transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶</span>
         <span>{t.people} ({people.length})</span>
       </button>
 
@@ -38,13 +39,13 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
               {people.map(person => (
                 <span
                   key={person.id}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                  className="inline-flex items-center gap-1 pl-3 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
                 >
                   {person.name}
                   <button
                     onClick={() => onRemovePerson(person.id)}
-                    className="ml-1 w-7 h-7 flex items-center justify-center text-blue-600 dark:text-blue-300 hover:text-red-600 dark:hover:text-red-400 font-bold rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                    aria-label={`Remove ${person.name}`}
+                    className="w-9 h-9 flex items-center justify-center text-blue-600 dark:text-blue-300 hover:text-red-600 dark:hover:text-red-400 font-bold rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                    aria-label={t.removePerson.replace('{name}', person.name)}
                   >
                     ×
                   </button>
@@ -67,7 +68,7 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
             <button
               type="submit"
               disabled={!newName.trim()}
-              className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 min-h-[44px] bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t.add}
             </button>
