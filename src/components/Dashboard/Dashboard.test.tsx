@@ -7,8 +7,14 @@ import { LanguageProvider } from '../../contexts/LanguageContext'
 import * as useListsModule from '../../hooks/useLists'
 import type { List } from '../../types'
 import { SyncContext, type SyncContextValue } from '../../contexts/SyncContext'
+import * as importExport from '../../lib/importExport'
 
 vi.mock('../../hooks/useLists')
+vi.mock('../../lib/importExport', async importOriginal => ({
+  ...(await importOriginal<typeof import('../../lib/importExport')>()),
+  exportData: vi.fn(),
+  importData: vi.fn(),
+}))
 
 const renderDashboard = () => render(<BrowserRouter><LanguageProvider><DarkModeProvider><Dashboard /></DarkModeProvider></LanguageProvider></BrowserRouter>)
 
@@ -147,6 +153,26 @@ describe('Dashboard', () => {
       expect(v.prepare).toHaveBeenCalled()
       fireEvent.click(screen.getByText(/sync with google|sincronizar com google/i))
       expect(v.signIn).toHaveBeenCalled()
+    })
+
+    it('recommends syncing after an export when signed out', async () => {
+      vi.mocked(importExport.exportData).mockResolvedValue()
+      renderWithSync(syncValue())
+      openSettings()
+      fireEvent.click(screen.getByText(/^export$|^exportar$/i))
+      expect(await screen.findByText(/sync with google so you don't need to export|sincronize com o google para não precisar exportar/i)).toBeTruthy()
+    })
+
+    it('asks for confirmation before importing while signed in', async () => {
+      vi.mocked(importExport.importData).mockResolvedValue({ lists: [] })
+      const setItem = vi.spyOn(Storage.prototype, 'setItem')
+      const { container } = renderWithSync(syncValue({ status: 'idle' }))
+      const input = container.querySelector('input[type="file"]') as HTMLInputElement
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [new File(['{}'], 'b.json', { type: 'application/json' })] } })
+      })
+      expect(await screen.findByText(/will be sent to the cloud|serão enviadas para a nuvem/i)).toBeTruthy()
+      expect(setItem).not.toHaveBeenCalledWith('app', expect.anything())
     })
   })
 })

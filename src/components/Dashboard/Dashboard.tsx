@@ -12,6 +12,8 @@ import { CloudCheckIcon, CloudIcon, DownloadIcon, EllipsisIcon, GlobeIcon, InfoI
 import { useSync } from '../../contexts/SyncContext'
 import { SyncStatusButton } from '../Sync/SyncStatusButton'
 import { AccountSheet } from '../Sync/AccountSheet'
+import { SyncBanner } from '../Sync/SyncBanner'
+import type { AppState } from '../../types'
 
 type Tab = 'active' | 'archived' | 'templates'
 
@@ -23,6 +25,8 @@ export const Dashboard = () => {
   const { locale, setLocale, t } = useLanguage()
   const sync = useSync()
   const [showAccount, setShowAccount] = useState(false)
+  const [showSyncHint, setShowSyncHint] = useState(false)
+  const [pendingImport, setPendingImport] = useState<AppState | null>(null)
 
   const openSettings = () => {
     sync.prepare() // load the SDK early so sign-in can open its popup within the tap
@@ -57,10 +61,22 @@ export const Dashboard = () => {
 
   // Called straight from the tap so the share sheet keeps the user gesture
   const handleExport = () => {
-    exportData({ lists }).catch(() => {
-      setImportError(t.exportFailed)
-      setTimeout(() => setImportError(null), 3000)
-    })
+    exportData({ lists })
+      .then(() => {
+        if (sync.status === 'signedOut') {
+          setShowSyncHint(true)
+          setTimeout(() => setShowSyncHint(false), 8000)
+        }
+      })
+      .catch(() => {
+        setImportError(t.exportFailed)
+        setTimeout(() => setImportError(null), 3000)
+      })
+  }
+
+  const applyImport = (data: AppState) => {
+    localStorage.setItem('app', JSON.stringify(data))
+    window.location.reload()
   }
 
   const handleImportClick = () => {
@@ -73,8 +89,9 @@ export const Dashboard = () => {
 
     try {
       const data = await importData(file)
-      localStorage.setItem('app', JSON.stringify(data))
-      window.location.reload()
+      const signedIn = sync.status !== 'disabled' && sync.status !== 'signedOut'
+      if (signedIn) setPendingImport(data)
+      else applyImport(data)
     } catch (error) {
       setImportError(error instanceof Error ? error.message : t.importFailed)
       setTimeout(() => setImportError(null), 3000)
@@ -169,6 +186,17 @@ export const Dashboard = () => {
           </div>
         )}
 
+        {showSyncHint && (
+          <div role="status" className="mb-4 p-3 bg-accent/10 text-ink rounded-group flex items-center gap-3">
+            <p className="flex-1 text-callout">{t.exportSyncHint}</p>
+            <button onClick={() => { setShowSyncHint(false); void sync.signIn() }} className="text-callout font-semibold text-accent">
+              {t.syncWithGoogle}
+            </button>
+          </div>
+        )}
+
+        <SyncBanner listCount={regularLists.length} />
+
         {activeTab === 'templates' ? (
           templates.length === 0 ? (
             <div className="text-center py-12 text-muted">
@@ -247,6 +275,16 @@ export const Dashboard = () => {
         message={t.deleteTemplateMessage}
         onConfirm={() => deleteTemplateConfirm && handleDeleteTemplate(deleteTemplateConfirm)}
         onCancel={() => setDeleteTemplateConfirm(null)}
+      />
+
+      <ConfirmDialog
+        isOpen={pendingImport !== null}
+        title={t.importSyncTitle}
+        message={t.importSyncWarning}
+        variant="info"
+        confirmLabel={t.import}
+        onConfirm={() => pendingImport && applyImport(pendingImport)}
+        onCancel={() => setPendingImport(null)}
       />
     </div>
   )

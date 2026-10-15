@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { LanguageProvider } from '../../contexts/LanguageContext'
 import { SyncContext, type SyncContextValue } from '../../contexts/SyncContext'
 import { SyncStatusButton } from './SyncStatusButton'
 import { AccountSheet } from './AccountSheet'
+import { SyncBanner } from './SyncBanner'
 
 const value = (over: Partial<SyncContextValue> = {}): SyncContextValue => ({
   status: 'idle', errorKind: null, lastSyncedAt: null,
@@ -58,5 +59,37 @@ describe('AccountSheet', () => {
     wrap(<AccountSheet isOpen onClose={() => {}} />, v)
     fireEvent.click(screen.getByRole('button', { name: 'Sign out' }))
     expect(v.signOut).toHaveBeenCalled()
+  })
+})
+
+describe('SyncBanner', () => {
+  beforeEach(() => localStorage.clear())
+
+  it('shows for signed-out users with 3+ lists and signs in', () => {
+    const v = value({ status: 'signedOut' })
+    wrap(<SyncBanner listCount={3} />, v)
+    fireEvent.click(screen.getByRole('button', { name: 'Sync with Google' }))
+    expect(v.signIn).toHaveBeenCalled()
+  })
+
+  it('hides with fewer than 3 lists, when signed in or when disabled', () => {
+    const { unmount } = wrap(<SyncBanner listCount={2} />, value({ status: 'signedOut' }))
+    expect(screen.queryByText('Keep your lists safe')).toBeNull()
+    unmount()
+    const r2 = wrap(<SyncBanner listCount={5} />, value({ status: 'idle' }))
+    expect(screen.queryByText('Keep your lists safe')).toBeNull()
+    r2.unmount()
+    wrap(<SyncBanner listCount={5} />, value({ status: 'disabled' }))
+    expect(screen.queryByText('Keep your lists safe')).toBeNull()
+  })
+
+  it('stays dismissed', () => {
+    const { unmount } = wrap(<SyncBanner listCount={3} />, value({ status: 'signedOut' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Not now' }))
+    expect(screen.queryByText('Keep your lists safe')).toBeNull()
+    unmount()
+    wrap(<SyncBanner listCount={3} />, value({ status: 'signedOut' }))
+    expect(screen.queryByText('Keep your lists safe')).toBeNull()
+    expect(localStorage.getItem('sync-banner-dismissed')).toBe('1')
   })
 })
