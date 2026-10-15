@@ -41,9 +41,9 @@ export const Landing = () => {
   }
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 text-white overflow-y-auto pt-safe">
+    <div ref={containerRef} className="min-h-dvh bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 text-white overflow-y-auto pt-safe">
       {/* Language toggle - top right */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-safe right-safe z-50">
         <button
           onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
           className="w-12 h-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center text-2xl hover:bg-opacity-30 transition-all shadow-lg"
@@ -54,7 +54,7 @@ export const Landing = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative">
+      <section className="min-h-dvh flex flex-col items-center justify-center px-6 text-center relative">
         <div className="text-6xl mb-6 animate-bounce-slow">
           💰📋📱
         </div>

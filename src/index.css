@@ -27,6 +27,18 @@
     background-color: #111827; /* gray-900 */
   }
 
+  /* Height of the fixed TotalsBar (excluding safe area), kept in sync by TotalsBar */
+  :root {
+    --totals-bar-h: 0px;
+  }
+
+  /* iOS Safari zooms into focused fields with font-size < 16px */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+
   body {
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
@@ -52,6 +64,32 @@
   /* Safe area top padding - apply to page containers so their bg fills behind status bar */
   .pt-safe {
     padding-top: env(safe-area-inset-top);
+  }
+
+  /* Safe area bottom helpers - for fixed elements, which ignore body padding */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+
+  .bottom-safe {
+    bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Horizontal insets for fixed elements (landscape notch / Dynamic Island) */
+  .right-safe {
+    right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .left-safe {
+    left: max(1rem, env(safe-area-inset-left));
+  }
+
+  .top-safe {
+    top: max(1rem, env(safe-area-inset-top));
   }
 
   /* Prevent overscroll bounce on scrollable containers */
