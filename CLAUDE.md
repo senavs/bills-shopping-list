@@ -16,6 +16,7 @@ Key features:
 - Import/Export data as JSON
 - Dark mode support
 - Fully offline - no backend required
+- Optional Google sign-in to sync lists with Firebase (Firestore, Spark plan)
 
 ## Development Commands
 
@@ -28,6 +29,9 @@ npm run dev
 
 # Run tests
 npm test
+
+# Firestore security rules tests (emulator; needs Firebase CLI + Java)
+npm run test:rules
 
 # Build for production
 npm run build
@@ -78,6 +82,8 @@ src/
 ├── contexts/               # React contexts for global state
 │   ├── ListsContext.tsx    # Central state management for lists/items/sections
 │   ├── ListsContext.test.tsx
+│   ├── SyncContext.tsx     # Optional Google/Firestore sync orchestration
+│   ├── SyncContext.test.tsx
 │   └── DarkModeContext.tsx # Theme management context
 ├── hooks/                  # Custom React hooks
 │   └── useLists.ts         # Hook to access ListsContext
@@ -87,7 +93,11 @@ src/
 │   ├── calculations.ts     # Tax and total calculation functions
 │   ├── calculations.test.ts
 │   ├── importExport.ts     # Data import/export functionality
-│   └── importExport.test.ts
+│   ├── importExport.test.ts
+│   ├── sync/               # Pure sync logic (no SDK): types, hash, merge, syncMeta,
+│   │                       # errors, memoryRemote (test fake), formatSyncedAgo
+│   └── firebase/           # Firebase adapters: config, client, remoteDoc,
+│                           # firestoreRemote, googleAuth, loadBackend (lazy import())
 ├── types/                  # TypeScript type definitions
 │   ├── index.ts            # Core data types (List, Item, Section, AppState)
 │   └── index.test.ts
@@ -121,6 +131,15 @@ The application uses React Context API for global state management with two prim
    - Manages application theme (light/dark mode)
    - Persists user preference in LocalStorage
    - Toggles document class for Tailwind dark mode styling
+
+3. **SyncContext** (`src/contexts/SyncContext.tsx`)
+   - Optional: `disabled` when `VITE_FIREBASE_*` env is missing; `localStorage` stays the source of truth
+   - Detects changes by hashing each list against `sync-meta` (`localStorage` key) — covers import, which writes storage directly
+   - Pull is incremental by server `syncedAt`; push is debounced 2 s and flushed on `visibilitychange`/`pagehide`
+   - Conflicts per list, last `updatedAt` wins; deletions are tombstones (`deleted: true`)
+   - Firebase SDK is loaded via `import()` only for signed-in users or on sign-in (`prepare()` preloads it so the popup keeps the tap gesture on iOS)
+   - `ListsContext` stamps `updatedAt` on every mutation and exposes `replaceLists` (no stamping) for applying remote state
+   - UI: `src/components/Sync/` (`SyncStatusButton`, `AccountSheet`, `SyncBanner`); no name/photo/e-mail is ever read or shown
 
 ### Key Components and Their Relationships
 
@@ -232,9 +251,11 @@ The application uses React Context API for global state management with two prim
     taxPercentage: number,
     items: Item[],
     sections: Section[],
-    archived: boolean
+    archived: boolean,
+    updatedAt?: number   // epoch ms of last local edit (sync conflict resolution)
   }
   ```
+- **Firestore** (sync only): `users/{uid}/lists/{listId}` = `{ ...List, updatedAt, deleted: false, syncedAt }` or tombstone `{ id, updatedAt, deleted: true, syncedAt }`; rules in `firestore.rules`
 - **Item**:
   ```typescript
   {
@@ -291,3 +312,8 @@ Unit tests use Vitest with React Testing Library. Test files are colocated with 
 - `src/lib/storage.test.ts` - Storage utility tests
 - `src/lib/calculations.test.ts` - Calculation function tests
 - `src/types/index.test.ts` - Type validation tests
+- `src/lib/sync/*.test.ts` - Hash, sync-meta, merge (incl. fast-check convergence/idempotence), errors
+- `src/lib/firebase/*.test.ts` - Env config and Firestore document mapping
+- `src/contexts/SyncContext.test.tsx` - Sync orchestration with in-memory remote and fake auth
+- `src/components/Sync/Sync.test.tsx` - Sync status button, account sheet, banner
+- `firestore-tests/rules.test.ts` - Firestore security rules (`npm run test:rules`, excluded from `npm test`)

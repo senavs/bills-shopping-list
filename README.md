@@ -53,6 +53,31 @@ npm run preview
 
 ## Deploy
 
+### Cloud sync (optional)
+
+Google sign-in + Firestore sync is enabled only when the Firebase web config is
+present at build time. Create a `.env.local` (git-ignored) with the values from
+Firebase console → Project settings → Your apps:
+
+```bash
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+Without it the app builds and runs fully local, with sync hidden.
+
+```bash
+# Firestore security rules (after editing firestore.rules)
+npm run test:rules                                   # needs Firebase CLI + Java
+firebase deploy --only firestore:rules --project <projectId>
+```
+
+The web config ends up in the public bundle by design — it identifies the project,
+it is not a secret. Access is protected by the Firestore rules, the Auth authorized
+domains and the API key's referrer restriction.
+
 ```bash
 # Build and deploy to GitHub Pages (runs predeploy → build automatically)
 npm run deploy
