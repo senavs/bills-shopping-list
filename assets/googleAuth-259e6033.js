@@ -1,1 +1,0 @@
-import{s as i,G as a,b as e,o as g}from"./index-4NFEPWkC-0559f9bb.js";import{g as s}from"./client-93638653.js";import"./main-9810c225.js";import"./modulepreload-polyfill-3cfb730f.js";const u=async()=>{const{auth:t}=s();return{signIn:()=>i(t,new a).then(()=>{}),signOut:()=>e(t),onChange:n=>g(t,o=>n((o==null?void 0:o.uid)??null))}};export{u as createGoogleAuth};
