@@ -5,24 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>BillBuddy</title>
 
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#3b82f6" />
+    <!-- PWA Meta Tags. theme-color tints the iOS status bar; DarkModeContext keeps it in sync with in-app overrides -->
+    <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="description" content="Offline-first web app for tracking expenses while shopping or dining out" />
 
-    <!-- Apple PWA Meta Tags -->
+    <!-- Apple PWA Meta Tags. "default" lets iOS pick status bar text that contrasts with theme-color in both themes -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="BillBuddy" />
     <link rel="apple-touch-icon" href="/bills-shopping-list/apple-touch-icon.png" />
 
-    <!-- Splash screens for iOS -->
     <link rel="icon" type="image/png" sizes="192x192" href="/bills-shopping-list/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/bills-shopping-list/icon-512.png" />
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4545953737931283" crossorigin="anonymous"></script>
-    <script type="module" crossorigin src="/bills-shopping-list/assets/index-eda2438e.js"></script>
-    <link rel="stylesheet" href="/bills-shopping-list/assets/index-0e557b58.css">
+    <!-- AdSense site ownership. The ad script itself is injected on demand (see src/components/ads/loadAdSense.ts) -->
+    <meta name="google-adsense-account" content="ca-pub-4545953737931283" />
+
+    <!-- Apply the theme before first paint to avoid a white flash in dark mode -->
+    <script>
+      (function () {
+        try {
+          var mode = localStorage.getItem('theme') || (localStorage.getItem('darkMode') === 'true' ? 'dark' : 'system');
+          var dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/bills-shopping-list/assets/index-37e66f11.js"></script>
+    <link rel="stylesheet" href="/bills-shopping-list/assets/index-75a23d29.css">
   <link rel="manifest" href="/bills-shopping-list/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/bills-shopping-list/registerSW.js"></script></head>
   <body>
     <div id="root"></div>
