@@ -8,6 +8,6 @@ export default defineConfig({
     // Git worktrees live in .claude/worktrees and carry their own copies of the
     // test files (and sometimes node_modules), which would run twice and load a
     // second React instance.
-    exclude: [...configDefaults.exclude, '.claude/**', '.git/**', '.kiro/**'],
+    exclude: [...configDefaults.exclude, '.claude/**', '.git/**', '.kiro/**', 'firestore-tests/**'],
   },
 })
