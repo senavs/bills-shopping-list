@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { parseLocaleNumber } from '../../lib/format'
 
 export const ListForm = () => {
   const navigate = useNavigate()
@@ -46,7 +47,7 @@ export const ListForm = () => {
       return
     }
     
-    const tax = parseFloat(taxPercentage)
+    const tax = parseLocaleNumber(taxPercentage)
     if (isNaN(tax) || tax < 0) {
       setError(t.taxMustBePositive)
       return
@@ -62,7 +63,7 @@ export const ListForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-safe">
+    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 pt-safe">
       <div className="container mx-auto p-4 max-w-2xl">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
           {id ? (existingList?.isTemplate ? t.editTemplate : t.editList) : t.createList}
@@ -124,11 +125,11 @@ export const ListForm = () => {
               {t.taxTipPercentage}
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
+              enterKeyHint="done"
               value={taxPercentage}
               onChange={(e) => setTaxPercentage(e.target.value)}
-              min="0"
-              step="0.1"
               required
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="0"

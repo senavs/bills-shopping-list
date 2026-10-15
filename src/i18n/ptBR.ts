@@ -51,6 +51,7 @@ export const ptBR: TranslationKeys = {
   editItem: 'Editar Item',
   addItemTitle: 'Adicionar Item',
   itemNamePlaceholder: 'ex: Leite',
+  pricePlaceholder: '0,00',
   quantity: 'Quantidade',
   unitPrice: 'Preço Unitário',
   unitType: 'Unidade',

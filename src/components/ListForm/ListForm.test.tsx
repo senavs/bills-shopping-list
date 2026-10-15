@@ -130,4 +130,20 @@ describe('ListForm', () => {
       taxPercentage: 0,
     })
   })
+
+  it('accepts a comma decimal tax percentage', () => {
+    const { container } = renderForm()
+    fireEvent.change(screen.getByPlaceholderText('e.g., Weekly Groceries'), { target: { value: 'Dinner' } })
+    fireEvent.change(screen.getByPlaceholderText('0'), { target: { value: '10,5' } })
+    fireEvent.submit(container.querySelector('form')!)
+
+    expect(mockUseLists.createList).toHaveBeenCalledWith(expect.objectContaining({ taxPercentage: 10.5 }))
+  })
+
+  it('uses a decimal keypad for the tax percentage', () => {
+    renderForm()
+    const taxInput = screen.getByPlaceholderText('0')
+    expect(taxInput.getAttribute('type')).toBe('text')
+    expect(taxInput.getAttribute('inputmode')).toBe('decimal')
+  })
 })

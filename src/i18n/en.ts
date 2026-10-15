@@ -49,6 +49,7 @@ export const en = {
   editItem: 'Edit Item',
   addItemTitle: 'Add Item',
   itemNamePlaceholder: 'e.g., Milk',
+  pricePlaceholder: '0.00',
   quantity: 'Quantity',
   unitPrice: 'Unit Price',
   unitType: 'Unit',
