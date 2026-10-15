@@ -67,6 +67,9 @@ export const BottomSheet = ({ isOpen, title, actions = [], children, onClose }: 
       {/* Sheet — the transition is off while dragging so it follows the finger */}
       <div
         ref={sheetRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         className={`absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl ease-out ${
           isDragging ? '' : 'transition-transform duration-200'
         } ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}

@@ -23,7 +23,7 @@ export const SectionForm = ({ initialName = '', onSubmit, onCancel }: SectionFor
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-xl">
+      <div role="dialog" aria-modal="true" aria-label={initialName ? t.renameSection : t.newSection} className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-xl">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           {initialName ? t.renameSection : t.newSection}
         </h3>

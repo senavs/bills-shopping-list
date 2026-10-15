@@ -15,8 +15,9 @@ export default defineConfig({
         start_url: '/bills-shopping-list/',
         scope: '/bills-shopping-list/',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#3b82f6',
+        // Match the app background so the iOS launch screen doesn't flash a different color
+        background_color: '#F2F2F7',
+        theme_color: '#F2F2F7',
         icons: [
           {
             src: 'icon-192.png',
