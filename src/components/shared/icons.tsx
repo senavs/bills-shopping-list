@@ -128,3 +128,19 @@ export const UsersIcon = (p: IconProps) => (
 )
 
 export const GripIcon = (p: IconProps) => <Icon {...p}><path d="M6 8h12M6 12h12M6 16h12" /></Icon>
+
+const CLOUD = 'M7 18a4 4 0 01-.5-7.97A6 6 0 0118 9a4.5 4.5 0 01-1 9H7z'
+
+export const CloudIcon = (p: IconProps) => <Icon {...p}><path d={CLOUD} /></Icon>
+
+export const CloudCheckIcon = (p: IconProps) => (
+  <Icon {...p}><path d={CLOUD} /><path d="M9.5 13.5l2 2 3.5-3.5" /></Icon>
+)
+
+export const CloudOffIcon = (p: IconProps) => (
+  <Icon {...p}><path d={CLOUD} /><path d="M4 4l16 16" /></Icon>
+)
+
+export const CloudAlertIcon = (p: IconProps) => (
+  <Icon {...p}><path d={CLOUD} /><path d="M12 11v3M12 16.5v.01" /></Icon>
+)

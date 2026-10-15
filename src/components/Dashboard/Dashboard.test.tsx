@@ -6,6 +6,7 @@ import { DarkModeProvider } from '../../contexts/DarkModeContext'
 import { LanguageProvider } from '../../contexts/LanguageContext'
 import * as useListsModule from '../../hooks/useLists'
 import type { List } from '../../types'
+import { SyncContext, type SyncContextValue } from '../../contexts/SyncContext'
 
 vi.mock('../../hooks/useLists')
 
@@ -120,5 +121,32 @@ describe('Dashboard', () => {
     await act(async () => { fireEvent.click(screen.getByText('Confirm')) })
 
     expect(mockUseLists.deleteList).toHaveBeenCalledWith('1')
+  })
+
+  describe('cloud sync entry', () => {
+    const syncValue = (over: Partial<SyncContextValue> = {}): SyncContextValue => ({
+      status: 'signedOut', errorKind: null, lastSyncedAt: null,
+      prepare: vi.fn(), signIn: vi.fn(async () => {}), signOut: vi.fn(async () => {}), syncNow: vi.fn(),
+      ...over,
+    })
+    const renderWithSync = (v: SyncContextValue) => render(
+      <BrowserRouter><LanguageProvider><DarkModeProvider><SyncContext.Provider value={v}><Dashboard /></SyncContext.Provider></DarkModeProvider></LanguageProvider></BrowserRouter>,
+    )
+    const openSettings = () => fireEvent.click(screen.getByRole('button', { name: /^(settings|ajustes)$/i }))
+
+    it('hides the sync entry when sync is disabled', () => {
+      renderDashboard()
+      openSettings()
+      expect(screen.queryByText(/sync with google|sincronizar com google/i)).toBeNull()
+    })
+
+    it('signed out: preloads on open and signs in from the sheet', () => {
+      const v = syncValue()
+      renderWithSync(v)
+      openSettings()
+      expect(v.prepare).toHaveBeenCalled()
+      fireEvent.click(screen.getByText(/sync with google|sincronizar com google/i))
+      expect(v.signIn).toHaveBeenCalled()
+    })
   })
 })

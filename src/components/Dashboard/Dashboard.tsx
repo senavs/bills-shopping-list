@@ -8,7 +8,10 @@ import { TemplateCard } from './TemplateCard'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { exportData, importData } from '../../lib/importExport'
-import { DownloadIcon, EllipsisIcon, GlobeIcon, InfoIcon, MoonIcon, PlusIcon, ShareIcon, SunIcon } from '../shared/icons'
+import { CloudCheckIcon, CloudIcon, DownloadIcon, EllipsisIcon, GlobeIcon, InfoIcon, MoonIcon, PlusIcon, ShareIcon, SunIcon } from '../shared/icons'
+import { useSync } from '../../contexts/SyncContext'
+import { SyncStatusButton } from '../Sync/SyncStatusButton'
+import { AccountSheet } from '../Sync/AccountSheet'
 
 type Tab = 'active' | 'archived' | 'templates'
 
@@ -18,6 +21,19 @@ export const Dashboard = () => {
   const { lists, archiveList, unarchiveList, deleteList, duplicateList, saveAsTemplate, createFromTemplate, deleteTemplate } = useLists()
   const { mode, setMode, isDark } = useDarkMode()
   const { locale, setLocale, t } = useLanguage()
+  const sync = useSync()
+  const [showAccount, setShowAccount] = useState(false)
+
+  const openSettings = () => {
+    sync.prepare() // load the SDK early so sign-in can open its popup within the tap
+    setShowSettings(true)
+  }
+
+  const syncAction: BottomSheetAction[] =
+    sync.status === 'disabled' ? []
+    : sync.status === 'signedOut'
+      ? [{ id: 'sync', label: t.syncWithGoogle, icon: <CloudIcon />, onAction: () => { void sync.signIn() } }]
+      : [{ id: 'sync', label: t.connectedWithGoogle, icon: <CloudCheckIcon />, onAction: () => setShowAccount(true) }]
   const location = useLocation()
   const navigate = useNavigate()
   const locationState = location.state as { activeTab?: Tab } | null
@@ -71,6 +87,7 @@ export const Dashboard = () => {
 
   // Rarely used preferences and data tools live together in one sheet
   const settingsActions: BottomSheetAction[] = [
+    ...syncAction,
     {
       id: 'language',
       label: locale === 'en' ? 'Mudar para Português' : 'Switch to English',
@@ -103,13 +120,16 @@ export const Dashboard = () => {
             <h1 className="text-large-title font-bold text-ink">
               {t.appTitle}
             </h1>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="w-11 h-11 flex items-center justify-center rounded-full bg-fill text-accent"
-              aria-label={t.settings}
-            >
-              <EllipsisIcon className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              <SyncStatusButton onOpen={() => setShowAccount(true)} />
+              <button
+                onClick={openSettings}
+                className="w-11 h-11 flex items-center justify-center rounded-full bg-fill text-accent"
+                aria-label={t.settings}
+              >
+                <EllipsisIcon className="w-6 h-6" />
+              </button>
+            </div>
           </div>
 
           {/* Segmented control */}
@@ -218,6 +238,8 @@ export const Dashboard = () => {
         actions={settingsActions}
         onClose={() => setShowSettings(false)}
       />
+
+      <AccountSheet isOpen={showAccount} onClose={() => setShowAccount(false)} />
 
       <ConfirmDialog
         isOpen={deleteTemplateConfirm !== null}

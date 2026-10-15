@@ -2,6 +2,8 @@ import { HashRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { ListsProvider } from './contexts/ListsContext'
 import { DarkModeProvider } from './contexts/DarkModeContext'
 import { LanguageProvider } from './contexts/LanguageContext'
+import { SyncProvider } from './contexts/SyncContext'
+import { loadBackend } from './lib/firebase/loadBackend'
 import { Landing } from './components/Landing/Landing'
 import { Dashboard } from './components/Dashboard/Dashboard'
 import { ListForm } from './components/ListForm/ListForm'
@@ -45,17 +47,19 @@ function App() {
     <LanguageProvider>
       <DarkModeProvider>
         <ListsProvider>
-          <HashRouter>
-            <Routes>
-              <Route path="/" element={<HomeRoute />} />
-              <Route element={<AppWithAds />}>
-                <Route path="/app" element={<Dashboard />} />
-                <Route path="/lists/new" element={<ListForm />} />
-                <Route path="/lists/:id" element={<ListDetail />} />
-                <Route path="/lists/:id/edit" element={<ListForm />} />
-              </Route>
-            </Routes>
-          </HashRouter>
+          <SyncProvider loadBackend={loadBackend}>
+            <HashRouter>
+              <Routes>
+                <Route path="/" element={<HomeRoute />} />
+                <Route element={<AppWithAds />}>
+                  <Route path="/app" element={<Dashboard />} />
+                  <Route path="/lists/new" element={<ListForm />} />
+                  <Route path="/lists/:id" element={<ListDetail />} />
+                  <Route path="/lists/:id/edit" element={<ListForm />} />
+                </Route>
+              </Routes>
+            </HashRouter>
+          </SyncProvider>
         </ListsProvider>
       </DarkModeProvider>
     </LanguageProvider>
