@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Person } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { ChevronRightIcon } from '../shared/icons'
 
 interface PeopleManagerProps {
   people: Person[]
@@ -22,29 +23,30 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
   }
 
   return (
-    <div className="mb-4">
+    <div>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
-        className="flex items-center gap-2 min-h-[44px] pr-3 text-sm font-medium text-gray-700 dark:text-gray-300"
+        className="flex items-center gap-2 min-h-[44px] pl-1 pr-3"
       >
-        <span aria-hidden="true" className={`inline-block transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶</span>
-        <span>{t.people} ({people.length})</span>
+        <ChevronRightIcon className={`w-4 h-4 text-muted transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+        <span className="text-callout font-semibold text-ink">{t.people}</span>
+        <span className="text-callout num text-muted">{people.length}</span>
       </button>
 
       {isExpanded && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow">
+        <div className="bg-surface rounded-group p-3">
           {people.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
               {people.map(person => (
                 <span
                   key={person.id}
-                  className="inline-flex items-center gap-1 pl-3 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                  className="inline-flex items-center gap-1 pl-3 bg-accent/15 text-accent rounded-full text-sm"
                 >
                   {person.name}
                   <button
                     onClick={() => onRemovePerson(person.id)}
-                    className="w-9 h-9 flex items-center justify-center text-blue-600 dark:text-blue-300 hover:text-red-600 dark:hover:text-red-400 font-bold rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                    className="w-9 h-9 flex items-center justify-center text-accent hover:text-danger font-bold rounded-full hover:bg-accent/15"
                     aria-label={t.removePerson.replace('{name}', person.name)}
                   >
                     ×
@@ -63,12 +65,12 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
               autoCapitalize="words"
               autoComplete="off"
               enterKeyHint="done"
-              className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
+              className="flex-1 min-w-0 px-3 py-2 border border-hairline rounded bg-surface text-ink text-base"
             />
             <button
               type="submit"
               disabled={!newName.trim()}
-              className="px-4 min-h-[44px] bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 min-h-[44px] bg-accent text-on-accent rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t.add}
             </button>

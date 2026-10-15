@@ -23,13 +23,13 @@ export const SectionForm = ({ initialName = '', onSubmit, onCancel }: SectionFor
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-      <div role="dialog" aria-modal="true" aria-label={initialName ? t.renameSection : t.newSection} className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-xl">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <div role="dialog" aria-modal="true" aria-label={initialName ? t.renameSection : t.newSection} className="bg-surface rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-xl">
+        <h3 className="text-lg font-semibold text-ink mb-4">
           {initialName ? t.renameSection : t.newSection}
         </h3>
         <form onSubmit={handleSubmit}>
           {error && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded text-sm">
+            <div className="mb-4 p-3 bg-danger/10 text-danger rounded text-sm">
               {error}
             </div>
           )}
@@ -37,15 +37,15 @@ export const SectionForm = ({ initialName = '', onSubmit, onCancel }: SectionFor
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
+            className="w-full px-4 py-3 border border-hairline rounded-xl bg-surface text-ink mb-4"
             placeholder={t.sectionNamePlaceholder}
             autoFocus
           />
           <div className="flex gap-3 justify-end">
-            <button type="button" onClick={onCancel} className="px-5 py-3 min-h-[44px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
+            <button type="button" onClick={onCancel} className="px-5 py-3 min-h-[44px] text-ink hover:bg-fill rounded-xl">
               {t.cancel}
             </button>
-            <button type="submit" className="px-5 py-3 min-h-[44px] bg-blue-600 text-white hover:bg-blue-700 rounded-xl transition-colors">
+            <button type="submit" className="px-5 py-3 min-h-[44px] bg-accent text-on-accent active:opacity-80 rounded-xl">
               {initialName ? t.save : t.create}
             </button>
           </div>

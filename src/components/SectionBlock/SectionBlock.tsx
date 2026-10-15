@@ -10,6 +10,7 @@ import { SortableContainer } from '../shared/SortableContainer'
 import { DragHandle } from '../shared/DragHandle'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { ChevronRightIcon, EllipsisIcon, ListIcon, PlusIcon, TextIcon, TrashIcon } from '../shared/icons'
 
 interface SectionBlockProps {
   section: Section
@@ -77,73 +78,59 @@ export const SectionBlock = ({
   }
 
   const sectionActions: BottomSheetAction[] = [
-    { id: 'edit-items', label: t.edit, icon: '📝', onAction: () => setShowItemsModal(true) },
-    { id: 'rename', label: t.rename, icon: '✏️', onAction: () => setShowRename(true) },
-    { id: 'delete', label: t.delete, icon: '🗑️', variant: 'destructive', onAction: () => setShowConfirm(true) },
+    { id: 'edit-items', label: t.edit, icon: <ListIcon />, onAction: () => setShowItemsModal(true) },
+    { id: 'rename', label: t.rename, icon: <TextIcon />, onAction: () => setShowRename(true) },
+    { id: 'delete', label: t.delete, icon: <TrashIcon />, variant: 'destructive', onAction: () => setShowConfirm(true) },
   ]
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`${isDragging ? 'opacity-50 z-50' : ''}`}
+      className={`pt-4 ${isDragging ? 'opacity-60 z-50' : ''}`}
     >
-      {/* Section header row */}
-      <div
-        className={`flex items-center gap-2 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-xl border-l-4 border-blue-500 transition-all ${
-          isDragging ? 'shadow-lg ring-2 ring-blue-400/50' : ''
-        }`}
-      >
+      {/* Section header: sits on the page background above its group, like iOS Settings */}
+      <div className="flex items-center gap-1 pl-1">
         {reorderMode && <DragHandle listeners={listeners} attributes={attributes} />}
 
         {/* Collapse toggle */}
         <button
           onClick={() => onUpdateSection(section.id, { collapsed: !section.collapsed })}
           aria-label={section.collapsed ? t.expandSection : t.collapseSection}
-          className="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          aria-expanded={!section.collapsed}
+          className="flex-1 min-w-0 flex items-center gap-2 min-h-[44px] text-left"
         >
-          {section.collapsed ? '▶' : '▼'}
+          <ChevronRightIcon className={`w-4 h-4 shrink-0 text-muted transition-transform ${section.collapsed ? '' : 'rotate-90'}`} />
+          <span className="text-callout font-semibold text-ink truncate">{section.name}</span>
+          <span className="text-callout num text-muted">{sectionItems.length}</span>
         </button>
-
-        <span className="flex-1 text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-200">
-          {section.name}
-          <span className="ml-2 text-xs font-normal normal-case text-gray-500 dark:text-gray-400">
-            ({sectionItems.length})
-          </span>
-        </span>
 
         {/* Add item to this section */}
         {onAddItem && !reorderMode && (
           <button
             onClick={onAddItem}
-            className="w-11 h-11 flex items-center justify-center rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            className="w-11 h-11 flex items-center justify-center rounded-full text-accent hover:bg-accent/10"
             aria-label={t.addItemToSection}
           >
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
-            </svg>
+            <PlusIcon />
           </button>
         )}
 
         {/* 3-dots menu button */}
         {!reorderMode && (
-        <button
-          onClick={() => setShowSheet(true)}
-          className="w-11 h-11 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          aria-label={t.sectionOptions}
-        >
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-            <circle cx="10" cy="4" r="2" />
-            <circle cx="10" cy="10" r="2" />
-            <circle cx="10" cy="16" r="2" />
-          </svg>
-        </button>
+          <button
+            onClick={() => setShowSheet(true)}
+            className="w-11 h-11 flex items-center justify-center rounded-full text-muted hover:bg-fill"
+            aria-label={t.sectionOptions}
+          >
+            <EllipsisIcon />
+          </button>
         )}
       </div>
 
       {/* Section items with dnd-kit */}
       {!section.collapsed && sectionItems.length > 0 && (
-        <div className="pl-4 mt-1 space-y-1">
+        <div className="mt-1 bg-surface rounded-group overflow-hidden">
           <SortableContainer
             items={sectionItems.map(i => i.id)}
             onReorder={handleItemReorder}

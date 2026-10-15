@@ -4,7 +4,7 @@ export const en = {
   add: 'Add',
   edit: 'Edit',
   delete: 'Delete',
-  back: '← Back',
+  back: 'Back',
   appTitle: 'BillBuddy',
   active: 'Active',
   archived: 'Archived',
@@ -157,6 +157,7 @@ export const en = {
   themeSystem: 'System',
   themeLight: 'Light',
   themeDark: 'Dark',
+  lists: 'Lists',
 }
 
 export type TranslationKeys = typeof en

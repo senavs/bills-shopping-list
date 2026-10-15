@@ -53,7 +53,7 @@ export function AdBanner({ adSlot, adFormat, style, className = '', adClient }: 
   if (!canShowAd) {
     return (
       <div
-        className={`flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-400 dark:text-gray-500 text-xs select-none ${className}`}
+        className={`flex items-center justify-center border-2 border-dashed border-hairline bg-fill rounded-lg text-muted text-xs select-none ${className}`}
         style={style}
         data-testid="ad-placeholder"
         aria-hidden="true"

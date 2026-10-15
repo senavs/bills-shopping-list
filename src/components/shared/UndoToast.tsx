@@ -24,19 +24,19 @@ export const UndoToast = ({ message, duration = 5000, onUndo, onDismiss }: UndoT
       className="fixed left-safe right-safe sm:left-auto sm:w-80 z-50 animate-slide-up"
       style={{ bottom: 'calc(max(var(--totals-bar-h, 0px), env(safe-area-inset-bottom)) + 0.75rem)' }}
     >
-      <div className="bg-gray-800 dark:bg-gray-700 text-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-[#2C2C2E] text-white rounded-group shadow-lg overflow-hidden">
         <div className="flex items-center justify-between pl-4 pr-1">
-          <span className="text-sm truncate mr-3">{message}</span>
+          <span className="text-callout truncate mr-3">{message}</span>
           <button
             onClick={onUndo}
-            className="px-3 min-h-[44px] text-blue-400 hover:text-blue-300 font-semibold text-sm shrink-0"
+            className="px-3 min-h-[44px] text-tag font-semibold text-callout shrink-0"
           >
             {t.undo}
           </button>
         </div>
-        <div className="h-1 bg-gray-600">
+        <div className="h-1 bg-white/20">
           <div
-            className="h-full bg-blue-500 animate-toast-progress"
+            className="h-full bg-tag animate-toast-progress"
             style={{ animationDuration: `${duration}ms` }}
           />
         </div>

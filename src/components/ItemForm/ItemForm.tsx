@@ -73,12 +73,12 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
     )
   }
 
-  const inputClass = 'w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
-  const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
+  const inputClass = 'w-full px-4 py-3 border border-hairline rounded-xl bg-surface text-ink'
+  const labelClass = 'block text-sm font-medium text-ink mb-2'
 
   const renderSwitchRow = (id: string, label: string, checked: boolean, onChange: (checked: boolean) => void) => (
     <label htmlFor={id} className="flex items-center justify-between gap-3 min-h-[44px] py-2 cursor-pointer select-none">
-      <span className="text-base text-gray-700 dark:text-gray-300">{label}</span>
+      <span className="text-base text-ink">{label}</span>
       <input
         type="checkbox"
         id={id}
@@ -89,30 +89,30 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
       />
       <span
         aria-hidden="true"
-        className="relative inline-flex shrink-0 w-[51px] h-[31px] rounded-full bg-gray-300 dark:bg-gray-600 transition-colors peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400 peer-focus-visible:ring-offset-2 dark:peer-focus-visible:ring-offset-gray-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-[27px] after:h-[27px] after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5"
+        className="relative inline-flex shrink-0 w-[51px] h-[31px] rounded-full bg-fill peer-checked:bg-accent peer-focus-visible:ring-2 peer-focus-visible:ring-accent peer-focus-visible:ring-offset-2  after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-[27px] after:h-[27px] after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5"
       />
     </label>
   )
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-      <div role="dialog" aria-modal="true" aria-label={item ? t.editItem : t.addItemTitle} className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90dvh] flex flex-col overflow-hidden shadow-xl">
+      <div role="dialog" aria-modal="true" aria-label={item ? t.editItem : t.addItemTitle} className="bg-surface rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90dvh] flex flex-col overflow-hidden shadow-xl">
         <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
           {/* iOS-style sheet header: stays visible above the keyboard while the body scrolls */}
-          <div className="flex items-center justify-between gap-2 px-2 py-2 border-b border-gray-200 dark:border-gray-700 shrink-0">
+          <div className="flex items-center justify-between gap-2 px-2 py-2 border-b border-hairline shrink-0">
             <button
               type="button"
               onClick={onCancel}
-              className="px-3 min-h-[44px] text-blue-600 dark:text-blue-400 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="px-3 min-h-[44px] text-accent rounded-xl hover:bg-fill"
             >
               {t.cancel}
             </button>
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+            <h3 className="text-base font-semibold text-ink truncate">
               {item ? t.editItem : t.addItemTitle}
             </h3>
             <button
               type="submit"
-              className="px-3 min-h-[44px] font-semibold text-blue-600 dark:text-blue-400 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="px-3 min-h-[44px] font-semibold text-accent rounded-xl hover:bg-fill"
             >
               {item ? t.save : t.add}
             </button>
@@ -120,7 +120,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
 
           <div className="overflow-y-auto overscroll-contain scroll-touch px-6 pt-4 pb-safe">
             {error && (
-              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded text-sm">
+              <div className="mb-4 p-3 bg-danger/10 text-danger rounded text-sm">
                 {error}
               </div>
             )}
@@ -194,9 +194,9 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
               />
             </div>
 
-            <div className="mb-4 divide-y divide-gray-200 dark:divide-gray-700">
-              {renderSwitchRow('includeInTax', `${t.includeInTax} 🧾`, includeInTax, setIncludeInTax)}
-              {renderSwitchRow('selected', `${t.selected} 🛒`, selected, setSelected)}
+            <div className="mb-4 divide-y divide-hairline">
+              {renderSwitchRow('includeInTax', t.includeInTax, includeInTax, setIncludeInTax)}
+              {renderSwitchRow('selected', t.selected, selected, setSelected)}
             </div>
 
             {people.length > 0 && (
@@ -204,7 +204,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 <span className={labelClass}>
                   {t.assignToPeople}
                 </span>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                <p className="text-xs text-muted mb-2">
                   {t.leaveEmptyToShare}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -213,10 +213,10 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                       key={person.id}
                       type="button"
                       onClick={() => togglePerson(person.id)}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                      className={`px-3 py-1.5 rounded-full text-sm ${
                         assignedTo.includes(person.id)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+                          ? 'bg-accent text-on-accent'
+                          : 'bg-fill text-ink border border-hairline'
                       }`}
                     >
                       {person.name}

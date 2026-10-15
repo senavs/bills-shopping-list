@@ -28,10 +28,10 @@ export const SectionItemsModal = ({ allItems, assignedItemIds, unavailableItemId
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-      <div role="dialog" aria-modal="true" aria-label={t.assignItemsToSection} className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-xl">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.assignItemsToSection}</h3>
+      <div role="dialog" aria-modal="true" aria-label={t.assignItemsToSection} className="bg-surface rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-xl">
+        <h3 className="text-lg font-semibold text-ink mb-4">{t.assignItemsToSection}</h3>
         {availableItems.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{t.noAvailableItems}</p>
+          <p className="text-muted text-sm mb-4">{t.noAvailableItems}</p>
         ) : (
           <ul className="mb-4 max-h-64 overflow-y-auto space-y-1 -webkit-overflow-scrolling-touch">
             {availableItems.map(item => (
@@ -44,7 +44,7 @@ export const SectionItemsModal = ({ allItems, assignedItemIds, unavailableItemId
                     onChange={() => toggle(item.id)}
                     className="w-5 h-5 shrink-0"
                   />
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-ink">
                     {item.name}
                   </span>
                 </label>
@@ -53,10 +53,10 @@ export const SectionItemsModal = ({ allItems, assignedItemIds, unavailableItemId
           </ul>
         )}
         <div className="flex gap-3 justify-end">
-          <button type="button" onClick={onCancel} className="px-5 py-3 min-h-[44px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
+          <button type="button" onClick={onCancel} className="px-5 py-3 min-h-[44px] text-ink hover:bg-fill rounded-xl">
             {t.cancel}
           </button>
-          <button onClick={() => onSave([...selected])} className="px-5 py-3 min-h-[44px] bg-blue-600 text-white hover:bg-blue-700 rounded-xl transition-colors">
+          <button onClick={() => onSave([...selected])} className="px-5 py-3 min-h-[44px] bg-accent text-on-accent active:opacity-80 rounded-xl">
             {t.save}
           </button>
         </div>

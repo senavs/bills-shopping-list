@@ -70,7 +70,7 @@ export const BottomSheet = ({ isOpen, title, actions = [], children, onClose }: 
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl ease-out ${
+        className={`absolute bottom-0 left-0 right-0 bg-surface rounded-t-2xl shadow-xl ease-out ${
           isDragging ? '' : 'transition-transform duration-200'
         } ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}
         style={{ transform: translateY > 0 ? `translateY(${translateY}px)` : undefined }}
@@ -81,13 +81,13 @@ export const BottomSheet = ({ isOpen, title, actions = [], children, onClose }: 
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-2">
-          <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
+          <div className="w-10 h-1 bg-hairline rounded-full" />
         </div>
 
         {/* Title */}
         {title && (
           <div className="px-5 pb-2">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            <h3 className="text-footnote font-semibold text-muted text-center truncate">
               {title}
             </h3>
           </div>
@@ -104,14 +104,14 @@ export const BottomSheet = ({ isOpen, title, actions = [], children, onClose }: 
                 action.onAction()
                 onClose()
               }}
-              className={`w-full flex items-center gap-4 px-4 py-3.5 min-h-[52px] rounded-xl transition-colors ${
+              className={`w-full flex items-center gap-4 px-4 py-3 min-h-[52px] rounded-xl ${
                 action.variant === 'destructive'
-                  ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/30'
-                  : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600'
+                  ? 'text-danger hover:bg-danger/10 active:bg-danger/15'
+                  : 'text-ink hover:bg-fill active:bg-fill'
               }`}
             >
-              <span className="text-xl w-8 flex items-center justify-center">{action.icon}</span>
-              <span className="text-base font-medium">{action.label}</span>
+              <span className="w-7 flex items-center justify-center text-xl">{action.icon}</span>
+              <span className="text-body">{action.label}</span>
             </button>
           ))}
         </div>

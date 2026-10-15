@@ -4,6 +4,7 @@ import type { List } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
+import { EllipsisIcon, OpenIcon, PencilIcon, TrashIcon } from '../shared/icons'
 
 interface TemplateCardProps {
   template: List
@@ -20,9 +21,9 @@ export const TemplateCard = ({ template, activeTab, onUseTemplate, onDelete }: T
   const [confirmAction, setConfirmAction] = useState<'useTemplate' | 'delete' | null>(null)
 
   const actions: BottomSheetAction[] = [
-    { id: 'useTemplate', label: t.useTemplate, icon: '📋', onAction: () => setConfirmAction('useTemplate') },
-    { id: 'edit', label: t.edit, icon: '✏️', onAction: () => navigate(`/lists/${template.id}/edit`, { state: { activeTab, from: '/app' } }) },
-    { id: 'delete', label: t.delete, icon: '🗑️', variant: 'destructive' as const, onAction: () => setConfirmAction('delete') },
+    { id: 'useTemplate', label: t.useTemplate, icon: <OpenIcon />, onAction: () => setConfirmAction('useTemplate') },
+    { id: 'edit', label: t.edit, icon: <PencilIcon />, onAction: () => navigate(`/lists/${template.id}/edit`, { state: { activeTab, from: '/app' } }) },
+    { id: 'delete', label: t.delete, icon: <TrashIcon />, variant: 'destructive' as const, onAction: () => setConfirmAction('delete') },
   ]
 
   const handleConfirm = () => {
@@ -45,34 +46,31 @@ export const TemplateCard = ({ template, activeTab, onUseTemplate, onDelete }: T
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 relative no-callout">
-        <Link to={`/lists/${template.id}`} state={{ activeTab, from: '/app' }} className="block">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{icon}</span>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white hover:text-green-600 dark:hover:text-green-400 pr-8">
-                {template.name}
-              </h3>
-            </div>
-          </div>
-
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            {template.items.length} {template.items.length === 1 ? t.item : t.items}
-            {template.sections.length > 0 && ` • ${template.sections.length} ${t.sections}`}
-          </p>
+      <div className="relative flex items-center bg-surface active:bg-fill no-callout after:absolute after:top-0 after:right-0 after:left-[4.25rem] after:h-px after:bg-hairline first:after:hidden">
+        <Link
+          to={`/lists/${template.id}`}
+          state={{ activeTab, from: '/app' }}
+          className="flex-1 min-w-0 flex items-center gap-3 pl-4 py-3 min-h-[64px]"
+        >
+          <span aria-hidden="true" className="shrink-0 w-10 h-10 rounded-full bg-fill flex items-center justify-center text-xl">
+            {icon}
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-body font-semibold text-ink truncate">{template.name}</span>
+            <span className="block text-footnote text-muted truncate">
+              {template.items.length} {template.items.length === 1 ? t.item : t.items}
+              {template.sections.length > 0 && `, ${template.sections.length} ${t.sections}`}
+            </span>
+          </span>
         </Link>
 
         {/* More options button */}
         <button
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); setShowSheet(true) }}
-          className="absolute top-2 right-2 w-11 h-11 flex items-center justify-center rounded-full text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          className="shrink-0 w-11 h-11 mr-1 flex items-center justify-center rounded-full text-muted hover:bg-fill"
           aria-label={t.moreOptions}
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-            <circle cx="10" cy="4" r="2" />
-            <circle cx="10" cy="10" r="2" />
-            <circle cx="10" cy="16" r="2" />
-          </svg>
+          <EllipsisIcon />
         </button>
       </div>
 

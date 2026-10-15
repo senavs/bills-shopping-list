@@ -12,6 +12,7 @@ import { SplitModal } from '../SplitModal/SplitModal'
 import { SortableContainer } from '../shared/SortableContainer'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { Item } from '../../types'
+import { ChevronLeftIcon, PencilIcon, PlusIcon, UsersIcon } from '../shared/icons'
 
 interface PendingDelete {
   listId: string
@@ -94,10 +95,10 @@ export const ListDetail = () => {
 
   if (!list) {
     return (
-      <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 flex items-center justify-center pt-safe">
+      <div className="min-h-dvh bg-bg flex items-center justify-center pt-safe">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">{t.listNotFound}</p>
-          <button onClick={() => navigate('/app', { state: { activeTab: locationState?.activeTab } })} className="text-blue-600 dark:text-blue-400 hover:underline">{t.backToDashboard}</button>
+          <p className="text-muted mb-4">{t.listNotFound}</p>
+          <button onClick={() => navigate('/app', { state: { activeTab: locationState?.activeTab } })} className="min-h-[44px] px-3 text-accent">{t.backToDashboard}</button>
         </div>
       </div>
     )
@@ -147,78 +148,88 @@ export const ListDetail = () => {
 
   const isEmpty = list.items.length === 0 && list.sections.length === 0
 
+  const typeEmoji = { shopping: '🛒', restaurant: '🍽️', bar: '🍻' }[list.type] || '🛒'
+  const typeLabel = { shopping: t.shopping, restaurant: t.restaurant, bar: t.bar }[list.type]
+
+  const renderItemRow = (item: Item) => (
+    <ItemRow
+      key={item.id}
+      item={item}
+      currency={list.currency}
+      hideCheckbox={isTemplate}
+      people={list.people || []}
+      reorderMode={reorderMode}
+      onToggleSelected={(selected) => updateItem(list.id, item.id, { selected })}
+      onEdit={() => setEditingItem(item)}
+      onDelete={() => handleDeleteItem(item.id)}
+      onDuplicate={() => duplicateItem(list.id, item.id)}
+    />
+  )
+
   return (
     <div
-      className="min-h-dvh bg-gray-50 dark:bg-gray-900"
+      className="min-h-dvh bg-bg"
       style={{ paddingBottom: 'calc(var(--totals-bar-h, 0px) + 1.5rem)' }}
     >
-      {/* Sticky header: back button + list name + actions */}
-      <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md pt-safe">
-        <div className="container mx-auto px-4 pt-4 pb-3 max-w-4xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <button onClick={() => navigate('/app', { state: { activeTab: locationState?.activeTab } })} className="w-9 h-9 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors mb-1" aria-label={t.back}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
-                </svg>
-              </button>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{list.name}</h1>
-                {isTemplate && (
-                  <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
-                    {t.templateBadge}
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {{ shopping: '🛒', restaurant: '🍽️', bar: '🍻' }[list.type] || '🛒'} {{ shopping: t.shopping, restaurant: t.restaurant, bar: t.bar }[list.type]} • {list.currency}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              {!isEmpty && (
-                <button
-                  type="button"
-                  onClick={() => setReorderMode(m => !m)}
-                  aria-pressed={reorderMode}
-                  className={`px-3 min-h-[44px] rounded-full text-sm font-semibold transition-colors ${
-                    reorderMode
-                      ? 'bg-blue-600 text-white'
-                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
-                  }`}
-                >
-                  {reorderMode ? t.done : t.reorder}
-                </button>
-              )}
-              {(list.people || []).length > 0 && !isTemplate && (
-                <button
-                  onClick={() => setShowSplitModal(true)}
-                  className="w-11 h-11 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
-                  title={t.viewSplit}
-                  aria-label={t.viewSplit}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1.49 15.326a.78.78 0 01-.358-.442 3 3 0 014.308-3.516 6.484 6.484 0 00-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 01-2.07-.655zM16.44 15.98a4.97 4.97 0 002.07-.654.78.78 0 00.357-.442 3 3 0 00-4.308-3.517 6.484 6.484 0 011.907 3.96 2.32 2.32 0 01-.026.654zM18 8a2 2 0 11-4 0 2 2 0 014 0zM5.304 16.19a.844.844 0 01-.277-.71 5 5 0 019.947 0 .843.843 0 01-.277.71A6.975 6.975 0 0110 18a6.974 6.974 0 01-4.696-1.81z" />
-                  </svg>
-                </button>
-              )}
-              <Link
-                to={`/lists/${list.id}/edit`}
-                state={{ activeTab: locationState?.activeTab, from: `/lists/${list.id}` }}
-                className="w-11 h-11 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                title={t.editList}
-                aria-label={t.editList}
+      {/* Navigation bar: back + actions, translucent like iOS */}
+      <div className="sticky top-0 z-30 bg-bg/85 backdrop-blur-md pt-safe">
+        <div className="container mx-auto max-w-4xl px-2 h-11 flex items-center justify-between">
+          <button
+            onClick={() => navigate('/app', { state: { activeTab: locationState?.activeTab } })}
+            className="flex items-center gap-0.5 min-h-[44px] pr-2 text-accent text-body"
+            aria-label={t.back}
+          >
+            <ChevronLeftIcon className="w-6 h-6" />
+            <span>{t.lists}</span>
+          </button>
+          <div className="flex items-center gap-1">
+            {!isEmpty && (
+              <button
+                type="button"
+                onClick={() => setReorderMode(m => !m)}
+                aria-pressed={reorderMode}
+                className={`px-3 min-h-[44px] text-body text-accent ${reorderMode ? 'font-semibold' : ''}`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                  <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
-                </svg>
-              </Link>
-            </div>
+                {reorderMode ? t.done : t.reorder}
+              </button>
+            )}
+            {(list.people || []).length > 0 && !isTemplate && (
+              <button
+                onClick={() => setShowSplitModal(true)}
+                className="w-11 h-11 flex items-center justify-center rounded-full text-accent hover:bg-accent/10"
+                title={t.viewSplit}
+                aria-label={t.viewSplit}
+              >
+                <UsersIcon className="w-6 h-6" />
+              </button>
+            )}
+            <Link
+              to={`/lists/${list.id}/edit`}
+              state={{ activeTab: locationState?.activeTab, from: `/lists/${list.id}` }}
+              className="w-11 h-11 flex items-center justify-center rounded-full text-accent hover:bg-accent/10"
+              title={t.editList}
+              aria-label={t.editList}
+            >
+              <PencilIcon className="w-6 h-6" />
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Scrollable content */}
-      <div className="container mx-auto px-4 pt-2 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Large title */}
+        <div className="pt-1 pb-3">
+          <h1 className="text-large-title font-bold text-ink break-words">{list.name}</h1>
+          <p className="text-callout text-muted flex items-center gap-2">
+            <span>{typeEmoji} {typeLabel}</span>
+            {isTemplate && (
+              <span className="text-footnote font-semibold bg-accent/15 text-accent px-2 py-0.5 rounded-full">
+                {t.templateBadge}
+              </span>
+            )}
+          </p>
+        </div>
+
         {/* People manager */}
         {!isTemplate && (
           <PeopleManager
@@ -229,11 +240,11 @@ export const ListDetail = () => {
         )}
 
         {isEmpty ? (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-12 text-muted">
             {t.noItemsYet}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div>
             {/* Sections with dnd-kit */}
             <SortableContainer
               items={list.sections.map(s => s.id)}
@@ -260,30 +271,23 @@ export const ListDetail = () => {
             </SortableContainer>
 
             {/* Unassigned items */}
-            {unassignedItems.length > 0 && list.sections.length > 0 && (
-              <div className="pt-2 pb-1 px-1 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                {t.otherItems}
+            {unassignedItems.length > 0 && (
+              <div className={list.sections.length > 0 ? 'pt-4' : ''}>
+                {list.sections.length > 0 && (
+                  <h2 className="pl-1 min-h-[44px] flex items-center text-callout font-semibold text-ink">
+                    {t.otherItems}
+                  </h2>
+                )}
+                <div className="bg-surface rounded-group overflow-hidden">
+                  <SortableContainer
+                    items={unassignedItems.map(i => i.id)}
+                    onReorder={handleUnassignedReorder}
+                  >
+                    {unassignedItems.map(renderItemRow)}
+                  </SortableContainer>
+                </div>
               </div>
             )}
-            <SortableContainer
-              items={unassignedItems.map(i => i.id)}
-              onReorder={handleUnassignedReorder}
-            >
-              {unassignedItems.map((item) => (
-                <ItemRow
-                  key={item.id}
-                  item={item}
-                  currency={list.currency}
-                  hideCheckbox={isTemplate}
-                  people={list.people || []}
-                  reorderMode={reorderMode}
-                  onToggleSelected={(selected) => updateItem(list.id, item.id, { selected })}
-                  onEdit={() => setEditingItem(item)}
-                  onDelete={() => handleDeleteItem(item.id)}
-                  onDuplicate={() => duplicateItem(list.id, item.id)}
-                />
-              ))}
-            </SortableContainer>
           </div>
         )}
 
@@ -291,9 +295,10 @@ export const ListDetail = () => {
           <button
             type="button"
             onClick={() => setShowSectionForm(true)}
-            className="mt-4 px-1 min-h-[44px] text-blue-600 dark:text-blue-400 font-medium"
+            className="mt-4 px-1 min-h-[44px] flex items-center gap-1 text-accent text-body"
           >
-            + {t.newSection}
+            <PlusIcon className="w-5 h-5" />
+            {t.newSection}
           </button>
         )}
       </div>

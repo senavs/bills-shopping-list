@@ -39,19 +39,19 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
         aria-label={t.billSplit}
         onClick={(e) => e.stopPropagation()}
         style={dragY > 0 ? { transform: `translateY(${dragY}px)` } : undefined}
-        className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90dvh] pb-safe overflow-y-auto scroll-touch shadow-xl">
+        className="bg-surface rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90dvh] pb-safe overflow-y-auto scroll-touch shadow-xl">
         <div
-          className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 pl-4 pr-2 py-2 flex items-center justify-between"
+          className="sticky top-0 bg-surface border-b border-hairline pl-4 pr-2 py-2 flex items-center justify-between"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-ink">
             {t.billSplit}
           </h3>
           <button
             onClick={onClose}
-            className="w-11 h-11 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 text-2xl leading-none"
+            className="w-11 h-11 flex items-center justify-center rounded-full text-muted hover:bg-fill text-2xl leading-none"
             aria-label={t.close}
           >
             ×
@@ -60,20 +60,20 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
 
         <div className="p-4 space-y-4">
           {splits.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+            <p className="text-center text-muted py-8">
               {t.addPeopleToSplit}
             </p>
           ) : (
             splits.map(split => (
               <div
                 key={split.personId}
-                className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4"
+                className="bg-bg rounded-lg p-4"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
+                  <h4 className="font-semibold text-ink text-lg">
                     {split.personName}
                   </h4>
-                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  <span className="text-lg font-bold text-accent">
                     {formatAmount(split.total)}
                   </span>
                 </div>
@@ -82,13 +82,13 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
                 <div className="space-y-1 mb-3">
                   {split.items.map((item, idx) => (
                     <div key={idx} className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-300 truncate mr-2">
+                      <span className="text-muted truncate mr-2">
                         {item.name}
                         {item.shared && (
-                          <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">({t.split})</span>
+                          <span className="text-xs text-muted ml-1">({t.split})</span>
                         )}
                       </span>
-                      <span className="text-gray-700 dark:text-gray-200 shrink-0">
+                      <span className="text-ink shrink-0">
                         {formatAmount(item.amount)}
                       </span>
                     </div>
@@ -96,20 +96,20 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
                 </div>
 
                 {/* Subtotal and tax */}
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-2 space-y-1">
+                <div className="border-t border-hairline pt-2 space-y-1">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">{t.subtotal}</span>
-                    <span className="text-gray-700 dark:text-gray-200">{formatAmount(split.subtotal)}</span>
+                    <span className="text-muted">{t.subtotal}</span>
+                    <span className="text-ink">{formatAmount(split.subtotal)}</span>
                   </div>
                   {split.taxAmount > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">{t.tax} ({list.taxPercentage}%)</span>
-                      <span className="text-gray-700 dark:text-gray-200">{formatAmount(split.taxAmount)}</span>
+                      <span className="text-muted">{t.tax} ({list.taxPercentage}%)</span>
+                      <span className="text-ink">{formatAmount(split.taxAmount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm font-bold pt-1">
-                    <span className="text-gray-900 dark:text-white">{t.total}</span>
-                    <span className="text-gray-900 dark:text-white">{formatAmount(split.total)}</span>
+                    <span className="text-ink">{t.total}</span>
+                    <span className="text-ink">{formatAmount(split.total)}</span>
                   </div>
                 </div>
               </div>
@@ -118,8 +118,8 @@ export const SplitModal = ({ list, onClose }: SplitModalProps) => {
 
           {/* Grand total verification */}
           {splits.length > 0 && (
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <div className="flex justify-between font-semibold text-gray-900 dark:text-white">
+            <div className="border-t border-hairline pt-4">
+              <div className="flex justify-between font-semibold text-ink">
                 <span>{t.grandTotal}</span>
                 <span>{formatAmount(splits.reduce((sum, s) => sum + s.total, 0))}</span>
               </div>

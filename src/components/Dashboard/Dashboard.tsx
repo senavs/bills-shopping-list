@@ -8,6 +8,7 @@ import { TemplateCard } from './TemplateCard'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { exportData, importData } from '../../lib/importExport'
+import { DownloadIcon, EllipsisIcon, GlobeIcon, InfoIcon, MoonIcon, PlusIcon, ShareIcon, SunIcon } from '../shared/icons'
 
 type Tab = 'active' | 'archived' | 'templates'
 
@@ -73,18 +74,18 @@ export const Dashboard = () => {
     {
       id: 'language',
       label: locale === 'en' ? 'Mudar para Português' : 'Switch to English',
-      icon: locale === 'en' ? '🇧🇷' : '🇺🇸',
+      icon: <GlobeIcon />,
       onAction: () => setLocale(locale === 'en' ? 'pt-BR' : 'en'),
     },
     {
       id: 'theme',
       label: `${t.theme}: ${{ system: t.themeSystem, light: t.themeLight, dark: t.themeDark }[mode]}`,
-      icon: isDark ? '🌙' : '☀️',
+      icon: isDark ? <MoonIcon /> : <SunIcon />,
       onAction: () => setMode(NEXT_THEME[mode]),
     },
-    { id: 'export', label: t.export, icon: '📤', onAction: handleExport },
-    { id: 'import', label: t.import, icon: '📥', onAction: handleImportClick },
-    { id: 'about', label: t.aboutApp, icon: 'ℹ️', onAction: () => navigate('/') },
+    { id: 'export', label: t.export, icon: <ShareIcon />, onAction: handleExport },
+    { id: 'import', label: t.import, icon: <DownloadIcon />, onAction: handleImportClick },
+    { id: 'about', label: t.aboutApp, icon: <InfoIcon />, onAction: () => navigate('/') },
   ]
 
   const tabs: { id: Tab; label: string }[] = [
@@ -94,39 +95,35 @@ export const Dashboard = () => {
   ]
 
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 pb-24">
+    <div className="min-h-dvh bg-bg pb-24">
       {/* Sticky header: title + tabs */}
-      <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md pt-safe">
+      <div className="sticky top-0 z-30 bg-bg/85 backdrop-blur-md pt-safe">
         <div className="container mx-auto px-4 pt-4 pb-3 max-w-4xl">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-large-title font-bold text-ink">
               {t.appTitle}
             </h1>
             <button
               onClick={() => setShowSettings(true)}
-              className="w-11 h-11 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="w-11 h-11 flex items-center justify-center rounded-full bg-fill text-accent"
               aria-label={t.settings}
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <circle cx="4" cy="10" r="2" />
-                <circle cx="10" cy="10" r="2" />
-                <circle cx="16" cy="10" r="2" />
-              </svg>
+              <EllipsisIcon className="w-6 h-6" />
             </button>
           </div>
 
           {/* Segmented control */}
-          <div role="tablist" className="grid grid-cols-3 p-0.5 rounded-lg bg-gray-200 dark:bg-gray-800">
+          <div role="tablist" className="grid grid-cols-3 p-0.5 rounded-[9px] bg-fill">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 role="tab"
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`min-h-[36px] px-2 rounded-md text-sm font-medium truncate transition-colors ${
+                className={`min-h-[32px] px-2 rounded-[7px] text-footnote truncate ${
                   activeTab === tab.id
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400'
+                    ? 'bg-surface dark:bg-[#636366] text-ink font-semibold shadow-sm'
+                    : 'text-ink'
                 }`}
               >
                 {tab.label}
@@ -147,19 +144,19 @@ export const Dashboard = () => {
         />
 
         {importError && (
-          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded">
+          <div role="alert" className="mb-4 p-3 bg-danger/10 text-danger rounded-group">
             {importError}
           </div>
         )}
 
         {activeTab === 'templates' ? (
           templates.length === 0 ? (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-12 text-muted">
               <p className="mb-2">{t.noTemplates}</p>
-              <p className="text-sm">{t.noTemplatesHint}</p>
+              <p className="text-callout">{t.noTemplatesHint}</p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="bg-surface rounded-group overflow-hidden">
               {templates.map(template => (
                 <TemplateCard
                   key={template.id}
@@ -173,18 +170,18 @@ export const Dashboard = () => {
           )
         ) : (
           filteredLists.length === 0 ? (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-12 text-muted">
               <p>{activeTab === 'active' ? t.noActiveLists : t.noArchivedLists}</p>
               {activeTab === 'active' && (
-                <p className="mt-3 text-sm">
-                  <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline">
+                <p className="mt-3 text-callout">
+                  <Link to="/" className="text-accent">
                     {t.landingHint}
                   </Link>
                 </p>
               )}
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="bg-surface rounded-group overflow-hidden">
               {filteredLists.map(list => (
                 <ListCard
                   key={list.id}
@@ -208,12 +205,10 @@ export const Dashboard = () => {
             bottom: 'max(1.5rem, calc(0.5rem + env(safe-area-inset-bottom)))',
             right: 'max(1.5rem, env(safe-area-inset-right))',
           }}
-          className="fixed w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center z-10 transition-all"
+          className="fixed w-14 h-14 bg-accent text-on-accent rounded-full shadow-lg active:opacity-80 flex items-center justify-center z-10"
           aria-label={t.createList}
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="w-7 h-7" aria-hidden="true">
-            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-          </svg>
+          <PlusIcon className="w-7 h-7" />
         </Link>
       </div>
 
