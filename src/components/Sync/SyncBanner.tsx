@@ -12,7 +12,7 @@ const readDismissed = () => {
 
 /** One-time nudge for users with enough data to lose who never signed in. */
 export const SyncBanner = ({ listCount }: { listCount: number }) => {
-  const { status, signIn } = useSync()
+  const { status, signIn, prepare } = useSync()
   const { t } = useLanguage()
   const [dismissed, setDismissed] = useState(readDismissed)
 
@@ -30,7 +30,8 @@ export const SyncBanner = ({ listCount }: { listCount: number }) => {
         <p className="text-body font-semibold text-ink">{t.syncBannerTitle}</p>
         <p className="text-footnote text-muted">{t.syncBannerBody}</p>
         <div className="mt-2 flex gap-4">
-          <button onClick={() => { void signIn() }} className="text-callout font-semibold text-accent">{t.syncWithGoogle}</button>
+          {/* Preload on press so the SDK is ready by click and the popup keeps the tap gesture */}
+          <button onPointerDown={prepare} onClick={() => { void signIn() }} className="text-callout font-semibold text-accent">{t.syncWithGoogle}</button>
           <button onClick={dismiss} className="text-callout text-muted">{t.notNow}</button>
         </div>
       </div>

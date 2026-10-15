@@ -72,6 +72,13 @@ describe('SyncBanner', () => {
     expect(v.signIn).toHaveBeenCalled()
   })
 
+  it('preloads the SDK as soon as the sign-in button is pressed (keeps the iOS tap gesture)', () => {
+    const v = value({ status: 'signedOut' })
+    wrap(<SyncBanner listCount={3} />, v)
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Sync with Google' }))
+    expect(v.prepare).toHaveBeenCalled()
+  })
+
   it('hides with fewer than 3 lists, when signed in or when disabled', () => {
     const { unmount } = wrap(<SyncBanner listCount={2} />, value({ status: 'signedOut' }))
     expect(screen.queryByText('Keep your lists safe')).toBeNull()
