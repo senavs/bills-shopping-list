@@ -6,6 +6,7 @@ import { createMemoryRemote } from '../lib/sync/memoryRemote'
 import { emptySyncMeta, loadSyncMeta, saveSyncMeta } from '../lib/sync/syncMeta'
 import type { List } from '../types'
 import type { AuthProvider, RemoteStore } from '../lib/sync/types'
+import { consumeOAuthRedirect, startOAuthRedirect, takePendingToken, type RedirectWindow } from '../lib/sync/oauthRedirect'
 
 const mk = (id: string, name = id, updatedAt = 1): List => ({
   id, name, type: 'shopping', currency: 'BRL', taxPercentage: 0, items: [], sections: [], archived: false, updatedAt,
@@ -184,6 +185,21 @@ describe('SyncProvider', () => {
     await act(async () => { releasePull() })
     await waitFor(() => expect(memory.all('u1').find(d => d.id === 'a')?.list?.name).toBe('during-pull'))
     expect(get().lists.lists[0].name).toBe('during-pull')
+  })
+
+  it('loads the backend on startup when returning from the Google redirect, even for a first-time user', async () => {
+    const win: RedirectWindow = {
+      location: { origin: 'https://x', pathname: '/', hash: '#/app', assign: () => {} },
+      history: { replaceState: () => {} },
+    }
+    let url = ''
+    win.location.assign = u => { url = u }
+    startOAuthRedirect('cid', win)
+    win.location.hash = `#access_token=tok&state=${new URL(url).searchParams.get('state')}`
+    expect(consumeOAuthRedirect(win)).toBe('token')
+    const { loadBackend } = setup()
+    await waitFor(() => expect(loadBackend).toHaveBeenCalled())
+    takePendingToken()
   })
 
   it('a different account on the same device starts a fresh merge', async () => {

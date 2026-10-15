@@ -95,7 +95,7 @@ src/
 │   ├── importExport.ts     # Data import/export functionality
 │   ├── importExport.test.ts
 │   ├── sync/               # Pure sync logic (no SDK): types, hash, merge, syncMeta,
-│   │                       # errors, memoryRemote (test fake), formatSyncedAgo
+│   │                       # errors, oauthRedirect, memoryRemote (test fake), formatSyncedAgo
 │   └── firebase/           # Firebase adapters: config, client, remoteDoc,
 │                           # firestoreRemote, googleAuth, loadBackend (lazy import())
 ├── types/                  # TypeScript type definitions
@@ -137,7 +137,8 @@ The application uses React Context API for global state management with two prim
    - Detects changes by hashing each list against `sync-meta` (`localStorage` key) — covers import, which writes storage directly
    - Pull is incremental by server `syncedAt`; push is debounced 2 s and flushed on `visibilitychange`/`pagehide`
    - Conflicts per list, last `updatedAt` wins; deletions are tombstones (`deleted: true`)
-   - Firebase SDK is loaded via `import()` only for signed-in users or on sign-in (`prepare()` preloads it so the popup keeps the tap gesture on iOS)
+   - Firebase SDK is loaded via `import()` only for signed-in users, on sign-in, or when returning from Google (`prepare()` preloads it)
+   - Sign-in is a full-page OAuth implicit redirect (`src/lib/sync/oauthRedirect.ts`), not a popup: popups never return to an installed iOS PWA. `main.tsx` calls `consumeOAuthRedirect()` before render to strip `#access_token=…` (state-checked) before HashRouter reads the hash; `googleAuth.ts` exchanges it via `signInWithCredential`. Requires `VITE_GOOGLE_CLIENT_ID`
    - `ListsContext` stamps `updatedAt` on every mutation and exposes `replaceLists` (no stamping) for applying remote state
    - UI: `src/components/Sync/` (`SyncStatusButton`, `AccountSheet`, `SyncBanner`); no name/photo/e-mail is ever read or shown
 

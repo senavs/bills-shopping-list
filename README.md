@@ -64,9 +64,15 @@ VITE_FIREBASE_API_KEY=
 VITE_FIREBASE_AUTH_DOMAIN=
 VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_APP_ID=
+VITE_GOOGLE_CLIENT_ID=   # Google Cloud → Credentials → "Web client (auto created by Google Service)"
 ```
 
 Without it the app builds and runs fully local, with sync hidden.
+
+Sign-in uses a full-page Google OAuth redirect (popups never return to an
+installed iOS PWA). The OAuth client must list these **Authorized redirect URIs**:
+`https://senavs.github.io/bills-shopping-list/` and, for local dev,
+`http://localhost:5173/bills-shopping-list/`.
 
 ```bash
 # Firestore security rules (after editing firestore.rules)

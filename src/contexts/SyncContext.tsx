@@ -5,6 +5,7 @@ import type { LoadBackend, SyncBackend } from '../lib/firebase/loadBackend'
 import { clearSyncMeta, emptySyncMeta, loadSyncMeta, saveSyncMeta } from '../lib/sync/syncMeta'
 import { mergeRemote, nextSyncMeta, recordDeletions } from '../lib/sync/merge'
 import { classifyError, withTimeout } from '../lib/sync/errors'
+import { hasPendingToken } from '../lib/sync/oauthRedirect'
 
 export interface SyncContextValue {
   status: SyncStatus
@@ -169,9 +170,9 @@ export const SyncProvider = ({ children, loadBackend, pushDebounceMs = 2000, net
 
   const syncNow = useCallback(() => schedule('full'), [schedule])
 
-  // Returning signed-in user: load the SDK and resume
+  // Returning signed-in user, or back from the Google redirect: load the SDK and resume
   useEffect(() => {
-    if (metaRef.current) prepare()
+    if (metaRef.current || hasPendingToken()) prepare()
   }, [prepare])
 
   // Record deletions as they happen, then debounce a push
