@@ -128,12 +128,13 @@ describe('ItemForm - unit type selector', () => {
     expect(unitSelect.value).toBe('kg')
   })
 
-  it('selector is adjacent to quantity field in same grid-cols-3 row', () => {
-    const { container } = render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
-    const grid = container.querySelector('.grid.grid-cols-3')
-    expect(grid).not.toBeNull()
-    // The grid should contain 3 children: quantity, unit type, unit price
-    expect(grid!.children.length).toBe(3)
+  it('selector shares a row with quantity, with unit price on its own row', () => {
+    render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    const row = screen.getByLabelText('Quantity').closest('.grid.grid-cols-2')
+    expect(row).not.toBeNull()
+    // The row should contain 2 children: quantity and unit type
+    expect(row!.children.length).toBe(2)
+    expect(row!.contains(screen.getByLabelText('Unit Price'))).toBe(false)
   })
 
   it('renders localized labels in pt-BR locale', () => {
@@ -209,5 +210,84 @@ describe('ItemForm - Property 8: Form submit includes selected unitType', () => 
       ),
       { numRuns: 100 }
     )
+  })
+})
+
+describe('ItemForm - iOS keyboard and sheet', () => {
+  it('starts the unit price empty with a locale placeholder when adding', () => {
+    render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    const price = screen.getByLabelText('Unit Price') as HTMLInputElement
+    expect(price.value).toBe('')
+    expect(price.placeholder).toBe('0.00')
+  })
+
+  it('pre-fills the unit price when editing', () => {
+    render(<LanguageProvider><ItemForm item={baseItem} onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('3.5')
+  })
+
+  it('submits unitPrice 0 when the price is left empty', () => {
+    const onSubmit = vi.fn()
+    render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
+    fillAndSubmit()
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ unitPrice: 0 }), '')
+  })
+
+  it('accepts a comma decimal price', () => {
+    const onSubmit = vi.fn()
+    render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
+    fireEvent.change(screen.getByLabelText('Unit Price'), { target: { value: '6,45' } })
+    fillAndSubmit()
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ unitPrice: 6.45 }), '')
+  })
+
+  it('sets iOS keyboard hints on the fields', () => {
+    render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    const name = screen.getByLabelText(/name/i)
+    expect(name.getAttribute('autocapitalize')).toBe('sentences')
+    expect(name.getAttribute('autocomplete')).toBe('off')
+    expect(name.getAttribute('enterkeyhint')).toBe('next')
+    expect(screen.getByLabelText('Quantity').getAttribute('enterkeyhint')).toBe('next')
+    const price = screen.getByLabelText('Unit Price')
+    expect(price.getAttribute('inputmode')).toBe('decimal')
+    expect(price.getAttribute('enterkeyhint')).toBe('done')
+  })
+
+  it('focuses the name field when adding', () => {
+    render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect(document.activeElement).toBe(screen.getByLabelText(/name/i))
+  })
+
+  it('does not focus the name field when editing', () => {
+    render(<LanguageProvider><ItemForm item={baseItem} onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect(document.activeElement).not.toBe(screen.getByLabelText(/name/i))
+  })
+
+  it('submits from the header Add button', () => {
+    const onSubmit = vi.fn()
+    render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
+    fireEvent.change(screen.getByPlaceholderText('e.g., Milk'), { target: { value: 'Bread' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }))
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ name: 'Bread' }), '')
+  })
+
+  it('shows Save in the header when editing', () => {
+    render(<LanguageProvider><ItemForm item={baseItem} onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDefined()
+  })
+
+  it('cancels from the header Cancel button', () => {
+    const onCancel = vi.fn()
+    render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={onCancel} /></LanguageProvider>)
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(onCancel).toHaveBeenCalled()
+  })
+
+  it('toggles include in tax by tapping anywhere on its row', () => {
+    render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    const checkbox = screen.getByLabelText(/include in tax/i) as HTMLInputElement
+    expect(checkbox.checked).toBe(true)
+    fireEvent.click(checkbox.closest('label')!)
+    expect(checkbox.checked).toBe(false)
   })
 })

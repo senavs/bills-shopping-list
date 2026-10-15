@@ -59,7 +59,10 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder={t.addPerson}
-              className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              autoCapitalize="words"
+              autoComplete="off"
+              enterKeyHint="done"
+              className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
             />
             <button
               type="submit"

@@ -20,7 +20,8 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
   const [name, setName] = useState(item?.name || '')
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1')
   const [unitType, setUnitType] = useState<UnitType>(item?.unitType ?? 'unit')
-  const [unitPrice, setUnitPrice] = useState(item?.unitPrice.toString() || '0')
+  // New items start with an empty price so the user doesn't have to delete a 0 first
+  const [unitPrice, setUnitPrice] = useState(item ? item.unitPrice.toString() : '')
   const [includeInTax, setIncludeInTax] = useState(item?.includeInTax ?? true)
   const [selected, setSelected] = useState(item?.selected ?? false)
   const [sectionId, setSectionId] = useState(initialSectionId)
@@ -48,7 +49,8 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
     }
 
     const qty = parseLocaleNumber(quantity)
-    const price = parseLocaleNumber(unitPrice)
+    // An empty price means the user hasn't priced the item yet
+    const price = unitPrice.trim() === '' ? 0 : parseLocaleNumber(unitPrice)
 
     if (isNaN(qty) || qty < 0) {
       setError(t.quantityError)
@@ -71,165 +73,177 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
     )
   }
 
+  const inputClass = 'w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+  const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
+
+  const renderSwitchRow = (id: string, label: string, checked: boolean, onChange: (checked: boolean) => void) => (
+    <label htmlFor={id} className="flex items-center justify-between gap-3 min-h-[44px] py-2 cursor-pointer select-none">
+      <span className="text-base text-gray-700 dark:text-gray-300">{label}</span>
+      <input
+        type="checkbox"
+        id={id}
+        role="switch"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer sr-only"
+      />
+      <span
+        aria-hidden="true"
+        className="relative inline-flex shrink-0 w-[51px] h-[31px] rounded-full bg-gray-300 dark:bg-gray-600 transition-colors peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400 peer-focus-visible:ring-offset-2 dark:peer-focus-visible:ring-offset-gray-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-[27px] after:h-[27px] after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5"
+      />
+    </label>
+  )
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md max-h-[90vh] overflow-y-auto scroll-touch shadow-xl">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          {item ? t.editItem : t.addItemTitle}
-        </h3>
-
-        <form onSubmit={handleSubmit}>
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded text-sm">
-              {error}
-            </div>
-          )}
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t.name} *
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder={t.itemNamePlaceholder}
-              required
-            />
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90dvh] flex flex-col overflow-hidden shadow-xl">
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
+          {/* iOS-style sheet header: stays visible above the keyboard while the body scrolls */}
+          <div className="flex items-center justify-between gap-2 px-2 py-2 border-b border-gray-200 dark:border-gray-700 shrink-0">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-3 min-h-[44px] text-blue-600 dark:text-blue-400 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              {t.cancel}
+            </button>
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+              {item ? t.editItem : t.addItemTitle}
+            </h3>
+            <button
+              type="submit"
+              className="px-3 min-h-[44px] font-semibold text-blue-600 dark:text-blue-400 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              {item ? t.save : t.add}
+            </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t.quantity}
+          <div className="overflow-y-auto overscroll-contain scroll-touch px-6 pt-4 pb-safe">
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label htmlFor="itemName" className={labelClass}>
+                {t.name} *
               </label>
               <input
                 type="text"
-                inputMode="decimal"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                id="itemName"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={inputClass}
+                placeholder={t.itemNamePlaceholder}
+                autoFocus={!item}
+                autoCapitalize="sentences"
+                autoComplete="off"
+                enterKeyHint="next"
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t.unitType}
-              </label>
-              <select
-                value={unitType}
-                onChange={(e) => setUnitType(e.target.value as UnitType)}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                {getUnitTypeOptions(locale).map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label htmlFor="itemQuantity" className={labelClass}>
+                  {t.quantity}
+                </label>
+                <input
+                  type="text"
+                  id="itemQuantity"
+                  inputMode="decimal"
+                  enterKeyHint="next"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  required
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="itemUnitType" className={labelClass}>
+                  {t.unitType}
+                </label>
+                <select
+                  id="itemUnitType"
+                  value={unitType}
+                  onChange={(e) => setUnitType(e.target.value as UnitType)}
+                  className={inputClass}
+                >
+                  {getUnitTypeOptions(locale).map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <div className="mb-4">
+              <label htmlFor="itemUnitPrice" className={labelClass}>
                 {t.unitPrice}
               </label>
               <input
                 type="text"
+                id="itemUnitPrice"
                 inputMode="decimal"
+                enterKeyHint="done"
                 value={unitPrice}
                 onChange={(e) => setUnitPrice(e.target.value)}
-                required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder={t.pricePlaceholder}
+                className={`${inputClass} text-lg`}
               />
             </div>
-          </div>
 
-          <div className="mb-4 flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="includeInTax"
-              checked={includeInTax}
-              onChange={(e) => setIncludeInTax(e.target.checked)}
-              className="w-4 h-4"
-            />
-            <label htmlFor="includeInTax" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              {t.includeInTax} 🧾
-            </label>
-          </div>
+            <div className="mb-4 divide-y divide-gray-200 dark:divide-gray-700">
+              {renderSwitchRow('includeInTax', `${t.includeInTax} 🧾`, includeInTax, setIncludeInTax)}
+              {renderSwitchRow('selected', `${t.selected} 🛒`, selected, setSelected)}
+            </div>
 
-          <div className="mb-4 flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="selected"
-              checked={selected}
-              onChange={(e) => setSelected(e.target.checked)}
-              className="w-4 h-4"
-            />
-            <label htmlFor="selected" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              {t.selected} 🛒
-            </label>
-          </div>
-
-          {people.length > 0 && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t.assignToPeople}
-              </label>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                {t.leaveEmptyToShare}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {people.map(person => (
-                  <button
-                    key={person.id}
-                    type="button"
-                    onClick={() => togglePerson(person.id)}
-                    className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                      assignedTo.includes(person.id)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-                    }`}
-                  >
-                    {person.name}
-                  </button>
-                ))}
+            {people.length > 0 && (
+              <div className="mb-4">
+                <span className={labelClass}>
+                  {t.assignToPeople}
+                </span>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  {t.leaveEmptyToShare}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {people.map(person => (
+                    <button
+                      key={person.id}
+                      type="button"
+                      onClick={() => togglePerson(person.id)}
+                      className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                        assignedTo.includes(person.id)
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
+                      {person.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {sections.length > 0 && (
-            <div className="mb-4">
-              <label htmlFor="sectionId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t.section}
-              </label>
-              <select
-                id="sectionId"
-                value={sectionId}
-                onChange={(e) => setSectionId(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="">{t.noSection}</option>
-                {sections.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div className="flex gap-3 justify-end">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-5 py-3 min-h-[44px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
-            >
-              {t.cancel}
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-3 min-h-[44px] bg-blue-600 text-white hover:bg-blue-700 rounded-xl transition-colors"
-            >
-              {item ? t.save : t.add}
-            </button>
+            {sections.length > 0 && (
+              <div className="mb-4">
+                <label htmlFor="sectionId" className={labelClass}>
+                  {t.section}
+                </label>
+                <select
+                  id="sectionId"
+                  value={sectionId}
+                  onChange={(e) => setSectionId(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">{t.noSection}</option>
+                  {sections.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         </form>
       </div>
