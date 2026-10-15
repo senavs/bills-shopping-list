@@ -51,6 +51,21 @@ describe('Dashboard', () => {
     expect(screen.getByText('Archived')).toBeDefined()
   })
 
+  it('renders the list filters as a segmented control', () => {
+    renderDashboard()
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs).toHaveLength(3)
+    expect(tabs[0].getAttribute('aria-selected')).toBe('true')
+  })
+
+  it('groups preferences and data tools in the settings sheet', async () => {
+    renderDashboard()
+    await act(async () => { fireEvent.click(screen.getByLabelText('Settings')) })
+    expect(screen.getByText('Export')).toBeDefined()
+    expect(screen.getByText('Import')).toBeDefined()
+    expect(screen.getByText('Mudar para Português')).toBeDefined()
+  })
+
   it('shows empty state when no lists', () => {
     renderDashboard()
     expect(screen.getAllByText(/No active lists yet/)[0]).toBeDefined()

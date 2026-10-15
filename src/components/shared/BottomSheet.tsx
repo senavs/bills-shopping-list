@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useScrollLock } from '../../hooks/useScrollLock'
 
 export interface BottomSheetAction {
   id: string
   label: string
-  icon: string
+  icon: ReactNode
   variant?: 'default' | 'destructive'
   onAction: () => void
 }
@@ -12,16 +12,18 @@ export interface BottomSheetAction {
 interface BottomSheetProps {
   isOpen: boolean
   title?: string
-  actions: BottomSheetAction[]
+  actions?: BottomSheetAction[]
+  /** Free-form content rendered above the actions */
+  children?: ReactNode
   onClose: () => void
 }
 
-export const BottomSheet = ({ isOpen, title, actions, onClose }: BottomSheetProps) => {
+export const BottomSheet = ({ isOpen, title, actions = [], children, onClose }: BottomSheetProps) => {
   useScrollLock(isOpen)
   const [isVisible, setIsVisible] = useState(false)
   const [translateY, setTranslateY] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
   const touchStartRef = useRef<number>(0)
-  const isDraggingRef = useRef(false)
   const sheetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -35,19 +37,17 @@ export const BottomSheet = ({ isOpen, title, actions, onClose }: BottomSheetProp
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartRef.current = e.touches[0].clientY
-    isDraggingRef.current = true
+    setIsDragging(true)
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDraggingRef.current) return
+    if (!isDragging) return
     const deltaY = e.touches[0].clientY - touchStartRef.current
-    if (deltaY > 0) {
-      setTranslateY(deltaY)
-    }
+    setTranslateY(Math.max(0, deltaY))
   }
 
   const handleTouchEnd = () => {
-    isDraggingRef.current = false
+    setIsDragging(false)
     if (translateY > 100) {
       onClose()
     }
@@ -64,12 +64,12 @@ export const BottomSheet = ({ isOpen, title, actions, onClose }: BottomSheetProp
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
-      {/* Sheet */}
+      {/* Sheet — the transition is off while dragging so it follows the finger */}
       <div
         ref={sheetRef}
-        className={`absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl transition-transform duration-200 ease-out ${
-          isVisible ? 'translate-y-0' : 'translate-y-full'
-        }`}
+        className={`absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl ease-out ${
+          isDragging ? '' : 'transition-transform duration-200'
+        } ${isVisible ? 'translate-y-0' : 'translate-y-full'}`}
         style={{ transform: translateY > 0 ? `translateY(${translateY}px)` : undefined }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={handleTouchStart}
@@ -90,6 +90,8 @@ export const BottomSheet = ({ isOpen, title, actions, onClose }: BottomSheetProp
           </div>
         )}
 
+        {children && <div className="px-5 pb-2">{children}</div>}
+
         {/* Actions */}
         <div className="px-2 pb-safe">
           {actions.map((action) => (
@@ -105,7 +107,7 @@ export const BottomSheet = ({ isOpen, title, actions, onClose }: BottomSheetProp
                   : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600'
               }`}
             >
-              <span className="text-xl w-8 text-center">{action.icon}</span>
+              <span className="text-xl w-8 flex items-center justify-center">{action.icon}</span>
               <span className="text-base font-medium">{action.label}</span>
             </button>
           ))}

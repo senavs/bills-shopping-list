@@ -45,7 +45,7 @@ export const TemplateCard = ({ template, activeTab, onUseTemplate, onDelete }: T
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 border-l-4 border-green-500 relative">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 relative no-callout">
         <Link to={`/lists/${template.id}`} state={{ activeTab, from: '/app' }} className="block">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-3">
@@ -65,8 +65,8 @@ export const TemplateCard = ({ template, activeTab, onUseTemplate, onDelete }: T
         {/* More options button */}
         <button
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); setShowSheet(true) }}
-          className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-full text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-          aria-label="More options"
+          className="absolute top-2 right-2 w-11 h-11 flex items-center justify-center rounded-full text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          aria-label={t.moreOptions}
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <circle cx="10" cy="4" r="2" />

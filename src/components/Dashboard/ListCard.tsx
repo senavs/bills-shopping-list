@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import type { List } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { formatCurrency } from '../../lib/format'
+import { calcTotals } from '../../lib/calculations'
 import { useLongPress } from '../../hooks/useLongPress'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
@@ -21,7 +22,8 @@ export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, on
   const { t, locale } = useLanguage()
   const navigate = useNavigate()
   const icon = { shopping: '🛒', restaurant: '🍽️', bar: '🍻' }[list.type] || '🛒'
-  const total = list.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
+  // Same figure the list's totals bar calls "Total" (tax/tip included)
+  const total = calcTotals(list).totalAllWithTax
   const [showSheet, setShowSheet] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'archive' | 'unarchive' | 'duplicate' | 'template' | 'delete' | null>(null)
 
@@ -76,7 +78,7 @@ export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, on
   return (
     <>
       <div
-        className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] cursor-pointer relative select-none border-l-4 ${list.archived ? 'border-red-500' : 'border-blue-500'}`}
+        className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] cursor-pointer relative no-callout ${list.archived ? 'opacity-80' : ''}`}
         {...handlers}
       >
         <Link
@@ -97,15 +99,15 @@ export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, on
           <p className="text-sm text-gray-600 dark:text-gray-300">
             {list.items.length} {list.items.length === 1 ? t.item : t.items}
             {list.sections.length > 0 && ` • ${list.sections.length} ${t.sections}`}
-            {' • '}{formatCurrency(total, list.currency, locale)}
+            {' • '}{t.total} <span className="tabular-nums">{formatCurrency(total, list.currency, locale)}</span>
           </p>
         </Link>
 
         {/* More options button (alternative to long press) */}
         <button
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); setShowSheet(true) }}
-          className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-full text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-          aria-label="More options"
+          className="absolute top-2 right-2 w-11 h-11 flex items-center justify-center rounded-full text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          aria-label={t.moreOptions}
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <circle cx="10" cy="4" r="2" />

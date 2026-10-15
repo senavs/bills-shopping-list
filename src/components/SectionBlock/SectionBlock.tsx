@@ -16,6 +16,8 @@ interface SectionBlockProps {
   list: List
   hideCheckbox?: boolean
   people?: Person[]
+  /** Reorder mode: shows drag handles for the section and its items */
+  reorderMode?: boolean
   onUpdateSection: (sectionId: string, updates: Partial<Section>) => void
   onDeleteSection: (sectionId: string) => void
   onReorderItemInSection: (sectionId: string, fromIndex: number, toIndex: number) => void
@@ -27,7 +29,7 @@ interface SectionBlockProps {
 }
 
 export const SectionBlock = ({
-  section, list, hideCheckbox, people,
+  section, list, hideCheckbox, people, reorderMode = false,
   onUpdateSection, onDeleteSection, onReorderItemInSection,
   onEditItem, onDeleteItem, onDuplicateItem, onToggleSelected, onAddItem,
 }: SectionBlockProps) => {
@@ -45,7 +47,7 @@ export const SectionBlock = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: section.id })
+  } = useSortable({ id: section.id, disabled: !reorderMode })
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -88,17 +90,17 @@ export const SectionBlock = ({
     >
       {/* Section header row */}
       <div
-        className={`flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl border-l-4 border-blue-500 transition-all ${
+        className={`flex items-center gap-2 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-xl border-l-4 border-blue-500 transition-all ${
           isDragging ? 'shadow-lg ring-2 ring-blue-400/50' : ''
         }`}
       >
-        <DragHandle listeners={listeners} attributes={attributes} />
+        {reorderMode && <DragHandle listeners={listeners} attributes={attributes} />}
 
         {/* Collapse toggle */}
         <button
           onClick={() => onUpdateSection(section.id, { collapsed: !section.collapsed })}
-          aria-label={section.collapsed ? 'Expand section' : 'Collapse section'}
-          className="w-9 h-9 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          aria-label={section.collapsed ? t.expandSection : t.collapseSection}
+          className="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
         >
           {section.collapsed ? '▶' : '▼'}
         </button>
@@ -111,11 +113,11 @@ export const SectionBlock = ({
         </span>
 
         {/* Add item to this section */}
-        {onAddItem && (
+        {onAddItem && !reorderMode && (
           <button
             onClick={onAddItem}
-            className="w-9 h-9 flex items-center justify-center rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-            aria-label="Add item to section"
+            className="w-11 h-11 flex items-center justify-center rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            aria-label={t.addItemToSection}
           >
             <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
@@ -124,10 +126,11 @@ export const SectionBlock = ({
         )}
 
         {/* 3-dots menu button */}
+        {!reorderMode && (
         <button
           onClick={() => setShowSheet(true)}
-          className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          aria-label="Section options"
+          className="w-11 h-11 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          aria-label={t.sectionOptions}
         >
           <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
             <circle cx="10" cy="4" r="2" />
@@ -135,6 +138,7 @@ export const SectionBlock = ({
             <circle cx="10" cy="16" r="2" />
           </svg>
         </button>
+        )}
       </div>
 
       {/* Section items with dnd-kit */}
@@ -151,6 +155,7 @@ export const SectionBlock = ({
                 currency={list.currency}
                 hideCheckbox={hideCheckbox}
                 people={people}
+                reorderMode={reorderMode}
                 onToggleSelected={(selected) => onToggleSelected(item.id, selected)}
                 onEdit={() => onEditItem(item)}
                 onDelete={() => onDeleteItem(item.id)}

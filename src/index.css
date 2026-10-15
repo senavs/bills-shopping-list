@@ -17,6 +17,25 @@
   animation: slide-up 0.2s ease-out;
 }
 
+@keyframes toast-progress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+.animate-toast-progress {
+  transform-origin: left;
+  animation-name: toast-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* Long-pressable cards: suppress the iOS link preview / callout and text selection */
+.no-callout {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 @layer base {
   /* iOS PWA safe area */
   html {

@@ -1,38 +1,28 @@
-import { useState, useRef, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, useRef } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { useDarkMode } from '../../contexts/DarkModeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { ListCard } from './ListCard'
 import { TemplateCard } from './TemplateCard'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
+import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { exportData, importData } from '../../lib/importExport'
+
+type Tab = 'active' | 'archived' | 'templates'
 
 export const Dashboard = () => {
   const { lists, archiveList, unarchiveList, deleteList, duplicateList, saveAsTemplate, createFromTemplate, deleteTemplate } = useLists()
   const { isDark, toggleDarkMode } = useDarkMode()
   const { locale, setLocale, t } = useLanguage()
   const location = useLocation()
-  const locationState = location.state as { activeTab?: 'active' | 'archived' | 'templates' } | null
-  const [activeTab, setActiveTab] = useState<'active' | 'archived' | 'templates'>(locationState?.activeTab || 'active')
+  const navigate = useNavigate()
+  const locationState = location.state as { activeTab?: Tab } | null
+  const [activeTab, setActiveTab] = useState<Tab>(locationState?.activeTab || 'active')
   const [deleteTemplateConfirm, setDeleteTemplateConfirm] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
-      }
-    }
-    if (menuOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [menuOpen])
 
   const regularLists = lists.filter(list => !list.isTemplate)
   const templates = lists.filter(list => list.isTemplate)
@@ -72,96 +62,65 @@ export const Dashboard = () => {
     }
   }
 
+  // Rarely used preferences and data tools live together in one sheet
+  const settingsActions: BottomSheetAction[] = [
+    {
+      id: 'language',
+      label: locale === 'en' ? 'Mudar para Português' : 'Switch to English',
+      icon: locale === 'en' ? '🇧🇷' : '🇺🇸',
+      onAction: () => setLocale(locale === 'en' ? 'pt-BR' : 'en'),
+    },
+    { id: 'theme', label: isDark ? t.lightMode : t.darkMode, icon: isDark ? '☀️' : '🌙', onAction: toggleDarkMode },
+    { id: 'export', label: t.export, icon: '📤', onAction: handleExport },
+    { id: 'import', label: t.import, icon: '📥', onAction: handleImportClick },
+    { id: 'about', label: t.aboutApp, icon: 'ℹ️', onAction: () => navigate('/') },
+  ]
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'active', label: t.active },
+    { id: 'archived', label: t.archived },
+    { id: 'templates', label: templates.length > 0 ? `${t.templates} (${templates.length})` : t.templates },
+  ]
+
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 pb-20">
+    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 pb-24">
       {/* Sticky header: title + tabs */}
       <div className="sticky top-0 z-30 bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-md pt-safe">
-        <div className="container mx-auto px-4 pt-4 max-w-4xl">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="container mx-auto px-4 pt-4 pb-3 max-w-4xl">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {t.appTitle}
             </h1>
-            <div className="flex gap-3 items-center">
-              <button
-                onClick={() => setLocale(locale === 'en' ? 'pt-BR' : 'en')}
-                className="w-12 h-12 flex items-center justify-center text-xl rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                title={locale === 'en' ? 'Mudar para Português' : 'Switch to English'}
-              >
-                {locale === 'pt-BR' ? '🇧🇷' : '🇺🇸'}
-              </button>
-              <button
-                onClick={toggleDarkMode}
-                className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
-                title={isDark ? 'Light mode' : 'Dark mode'}
-              >
-                {isDark ? '☀️' : '🌙'}
-              </button>
-              <Link
-                to="/"
-                className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
-                title="Home"
-              >
-                🏠
-              </Link>
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  className="w-12 h-12 bg-gray-600 text-white hover:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold transition-colors"
-                  aria-label="Menu"
-                >
-                  ⋮
-                </button>
-                {menuOpen && (
-                  <div className="absolute right-0 top-14 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 z-50 min-w-[160px]">
-                    <button
-                      onClick={() => { handleExport(); setMenuOpen(false) }}
-                      className="w-full text-left px-4 py-3 min-h-[44px] text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      {t.export}
-                    </button>
-                    <button
-                      onClick={() => { handleImportClick(); setMenuOpen(false) }}
-                      className="w-full text-left px-4 py-3 min-h-[44px] text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      {t.import}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="w-11 h-11 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              aria-label={t.settings}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <circle cx="4" cy="10" r="2" />
+                <circle cx="10" cy="10" r="2" />
+                <circle cx="16" cy="10" r="2" />
+              </svg>
+            </button>
           </div>
 
-          <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => setActiveTab('active')}
-              className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
-                activeTab === 'active'
-                  ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {t.active}
-            </button>
-            <button
-              onClick={() => setActiveTab('archived')}
-              className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
-                activeTab === 'archived'
-                  ? 'border-b-2 border-red-600 text-red-600 dark:text-red-400'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {t.archived}
-            </button>
-            <button
-              onClick={() => setActiveTab('templates')}
-              className={`pb-3 pt-2 px-2 min-h-[44px] text-sm font-medium transition-colors ${
-                activeTab === 'templates'
-                  ? 'border-b-2 border-green-600 text-green-600 dark:text-green-400'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {t.templates}{templates.length > 0 && ` (${templates.length})`}
-            </button>
+          {/* Segmented control */}
+          <div role="tablist" className="grid grid-cols-3 p-0.5 rounded-lg bg-gray-200 dark:bg-gray-800">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`min-h-[36px] px-2 rounded-md text-sm font-medium truncate transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -208,7 +167,7 @@ export const Dashboard = () => {
               {activeTab === 'active' && (
                 <p className="mt-3 text-sm">
                   <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline">
-                    {t.landingHint} →
+                    {t.landingHint}
                   </Link>
                 </p>
               )}
@@ -238,11 +197,21 @@ export const Dashboard = () => {
             bottom: 'max(1.5rem, calc(0.5rem + env(safe-area-inset-bottom)))',
             right: 'max(1.5rem, env(safe-area-inset-right))',
           }}
-          className="fixed w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center text-2xl z-10 transition-all"
+          className="fixed w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 active:shadow-md flex items-center justify-center z-10 transition-all"
+          aria-label={t.createList}
         >
-          +
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-7 h-7" aria-hidden="true">
+            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+          </svg>
         </Link>
       </div>
+
+      <BottomSheet
+        isOpen={showSettings}
+        title={t.settings}
+        actions={settingsActions}
+        onClose={() => setShowSettings(false)}
+      />
 
       <ConfirmDialog
         isOpen={deleteTemplateConfirm !== null}
