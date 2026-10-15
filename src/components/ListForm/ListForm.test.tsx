@@ -40,6 +40,7 @@ describe('ListForm', () => {
     deleteSection: vi.fn(),
     reorderSection: vi.fn(),
     reorderItemInSection: vi.fn(),
+    replaceLists: vi.fn(),
   }
 
   beforeEach(() => {

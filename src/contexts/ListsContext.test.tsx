@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { ListsProvider, useLists } from './ListsContext'
 import type { List } from '../types'
@@ -153,5 +153,32 @@ describe('deleteItem cascade', () => {
     act(() => getCtx().deleteItem(LIST_ID, 'a'))
     expect(getList(getCtx()).sections[0].itemIds).toEqual(['b'])
     expect(getList(getCtx()).items.map(i => i.id)).not.toContain('a')
+  })
+})
+
+describe('updatedAt stamping', () => {
+  afterEach(() => { vi.restoreAllMocks() })
+
+  it('stamps updatedAt when an item changes', () => {
+    vi.spyOn(Date, 'now').mockReturnValue(5_000)
+    const getCtx = setup()
+    act(() => getCtx().updateItem(LIST_ID, 'a', { name: 'Apricot' }))
+    expect(getList(getCtx()).updatedAt).toBe(5_000)
+  })
+
+  it('stamps updatedAt on create, duplicate and archive', () => {
+    vi.spyOn(Date, 'now').mockReturnValue(7_000)
+    const getCtx = setup()
+    act(() => getCtx().createList({ name: 'New', type: 'shopping', currency: 'BRL', taxPercentage: 0 }))
+    act(() => getCtx().duplicateList(LIST_ID))
+    act(() => getCtx().archiveList(LIST_ID))
+    expect(getCtx().lists.map(l => l.updatedAt)).toEqual([7_000, 7_000, 7_000])
+  })
+
+  it('replaceLists does not stamp updatedAt', () => {
+    vi.spyOn(Date, 'now').mockReturnValue(9_000)
+    const getCtx = setup()
+    act(() => getCtx().replaceLists([{ ...makeList(), name: 'Remote', updatedAt: 42 }]))
+    expect(getList(getCtx())).toMatchObject({ name: 'Remote', updatedAt: 42 })
   })
 })

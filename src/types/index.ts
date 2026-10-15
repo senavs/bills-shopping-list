@@ -36,6 +36,7 @@ export interface List {
   archived: boolean;
   isTemplate?: boolean;
   people?: Person[];
+  updatedAt?: number;  // epoch ms of the last local edit; drives sync conflict resolution
 }
 
 export interface AppState {

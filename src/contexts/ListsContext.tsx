@@ -25,6 +25,7 @@ interface ListsContextType {
   deleteSection: (listId: string, sectionId: string) => void
   reorderSection: (listId: string, fromIndex: number, toIndex: number) => void
   reorderItemInSection: (listId: string, sectionId: string, fromIndex: number, toIndex: number) => void
+  replaceLists: (lists: List[]) => void
 }
 
 const ListsContext = createContext<ListsContextType | undefined>(undefined)
@@ -36,11 +37,14 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     saveState({ lists })
   }, [lists])
 
+  // Every local edit stamps updatedAt so sync can resolve conflicts (last edit wins)
+  const touch = (l: List): List => ({ ...l, updatedAt: Date.now() })
+
   const updateListById = (id: string, updater: (list: List) => List) =>
-    setLists(prev => prev.map(l => l.id === id ? updater(l) : l))
+    setLists(prev => prev.map(l => l.id === id ? touch(updater(l)) : l))
 
   const createList = (list: Omit<List, 'id' | 'items' | 'sections' | 'archived'>) => {
-    setLists(prev => [...prev, { ...list, id: crypto.randomUUID(), items: [], sections: [], archived: false }])
+    setLists(prev => [...prev, touch({ ...list, id: crypto.randomUUID(), items: [], sections: [], archived: false })])
   }
 
   const updateList = (id: string, updates: Partial<List>) => {
@@ -68,7 +72,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
         id: crypto.randomUUID(),
         itemIds: s.itemIds.map(iid => itemIdMap[iid] ?? iid),
       }))
-      setLists(prev => [...prev, { ...list, id: crypto.randomUUID(), name: `${list.name} (copy)`, items, sections }])
+      setLists(prev => [...prev, touch({ ...list, id: crypto.randomUUID(), name: `${list.name} (copy)`, items, sections })])
     }
   }
 
@@ -87,7 +91,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
         itemIds: s.itemIds.map(iid => itemIdMap[iid] ?? iid),
         collapsed: false,
       }))
-      setLists(prev => [...prev, {
+      setLists(prev => [...prev, touch({
         ...list,
         id: crypto.randomUUID(),
         name: `${list.name}`,
@@ -95,7 +99,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
         sections,
         archived: false,
         isTemplate: true,
-      }])
+      })])
     }
   }
 
@@ -114,7 +118,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
         itemIds: s.itemIds.map(iid => itemIdMap[iid] ?? iid),
         collapsed: false,
       }))
-      setLists(prev => [...prev, {
+      setLists(prev => [...prev, touch({
         ...template,
         id: crypto.randomUUID(),
         name: template.name,
@@ -122,7 +126,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
         sections,
         archived: false,
         isTemplate: false,
-      }])
+      })])
     }
   }
 
@@ -239,6 +243,9 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     }))
   }
 
+  // Applies state that came from sync: keeps remote updatedAt instead of stamping
+  const replaceLists = (next: List[]) => setLists(next)
+
   return (
     <ListsContext.Provider value={{
       lists, createList, updateList, deleteList, archiveList, unarchiveList, duplicateList,
@@ -246,6 +253,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
       addPerson, removePerson,
       addItem, duplicateItem, updateItem, deleteItem, reorderItem,
       addSection, updateSection, deleteSection, reorderSection, reorderItemInSection,
+      replaceLists,
     }}>
       {children}
     </ListsContext.Provider>

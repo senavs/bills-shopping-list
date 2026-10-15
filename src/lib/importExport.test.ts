@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { validateImportData, exportData } from './importExport'
+import { validateImportData, exportData, normalizeImportedState } from './importExport'
 import type { AppState } from '../types'
 
 const validList = {
@@ -82,5 +82,19 @@ describe('exportData', () => {
     await exportData(state)
 
     expect(click).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('import updatedAt', () => {
+  const base = { id: 'l1', name: 'L', type: 'shopping', currency: 'BRL', taxPercentage: 0, items: [], sections: [], archived: false }
+
+  it('normalizeImportedState stamps updatedAt with now', () => {
+    const state = normalizeImportedState({ lists: [{ ...base, updatedAt: 1 } as never] }, 123)
+    expect(state.lists[0].updatedAt).toBe(123)
+  })
+
+  it('validateImportData accepts numeric updatedAt and rejects non-numeric', () => {
+    expect(validateImportData({ lists: [{ ...base, updatedAt: 5 }] })).toBe(true)
+    expect(validateImportData({ lists: [{ ...base, updatedAt: 'x' }] })).toBe(false)
   })
 })

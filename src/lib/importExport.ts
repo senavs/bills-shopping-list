@@ -47,7 +47,8 @@ export const validateImportData = (data: unknown): data is AppState => {
       (l.currency === 'BRL' || l.currency === 'USD') &&
       typeof l.taxPercentage === 'number' &&
       Array.isArray(l.items) &&
-      typeof l.archived === 'boolean'
+      typeof l.archived === 'boolean' &&
+      (l.updatedAt === undefined || typeof l.updatedAt === 'number')
     )
     
     if (!isValidList) return false
@@ -87,13 +88,14 @@ export const validateImportData = (data: unknown): data is AppState => {
 }
 
 /**
- * Normalize imported state: ensure every item has a unitType field.
- * Items missing unitType default to 'unit'.
+ * Normalize imported state: ensure every item has a unitType field and stamp
+ * updatedAt so an intentional import wins over older cloud copies.
  */
-export const normalizeImportedState = (state: AppState): AppState => ({
+export const normalizeImportedState = (state: AppState, now: number = Date.now()): AppState => ({
   ...state,
   lists: state.lists.map((l: List) => ({
     ...l,
+    updatedAt: now,
     items: l.items.map(item => ({
       ...item,
       unitType: item.unitType ?? 'unit',
