@@ -35,7 +35,7 @@ export const PeopleManager = ({ people, onAddPerson, onRemovePerson }: PeopleMan
       </button>
 
       {isExpanded && (
-        <div className="bg-surface rounded-group p-3">
+        <div className="bg-surface rounded-group p-3 mb-4">
           {people.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
               {people.map(person => (
