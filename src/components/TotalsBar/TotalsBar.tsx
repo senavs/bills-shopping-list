@@ -4,6 +4,7 @@ import { calcTotals } from '../../lib/calculations'
 import { formatCurrency } from '../../lib/format'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { BottomSheet } from '../shared/BottomSheet'
+import { PlusIcon } from '../shared/icons'
 
 interface TotalsBarProps {
   list: List
@@ -62,7 +63,7 @@ export const TotalsBar = ({ list, onAddItem }: TotalsBarProps) => {
       <div
         ref={barRef}
         data-testid="totals-bar"
-        className="fixed bottom-0 left-0 right-0 z-20 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-700"
+        className="fixed bottom-0 left-0 right-0 z-20 bg-surface/85 backdrop-blur-md border-t border-hairline"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div
@@ -75,16 +76,20 @@ export const TotalsBar = ({ list, onAddItem }: TotalsBarProps) => {
           <button
             type="button"
             onClick={() => setShowDetails(true)}
-            className="flex-1 min-w-0 text-left py-1 rounded-lg"
+            className="flex-1 min-w-0 text-left py-1"
             aria-label={t.showTotals}
           >
-            <span className="flex items-baseline gap-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">{primary.label}</span>
-              <span className="text-2xl font-bold tabular-nums text-gray-900 dark:text-white truncate" data-testid="totals-primary">
+            <span className="flex items-center gap-2">
+              <span className="text-footnote text-muted">{primary.label}</span>
+              {/* The price tag: the only yellow in the app */}
+              <span
+                className="num text-title font-bold bg-tag text-on-tag rounded-md px-2 py-0.5 truncate"
+                data-testid="totals-primary"
+              >
                 {fmt(primary.value)}
               </span>
             </span>
-            <span className="block text-sm tabular-nums text-gray-500 dark:text-gray-400 truncate">
+            <span className="block mt-0.5 text-footnote num text-muted truncate">
               {secondary.label} {fmt(secondary.value)}
             </span>
           </button>
@@ -93,23 +98,21 @@ export const TotalsBar = ({ list, onAddItem }: TotalsBarProps) => {
             <button
               type="button"
               onClick={onAddItem}
-              className="shrink-0 w-[52px] h-[52px] bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 flex items-center justify-center"
+              className="shrink-0 w-[52px] h-[52px] bg-accent text-on-accent rounded-full shadow-md active:opacity-80 flex items-center justify-center"
               aria-label={t.addItem}
             >
-              <svg viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6" aria-hidden="true">
-                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-              </svg>
+              <PlusIcon className="w-7 h-7" />
             </button>
           )}
         </div>
       </div>
 
       <BottomSheet isOpen={showDetails} title={list.name} onClose={() => setShowDetails(false)}>
-        <dl className="divide-y divide-gray-200 dark:divide-gray-700 pb-4">
+        <dl className="bg-bg rounded-group divide-y divide-hairline mb-4">
           {detailRows.map(row => (
-            <div key={row.label} className="flex items-center justify-between py-3">
-              <dt className="text-gray-600 dark:text-gray-300">{row.label}</dt>
-              <dd className="font-semibold tabular-nums text-gray-900 dark:text-white">{fmt(row.value)}</dd>
+            <div key={row.label} className="flex items-center justify-between px-4 min-h-[44px]">
+              <dt className="text-body text-ink">{row.label}</dt>
+              <dd className="text-body num font-semibold text-ink">{fmt(row.value)}</dd>
             </div>
           ))}
         </dl>

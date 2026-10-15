@@ -6,7 +6,7 @@ export const ptBR: TranslationKeys = {
   add: 'Adicionar',
   edit: 'Editar',
   delete: 'Excluir',
-  back: '← Voltar',
+  back: 'Voltar',
   appTitle: 'BillBuddy',
   active: 'Ativas',
   archived: 'Arquivadas',
@@ -159,4 +159,5 @@ export const ptBR: TranslationKeys = {
   themeSystem: 'Sistema',
   themeLight: 'Claro',
   themeDark: 'Escuro',
+  lists: 'Listas',
 }

@@ -63,42 +63,42 @@ export const ListForm = () => {
   }
 
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 pt-safe">
+    <div className="min-h-dvh bg-bg pt-safe">
       <div className="container mx-auto p-4 max-w-2xl">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        <h1 className="text-large-title font-bold text-ink mb-6">
           {id ? (existingList?.isTemplate ? t.editTemplate : t.editList) : t.createList}
         </h1>
 
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
+        <form onSubmit={handleSubmit} className="bg-surface rounded-group p-4">
           {error && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded">
+            <div className="mb-4 p-3 bg-danger/10 text-danger rounded">
               {error}
             </div>
           )}
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               {t.name} *
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-hairline rounded bg-surface text-ink"
               placeholder={t.namePlaceholder}
               required
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="list-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="list-type" className="block text-sm font-medium text-ink mb-2">
               {t.type} *
             </label>
             <select
               id="list-type"
               value={type}
               onChange={(e) => setType(e.target.value as 'shopping' | 'restaurant' | 'bar')}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-hairline rounded bg-surface text-ink"
             >
               <option value="shopping">🛒 {t.shopping}</option>
               <option value="restaurant">🍽️ {t.restaurant}</option>
@@ -107,13 +107,13 @@ export const ListForm = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               {t.currency} *
             </label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value as 'BRL' | 'USD')}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-hairline rounded bg-surface text-ink"
             >
               <option value="BRL">BRL (R$)</option>
               <option value="USD">USD ($)</option>
@@ -121,7 +121,7 @@ export const ListForm = () => {
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               {t.taxTipPercentage}
             </label>
             <input
@@ -131,7 +131,7 @@ export const ListForm = () => {
               value={taxPercentage}
               onChange={(e) => setTaxPercentage(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-hairline rounded bg-surface text-ink"
               placeholder="0"
             />
           </div>
@@ -140,13 +140,13 @@ export const ListForm = () => {
             <button
               type="button"
               onClick={() => navigateBack()}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+              className="px-4 min-h-[44px] text-accent rounded-xl hover:bg-fill"
             >
               {t.cancel}
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded"
+              className="px-5 min-h-[44px] bg-accent text-on-accent font-semibold active:opacity-80 rounded-xl"
             >
               {id ? t.saveChanges : t.createList}
             </button>

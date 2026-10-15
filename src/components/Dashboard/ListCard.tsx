@@ -7,6 +7,7 @@ import { calcTotals } from '../../lib/calculations'
 import { useLongPress } from '../../hooks/useLongPress'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
+import { ArchiveIcon, BookmarkIcon, CopyIcon, EllipsisIcon, OpenIcon, PencilIcon, TrashIcon, UnarchiveIcon } from '../shared/icons'
 
 interface ListCardProps {
   list: List
@@ -40,15 +41,15 @@ export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, on
   }
 
   const actions: BottomSheetAction[] = [
-    { id: 'open', label: t.openList, icon: '📋', onAction: () => navigate(`/lists/${list.id}`, { state: { activeTab, from: '/app' } }) },
-    { id: 'edit', label: t.edit, icon: '✏️', onAction: () => navigate(`/lists/${list.id}/edit`, { state: { activeTab, from: '/app' } }) },
-    { id: 'duplicate', label: t.duplicate, icon: '📑', onAction: () => setConfirmAction('duplicate') },
-    { id: 'template', label: t.template, icon: '📌', onAction: () => setConfirmAction('template') },
+    { id: 'open', label: t.openList, icon: <OpenIcon />, onAction: () => navigate(`/lists/${list.id}`, { state: { activeTab, from: '/app' } }) },
+    { id: 'edit', label: t.edit, icon: <PencilIcon />, onAction: () => navigate(`/lists/${list.id}/edit`, { state: { activeTab, from: '/app' } }) },
+    { id: 'duplicate', label: t.duplicate, icon: <CopyIcon />, onAction: () => setConfirmAction('duplicate') },
+    { id: 'template', label: t.template, icon: <BookmarkIcon />, onAction: () => setConfirmAction('template') },
     ...(!list.archived
-      ? [{ id: 'archive', label: t.archive, icon: '📦', onAction: () => setConfirmAction('archive') }]
-      : [{ id: 'unarchive', label: t.unarchive, icon: '📤', onAction: () => setConfirmAction('unarchive') }]
+      ? [{ id: 'archive', label: t.archive, icon: <ArchiveIcon />, onAction: () => setConfirmAction('archive') }]
+      : [{ id: 'unarchive', label: t.unarchive, icon: <UnarchiveIcon />, onAction: () => setConfirmAction('unarchive') }]
     ),
-    { id: 'delete', label: t.delete, icon: '🗑️', variant: 'destructive' as const, onAction: () => setConfirmAction('delete') },
+    { id: 'delete', label: t.delete, icon: <TrashIcon />, variant: 'destructive' as const, onAction: () => setConfirmAction('delete') },
   ]
 
   const handleConfirm = () => {
@@ -78,42 +79,38 @@ export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, on
   return (
     <>
       <div
-        className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] cursor-pointer relative no-callout ${list.archived ? 'opacity-80' : ''}`}
+        className={`relative flex items-center bg-surface active:bg-fill no-callout after:absolute after:top-0 after:right-0 after:left-[4.25rem] after:h-px after:bg-hairline first:after:hidden ${list.archived ? 'opacity-80' : ''}`}
         {...handlers}
       >
         <Link
           to={`/lists/${list.id}`}
           state={{ activeTab, from: '/app' }}
-          className="block"
+          className="flex-1 min-w-0 flex items-center gap-3 pl-4 py-3 min-h-[64px]"
           onClick={handleCardClick}
         >
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{icon}</span>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white pr-8">
-                {list.name}
-              </h3>
-            </div>
-          </div>
-
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            {list.items.length} {list.items.length === 1 ? t.item : t.items}
-            {list.sections.length > 0 && ` • ${list.sections.length} ${t.sections}`}
-            {' • '}{t.total} <span className="tabular-nums">{formatCurrency(total, list.currency, locale)}</span>
-          </p>
+          <span aria-hidden="true" className="shrink-0 w-10 h-10 rounded-full bg-fill flex items-center justify-center text-xl">
+            {icon}
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-body font-semibold text-ink truncate">{list.name}</span>
+            <span className="block text-footnote text-muted truncate">
+              {list.items.length} {list.items.length === 1 ? t.item : t.items}
+              {list.sections.length > 0 && `, ${list.sections.length} ${t.sections}`}
+            </span>
+          </span>
+          <span className="shrink-0 text-right">
+            <span className="block text-footnote text-muted">{t.total}</span>
+            <span className="block text-callout num font-semibold text-ink">{formatCurrency(total, list.currency, locale)}</span>
+          </span>
         </Link>
 
         {/* More options button (alternative to long press) */}
         <button
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); setShowSheet(true) }}
-          className="absolute top-2 right-2 w-11 h-11 flex items-center justify-center rounded-full text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          className="shrink-0 w-11 h-11 mr-1 flex items-center justify-center rounded-full text-muted hover:bg-fill"
           aria-label={t.moreOptions}
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-            <circle cx="10" cy="4" r="2" />
-            <circle cx="10" cy="10" r="2" />
-            <circle cx="10" cy="16" r="2" />
-          </svg>
+          <EllipsisIcon />
         </button>
       </div>
 
