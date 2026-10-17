@@ -94,6 +94,7 @@ src/
 │   ├── calculations.test.ts
 │   ├── importExport.ts     # Data import/export functionality
 │   ├── importExport.test.ts
+│   ├── presetTemplates.ts  # Built-in read-only templates (e.g. Monthly Groceries), i18n, never stored/synced
 │   ├── sync/               # Pure sync logic (no SDK): types, hash, merge, syncMeta,
 │   │                       # errors, oauthRedirect, memoryRemote (test fake), formatSyncedAgo
 │   └── firebase/           # Firebase adapters: config, client, remoteDoc,
@@ -115,6 +116,8 @@ The application uses React Context API for global state management with two prim
      - `deleteList`: Remove a list entirely
      - `archiveList`/`unarchiveList`: Toggle list archival status
      - `duplicateList`: Create a copy of an existing list (remaps item ids in sections)
+     - `saveAsTemplate`/`createFromTemplate`/`deleteTemplate`: user templates (`isTemplate: true` lists)
+     - `createFromPreset`/`copyPresetToTemplates`: start a list from, or copy into "My templates", a built-in template
      - `addItem`: Add a new item to a specific list; returns the new item's `id`
      - `updateItem`: Modify an existing item's properties
      - `deleteItem`: Remove an item from a list (also removes it from any section)

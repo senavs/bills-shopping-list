@@ -8,6 +8,7 @@ import { TemplateCard } from './TemplateCard'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { exportData, importData } from '../../lib/importExport'
+import { getPresetTemplates } from '../../lib/presetTemplates'
 import { CloudCheckIcon, CloudIcon, DownloadIcon, EllipsisIcon, GlobeIcon, InfoIcon, MoonIcon, PlusIcon, ShareIcon, SunIcon } from '../shared/icons'
 import { useSync } from '../../contexts/SyncContext'
 import { SyncStatusButton } from '../Sync/SyncStatusButton'
@@ -20,9 +21,9 @@ type Tab = 'active' | 'archived' | 'templates'
 const NEXT_THEME: Record<ThemeMode, ThemeMode> = { system: 'light', light: 'dark', dark: 'system' }
 
 export const Dashboard = () => {
-  const { lists, archiveList, unarchiveList, deleteList, duplicateList, saveAsTemplate, createFromTemplate, deleteTemplate } = useLists()
+  const { lists, archiveList, unarchiveList, deleteList, duplicateList, saveAsTemplate, createFromTemplate, deleteTemplate, createFromPreset, copyPresetToTemplates } = useLists()
   const { mode, setMode, isDark } = useDarkMode()
-  const { locale, setLocale, t } = useLanguage()
+  const { locale, setLocale, t, isBR } = useLanguage()
   const sync = useSync()
   const [showAccount, setShowAccount] = useState(false)
   const [showSyncHint, setShowSyncHint] = useState(false)
@@ -49,6 +50,7 @@ export const Dashboard = () => {
 
   const regularLists = lists.filter(list => !list.isTemplate)
   const templates = lists.filter(list => list.isTemplate)
+  const presetTemplates = getPresetTemplates(t, isBR)
 
   const filteredLists = regularLists.filter(list =>
     activeTab === 'active' ? !list.archived : list.archived
@@ -198,24 +200,45 @@ export const Dashboard = () => {
         <SyncBanner listCount={regularLists.length} />
 
         {activeTab === 'templates' ? (
-          templates.length === 0 ? (
-            <div className="text-center py-12 text-muted">
-              <p className="mb-2">{t.noTemplates}</p>
-              <p className="text-callout">{t.noTemplatesHint}</p>
-            </div>
-          ) : (
+          <>
+            <h2 className="pl-1 min-h-[44px] flex items-center text-callout font-semibold text-ink">
+              {t.myTemplates}
+            </h2>
+            {templates.length === 0 ? (
+              <div className="bg-surface rounded-group px-4 py-6 text-center text-muted">
+                <p className="mb-1">{t.noTemplates}</p>
+                <p className="text-callout">{t.noTemplatesHint}</p>
+              </div>
+            ) : (
+              <div className="bg-surface rounded-group overflow-hidden">
+                {templates.map(template => (
+                  <TemplateCard
+                    key={template.id}
+                    template={template}
+                    activeTab={activeTab}
+                    onUseTemplate={() => createFromTemplate(template.id)}
+                    onDelete={() => setDeleteTemplateConfirm(template.id)}
+                  />
+                ))}
+              </div>
+            )}
+
+            <h2 className="pl-1 pt-4 min-h-[44px] flex items-center text-callout font-semibold text-ink">
+              {t.presetTemplates}
+            </h2>
             <div className="bg-surface rounded-group overflow-hidden">
-              {templates.map(template => (
+              {presetTemplates.map(preset => (
                 <TemplateCard
-                  key={template.id}
-                  template={template}
+                  key={preset.id}
+                  template={preset}
                   activeTab={activeTab}
-                  onUseTemplate={() => createFromTemplate(template.id)}
-                  onDelete={() => setDeleteTemplateConfirm(template.id)}
+                  preset
+                  onUseTemplate={() => createFromPreset(preset)}
+                  onCopyToMyTemplates={() => copyPresetToTemplates(preset)}
                 />
               ))}
             </div>
-          )
+          </>
         ) : (
           filteredLists.length === 0 ? (
             <div className="text-center py-12 text-muted">

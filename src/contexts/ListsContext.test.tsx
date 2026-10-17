@@ -182,3 +182,40 @@ describe('updatedAt stamping', () => {
     expect(getList(getCtx())).toMatchObject({ name: 'Remote', updatedAt: 42 })
   })
 })
+
+describe('preset templates', () => {
+  const preset: List = {
+    id: 'preset-x',
+    name: 'Compras do Mês',
+    type: 'shopping',
+    currency: 'BRL',
+    taxPercentage: 0,
+    archived: false,
+    isTemplate: true,
+    items: [],
+    sections: [
+      { id: 'preset-x-0', name: 'Geladeira', itemIds: [], collapsed: false },
+      { id: 'preset-x-1', name: 'Outros', itemIds: [], collapsed: false },
+    ],
+  }
+
+  it('createFromPreset adds a regular list with fresh ids', () => {
+    const getCtx = setup()
+    act(() => getCtx().createFromPreset(preset))
+    const created = getCtx().lists[1]
+    expect(created).toMatchObject({ name: 'Compras do Mês', isTemplate: false, archived: false, taxPercentage: 0 })
+    expect(created.id).not.toBe(preset.id)
+    expect(created.sections.map(s => s.name)).toEqual(['Geladeira', 'Outros'])
+    expect(created.sections.map(s => s.id)).not.toContain('preset-x-0')
+    expect(created.updatedAt).toBeTypeOf('number')
+  })
+
+  it('copyPresetToTemplates adds an editable template owned by the user', () => {
+    const getCtx = setup()
+    act(() => getCtx().copyPresetToTemplates(preset))
+    const copy = getCtx().lists[1]
+    expect(copy).toMatchObject({ name: 'Compras do Mês', isTemplate: true })
+    expect(copy.id).not.toBe(preset.id)
+    expect(copy.sections).toHaveLength(2)
+  })
+})

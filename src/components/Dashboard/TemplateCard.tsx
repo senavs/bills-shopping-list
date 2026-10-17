@@ -4,24 +4,31 @@ import type { List } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
-import { EllipsisIcon, OpenIcon, PencilIcon, TrashIcon } from '../shared/icons'
+import { CopyIcon, EllipsisIcon, OpenIcon, PencilIcon, TrashIcon } from '../shared/icons'
 
 interface TemplateCardProps {
   template: List
   activeTab: 'active' | 'archived' | 'templates'
   onUseTemplate: () => void
-  onDelete: () => void
+  // Built-in templates are read-only: no detail view, edit or delete, only copy
+  preset?: boolean
+  onDelete?: () => void
+  onCopyToMyTemplates?: () => void
 }
 
-export const TemplateCard = ({ template, activeTab, onUseTemplate, onDelete }: TemplateCardProps) => {
+export const TemplateCard = ({ template, activeTab, onUseTemplate, preset, onDelete, onCopyToMyTemplates }: TemplateCardProps) => {
   const { t } = useLanguage()
   const navigate = useNavigate()
   const icon = { shopping: '🛒', restaurant: '🍽️', bar: '🍻' }[template.type] || '🛒'
   const [showSheet, setShowSheet] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'useTemplate' | 'delete' | null>(null)
 
-  const actions: BottomSheetAction[] = [
-    { id: 'useTemplate', label: t.useTemplate, icon: <OpenIcon />, onAction: () => setConfirmAction('useTemplate') },
+  const useAction: BottomSheetAction = { id: 'useTemplate', label: t.useTemplate, icon: <OpenIcon />, onAction: () => setConfirmAction('useTemplate') }
+  const actions: BottomSheetAction[] = preset ? [
+    useAction,
+    { id: 'copy', label: t.copyToMyTemplates, icon: <CopyIcon />, onAction: () => onCopyToMyTemplates?.() },
+  ] : [
+    useAction,
     { id: 'edit', label: t.edit, icon: <PencilIcon />, onAction: () => navigate(`/lists/${template.id}/edit`, { state: { activeTab, from: '/app' } }) },
     { id: 'delete', label: t.delete, icon: <TrashIcon />, variant: 'destructive' as const, onAction: () => setConfirmAction('delete') },
   ]
@@ -29,7 +36,7 @@ export const TemplateCard = ({ template, activeTab, onUseTemplate, onDelete }: T
   const handleConfirm = () => {
     switch (confirmAction) {
       case 'useTemplate': onUseTemplate(); break
-      case 'delete': onDelete(); break
+      case 'delete': onDelete?.(); break
     }
     setConfirmAction(null)
   }
@@ -44,25 +51,44 @@ export const TemplateCard = ({ template, activeTab, onUseTemplate, onDelete }: T
 
   const confirmProps = getConfirmProps()
 
+  const content = (
+    <>
+      <span aria-hidden="true" className="shrink-0 w-10 h-10 rounded-full bg-fill flex items-center justify-center text-xl">
+        {icon}
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-body font-semibold text-ink truncate">{template.name}</span>
+        <span className="block text-footnote text-muted truncate">
+          {preset ? template.sections.map(s => s.name).join(', ') : (
+            <>
+              {template.items.length} {template.items.length === 1 ? t.item : t.items}
+              {template.sections.length > 0 && `, ${template.sections.length} ${t.sections}`}
+            </>
+          )}
+        </span>
+      </span>
+    </>
+  )
+
   return (
     <>
       <div className="relative flex items-center bg-surface active:bg-fill no-callout after:absolute after:top-0 after:right-0 after:left-[4.25rem] after:h-px after:bg-hairline first:after:hidden">
-        <Link
-          to={`/lists/${template.id}`}
-          state={{ activeTab, from: '/app' }}
-          className="flex-1 min-w-0 flex items-center gap-3 pl-4 py-3 min-h-[64px]"
-        >
-          <span aria-hidden="true" className="shrink-0 w-10 h-10 rounded-full bg-fill flex items-center justify-center text-xl">
-            {icon}
-          </span>
-          <span className="flex-1 min-w-0">
-            <span className="block text-body font-semibold text-ink truncate">{template.name}</span>
-            <span className="block text-footnote text-muted truncate">
-              {template.items.length} {template.items.length === 1 ? t.item : t.items}
-              {template.sections.length > 0 && `, ${template.sections.length} ${t.sections}`}
-            </span>
-          </span>
-        </Link>
+        {preset ? (
+          <button
+            onClick={() => setShowSheet(true)}
+            className="flex-1 min-w-0 flex items-center gap-3 pl-4 py-3 min-h-[64px] text-left"
+          >
+            {content}
+          </button>
+        ) : (
+          <Link
+            to={`/lists/${template.id}`}
+            state={{ activeTab, from: '/app' }}
+            className="flex-1 min-w-0 flex items-center gap-3 pl-4 py-3 min-h-[64px]"
+          >
+            {content}
+          </Link>
+        )}
 
         {/* More options button */}
         <button
