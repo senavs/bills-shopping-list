@@ -29,6 +29,16 @@ describe('getPresetTemplates', () => {
     )
   })
 
+  it('includes every built-in template, with tax only on restaurant and bar', () => {
+    const presets = getPresetTemplates(ptBR, true)
+    expect(presets.map(p => p.name)).toEqual([
+      'Compras do Mês', 'Feira / Hortifrúti', 'Churrasco', 'Farmácia', 'Festa / Aniversário',
+      'Restaurante com Amigos', 'Bar / Happy Hour', 'Material Escolar', 'Mudança / Casa Nova',
+    ])
+    expect(presets.filter(p => p.taxPercentage > 0).map(p => p.type)).toEqual(['restaurant', 'bar'])
+    expect(presets.every(p => p.sections.length > 0 && p.sections.every(s => s.name))).toBe(true)
+  })
+
   it('keeps ids stable across calls and languages', () => {
     const ids = (t: typeof en, isBR: boolean) =>
       getPresetTemplates(t, isBR).flatMap(p => [p.id, ...p.sections.map(s => s.id)])
