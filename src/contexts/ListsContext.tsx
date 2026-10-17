@@ -13,6 +13,8 @@ interface ListsContextType {
   saveAsTemplate: (id: string) => void
   createFromTemplate: (templateId: string) => void
   deleteTemplate: (id: string) => void
+  createFromPreset: (preset: List) => void
+  copyPresetToTemplates: (preset: List) => void
   addPerson: (listId: string, name: string) => void
   removePerson: (listId: string, personId: string) => void
   addItem: (listId: string, item: Omit<Item, 'id'>) => string
@@ -76,59 +78,42 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  // Adds a fresh copy (new ids, nothing selected or collapsed) as a template or a regular list
+  const addTemplateCopy = (source: List, isTemplate: boolean) => {
+    const itemIdMap: Record<string, string> = {}
+    const items = source.items.map(item => {
+      const newId = crypto.randomUUID()
+      itemIdMap[item.id] = newId
+      return { ...item, id: newId, selected: false }
+    })
+    const sections = source.sections.map(s => ({
+      ...s,
+      id: crypto.randomUUID(),
+      itemIds: s.itemIds.map(iid => itemIdMap[iid] ?? iid),
+      collapsed: false,
+    }))
+    setLists(prev => [...prev, touch({
+      ...source,
+      id: crypto.randomUUID(),
+      items,
+      sections,
+      archived: false,
+      isTemplate,
+    })])
+  }
+
   const saveAsTemplate = (id: string) => {
     const list = lists.find(l => l.id === id)
-    if (list) {
-      const itemIdMap: Record<string, string> = {}
-      const items = list.items.map(item => {
-        const newId = crypto.randomUUID()
-        itemIdMap[item.id] = newId
-        return { ...item, id: newId, selected: false }
-      })
-      const sections = list.sections.map(s => ({
-        ...s,
-        id: crypto.randomUUID(),
-        itemIds: s.itemIds.map(iid => itemIdMap[iid] ?? iid),
-        collapsed: false,
-      }))
-      setLists(prev => [...prev, touch({
-        ...list,
-        id: crypto.randomUUID(),
-        name: `${list.name}`,
-        items,
-        sections,
-        archived: false,
-        isTemplate: true,
-      })])
-    }
+    if (list) addTemplateCopy(list, true)
   }
 
   const createFromTemplate = (templateId: string) => {
     const template = lists.find(l => l.id === templateId && l.isTemplate)
-    if (template) {
-      const itemIdMap: Record<string, string> = {}
-      const items = template.items.map(item => {
-        const newId = crypto.randomUUID()
-        itemIdMap[item.id] = newId
-        return { ...item, id: newId, selected: false }
-      })
-      const sections = template.sections.map(s => ({
-        ...s,
-        id: crypto.randomUUID(),
-        itemIds: s.itemIds.map(iid => itemIdMap[iid] ?? iid),
-        collapsed: false,
-      }))
-      setLists(prev => [...prev, touch({
-        ...template,
-        id: crypto.randomUUID(),
-        name: template.name,
-        items,
-        sections,
-        archived: false,
-        isTemplate: false,
-      })])
-    }
+    if (template) addTemplateCopy(template, false)
   }
+
+  const createFromPreset = (preset: List) => addTemplateCopy(preset, false)
+  const copyPresetToTemplates = (preset: List) => addTemplateCopy(preset, true)
 
   const deleteTemplate = (id: string) => {
     setLists(prev => prev.filter(l => l.id !== id))
@@ -249,7 +234,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ListsContext.Provider value={{
       lists, createList, updateList, deleteList, archiveList, unarchiveList, duplicateList,
-      saveAsTemplate, createFromTemplate, deleteTemplate,
+      saveAsTemplate, createFromTemplate, deleteTemplate, createFromPreset, copyPresetToTemplates,
       addPerson, removePerson,
       addItem, duplicateItem, updateItem, deleteItem, reorderItem,
       addSection, updateSection, deleteSection, reorderSection, reorderItemInSection,

@@ -28,6 +28,8 @@ describe('Dashboard', () => {
     saveAsTemplate: vi.fn(),
     createFromTemplate: vi.fn(),
     deleteTemplate: vi.fn(),
+    createFromPreset: vi.fn(),
+    copyPresetToTemplates: vi.fn(),
     addPerson: vi.fn(),
     removePerson: vi.fn(),
     createList: vi.fn(),
@@ -72,6 +74,45 @@ describe('Dashboard', () => {
     expect(screen.getByText('Export')).toBeDefined()
     expect(screen.getByText('Import')).toBeDefined()
     expect(screen.getByText('Mudar para Português')).toBeDefined()
+  })
+
+  describe('templates tab', () => {
+    const openTemplates = () => fireEvent.click(screen.getByRole('tab', { name: 'Templates' }))
+
+    it('shows my templates and the ready-made templates', () => {
+      renderDashboard()
+      openTemplates()
+      expect(screen.getByRole('heading', { name: 'My templates' })).toBeDefined()
+      expect(screen.getByText('No templates yet')).toBeDefined()
+      expect(screen.getByRole('heading', { name: 'Ready-made templates' })).toBeDefined()
+      expect(screen.getByText('Monthly Groceries')).toBeDefined()
+      expect(screen.getByText('Fridge, Pantry, Laundry, Bathroom, Bedroom, Other')).toBeDefined()
+    })
+
+    it('offers only use and copy for a ready-made template', () => {
+      renderDashboard()
+      openTemplates()
+      fireEvent.click(screen.getByText('Monthly Groceries'))
+      expect(screen.getByText('Copy to My Templates')).toBeDefined()
+      expect(screen.queryByText('Delete')).toBeNull()
+      expect(screen.queryByText('Edit')).toBeNull()
+
+      fireEvent.click(screen.getByText('Copy to My Templates'))
+      expect(mockUseLists.copyPresetToTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Monthly Groceries', isTemplate: true }),
+      )
+    })
+
+    it('creates a list from a ready-made template after confirming', () => {
+      renderDashboard()
+      openTemplates()
+      fireEvent.click(screen.getByText('Monthly Groceries'))
+      fireEvent.click(screen.getByText('Use Template'))
+      fireEvent.click(screen.getByRole('button', { name: 'Use Template' }))
+      expect(mockUseLists.createFromPreset).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Monthly Groceries', taxPercentage: 0 }),
+      )
+    })
   })
 
   it('shows empty state when no lists', () => {
