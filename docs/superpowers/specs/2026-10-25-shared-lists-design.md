@@ -58,16 +58,15 @@ Em listas compartilhadas, o `PeopleManager` vira **"Pessoas e membros"**. Ele é
 gerenciar quem está na conta. Nas listas privadas, nada muda.
 
 - Lista **todas** as `people` da lista.
-- **O app sabe quem é quem:** cada membro tem uma `Person` própria, criada com o nome que ele digitou ao entrar
-  (§ Entrar) e vinculada ao `uid` em `memberPeople`. Ninguém escolhe ou troca qual pessoa é. A pessoa de um
-  membro tem um ícone de "no app", e a do usuário logado tem o rótulo **"você"**. As outras são só nomes para
-  a divisão, como hoje.
+- Uma pessoa vinculada a um membro (está em `memberPeople`) tem um ícone de "no app". A sua tem o rótulo
+  **"você"**. As outras são só nomes para a divisão, como hoje.
 - Abaixo da lista ficam **"Adicionar pessoa"** (o campo atual) e **"Convidar mais"** (§ Convidar).
-- **Sem regra de negócio nova:** quem participa da divisão continua sendo definido pela seleção de pessoas em
-  cada item (`assignedTo`). Um membro que não está em nenhum item simplesmente não aparece na divisão. O ×
-  continua exatamente como hoje (`removePerson`). Se ele for usado na pessoa de um membro, o vínculo em
-  `memberPeople` fica órfão e é limpo, e na próxima vez que o membro abrir a lista o app pede o nome dele de
-  novo (o mesmo passo da primeira entrada). Remover o acesso de um membro está fora do MVP.
+- **Sem regras de negócio novas para a divisão.** Quem entra na divisão continua sendo decidido pela seleção
+  de pessoas em cada item (`assignedTo`), como hoje. Um membro que não está selecionado em nenhum item não
+  aparece na divisão.
+- O × continua igual ao de hoje (`removePerson`) para quem é só nome na divisão. A pessoa de um membro **não tem
+  ×**, porque removê-la seria remover o membro (fora do MVP) e deixaria `memberPeople` apontando para o nada.
+  *(Decisão do design.)*
 - O cabeçalho recolhido mostra a contagem de pessoas e um ícone de compartilhado.
 
 ### Convidar
@@ -86,13 +85,11 @@ gerenciar quem está na conta. Nas listas privadas, nada muda.
 2. Deslogado: tela explicando "Você foi convidado para uma lista compartilhada" + "Entrar com Google". O
    `startOAuthRedirect` já guarda `returnHash`, então depois do login a pessoa volta para o mesmo `#/join/...`.
 3. Logado: o app grava o próprio `uid` em `members` provando o token (ver §4). Se o usuário já é membro, só abre a lista.
-4. Na primeira entrada, o app pede **"Seu nome nesta lista"** (obrigatório). Não há lista de pessoas para
-   escolher, então ninguém consegue se passar por outra pessoa. O nome cria uma `Person` nova, e o app grava
-   `memberPeople[uid] = personId`. Esse é o nome que aparece em "Pessoas e membros" e na seleção de pessoas dos
-   itens. O **nome do Google não é lido**: o escopo do login continua `openid email` (requisito de privacidade
-   do spec de sync). O campo pode vir pré-preenchido com o último nome que o usuário digitou neste aparelho,
-   guardado só no `localStorage`. *(Decisão do design.)* O mesmo passo aparece se um membro abrir a lista e não
-   tiver vínculo.
+4. Na primeira entrada na lista, o app pede **"Seu nome nesta lista"** (obrigatório). O app cria uma `Person`
+   com esse nome e grava `memberPeople[uid] = personId`, tudo no mesmo batch da entrada. **Não existe escolher
+   uma pessoa já cadastrada**: cada usuário logado é sempre a própria pessoa, e ninguém se passa por outro.
+   O nome do Google **não** é usado (mantém o requisito de privacidade do sync). O campo vem preenchido com o
+   último nome usado neste aparelho, guardado no `localStorage`. *(Decisão do design.)*
 5. Navega para `/lists/:id`.
 6. Erros: o Firestore devolve `permission-denied` para token errado, lista excluída, lista inexistente e limite
    de membros, sem distinguir os casos (quem não é membro não pode ler o doc). Por isso há **uma mensagem
@@ -184,8 +181,8 @@ itens, seções e pessoas ficam no `shared-sync-meta` (§5), para o cliente calc
 Exclusões de item, pessoa e seção: item → tombstone (`deleted: true`, sem apagar o doc), para um cliente offline
 não ressuscitar o item. Pessoa e seção → `deleteField()` no mapa. Excluir uma seção não exclui os itens:
 os clientes tratam `sectionId` órfão como "Outros itens", igual ao comportamento local. Excluir uma pessoa remove
-o id dela dos `assignedTo` (mesma regra do `removePerson` local) e limpa as entradas de `memberPeople` que
-apontavam para ela.
+o id dela dos `assignedTo` (mesma regra do `removePerson` local). Pessoas vinculadas em `memberPeople` não são
+removíveis pela UI (§2).
 
 ## 4. Regras do Firestore (`firestore.rules`)
 
@@ -277,13 +274,13 @@ Um caminho de sync separado do pessoal, com a mesma filosofia: `localStorage` é
 ## 6. i18n, dark mode, testes
 
 - Toda string nova passa por `useLanguage().t`, com chaves em `en.ts` e `ptBR.ts`: opção do form, "Seu nome nesta lista", "Pessoas e membros", "você", "Convidar mais", botão Convidar,
-  texto do share, telas de join e do passo "Seu nome nesta lista", erros, "Sair da lista", selo, avisos.
+  texto do share, telas de join e de escolha de pessoa, erros, "Sair da lista", selo, avisos.
 - Toda UI nova tem `dark:`.
 - Testes Vitest:
   - funções puras de `src/lib/sharedSync/` (conversão ida e volta preservando ordem e seções, diff, merge por item,
     incluindo dois "clientes" adicionando itens à mesma seção sem perda);
   - fluxo em `SyncContext` com `memorySharedRemote` e auth fake;
-  - componentes (`ListForm` com a opção e o nome do criador, join pedindo o nome e criando a pessoa vinculada, `PeopleManager` em lista compartilhada com membros, "você" e "Convidar mais", "Sair da lista");
+  - componentes (`ListForm` com a opção e o nome do criador, join pedindo o nome e criando a `Person` vinculada, `PeopleManager` em lista compartilhada com membros, "você", "Convidar mais" e sem × na pessoa de um membro, "Sair da lista");
   - sync pessoal ignorando listas `shared`;
   - import removendo `shared`; `duplicateList` de lista compartilhada gerando cópia privada.
 - Testes de regras em `npm run test:rules` (§4).
@@ -292,7 +289,7 @@ Um caminho de sync separado do pessoal, com a mesma filosofia: `localStorage` é
 
 - Se a orquestração fica no `SyncContext` ou num contexto novo.
 - Técnica exata de `position` (fração vs. inteiro com renormalização).
-- Componentes exatos e visual do selo, do atalho "Convidar", de "Pessoas e membros" e do passo "Seu nome nesta lista".
+- Componentes exatos e visual do selo, do atalho "Convidar", de "Pessoas e membros" e da tela de nome no join.
 - Debounce exato e estratégia de reconexão dos listeners.
 - Ordem de implementação (sugestão: modelo + conversões puras → regras + testes de regras → remote/memória →
   orquestração → UI de criar/convidar/entrar → sair/excluir → polimento).
