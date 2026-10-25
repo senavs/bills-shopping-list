@@ -1,4 +1,5 @@
 import type { Item, List } from '../../types'
+import type { ItemWrite, ParentPatch } from './diff'
 
 /** An item as stored in sharedLists/{id}/items: section membership and order live on the item. */
 export interface SharedItem extends Omit<Item, 'id'> {
@@ -49,6 +50,24 @@ export interface ListMeta {
   people: Record<string, EntityMeta>
   sections: Record<string, EntityMeta>
   items: Record<string, EntityMeta>
+}
+
+/**
+ * Shared-list backend. Denials reject with { code: 'permission-denied' }, network
+ * failures with { code: 'unavailable' } (see classifyError). `uid` is the signed-in
+ * user; Firestore takes it from auth, the in-memory fake enforces the rules with it.
+ */
+export interface SharedRemote {
+  /** Idempotent: resolves without writing when the list already exists. */
+  create(uid: string, doc: SharedParentDoc): Promise<void>
+  join(uid: string, listId: string, token: string): Promise<'joined' | 'already'>
+  /** Removes uid from members and its memberPeople entry. */
+  leave(uid: string, listId: string): Promise<void>
+  /** Tombstone: deleted: true. Owner only. */
+  deleteList(uid: string, listId: string): Promise<void>
+  push(uid: string, listId: string, parent: ParentPatch, items: ItemWrite[]): Promise<void>
+  subscribeLists(uid: string, cb: (docs: SharedParentDoc[], fromCache: boolean) => void, onError: (e: unknown) => void): () => void
+  subscribeItems(uid: string, listId: string, cb: (items: Record<string, RemoteItem>) => void, onError: (e: unknown) => void): () => void
 }
 
 export interface SharedMeta {

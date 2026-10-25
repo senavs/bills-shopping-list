@@ -3,6 +3,7 @@ import { render, act, waitFor, cleanup } from '@testing-library/react'
 import { ListsProvider, useLists } from './ListsContext'
 import { SyncProvider, useSync } from './SyncContext'
 import { createMemoryRemote } from '../lib/sync/memoryRemote'
+import { createMemorySharedRemote } from '../lib/sharedSync/memorySharedRemote'
 import { emptySyncMeta, loadSyncMeta, saveSyncMeta } from '../lib/sync/syncMeta'
 import type { List } from '../types'
 import type { AuthProvider, RemoteStore } from '../lib/sync/types'
@@ -29,7 +30,7 @@ const setup = (opts: { remote?: RemoteStore; auth?: AuthProvider; local?: List[]
   localStorage.setItem('app', JSON.stringify({ lists: opts.local ?? [] }))
   const remote = opts.remote ?? createMemoryRemote()
   const auth = opts.auth ?? createFakeAuth()
-  const loadBackend = opts.configured === false ? null : vi.fn(async () => ({ auth, remote }))
+  const loadBackend = opts.configured === false ? null : vi.fn(async () => ({ auth, remote, shared: createMemorySharedRemote() }))
   let ctx!: Ctx
   const Capture = () => { ctx = { lists: useLists(), sync: useSync() }; return null }
   render(
