@@ -1,7 +1,7 @@
 import type { List } from '../../types'
 import { hashValue } from '../sync/hash'
 import { toForm } from './convert'
-import type { EntityMeta, ListMeta, RemoteItem, SharedForm } from './types'
+import type { EntityMeta, ListMeta, RemoteItem, SharedForm, SharedParentDoc } from './types'
 
 /** Parent doc update; keys are Firestore field paths ('name', 'people.<id>', 'memberPeople.<uid>'). */
 export interface ParentPatch {
@@ -64,6 +64,19 @@ export const metaFromForm = (form: SharedForm): ListMeta => ({
 })
 
 export const emptyListMeta = (): ListMeta => ({ fields: {}, people: {}, sections: {}, items: {} })
+
+/**
+ * The sharedLists/{id} doc that creates `list` with `uid` as owner and only
+ * member, and the meta once it is written (items are pushed afterwards).
+ */
+export const newParentDoc = (list: List, uid: string, now: number): { doc: SharedParentDoc; meta: ListMeta } => {
+  const form = toForm(list, undefined)
+  const doc: SharedParentDoc = {
+    id: list.id, ownerUid: uid, inviteToken: list.shared!.inviteToken, members: [uid], deleted: false, updatedAt: now,
+    ...form.fields, memberPeople: form.memberPeople, people: form.people, sections: form.sections,
+  }
+  return { doc, meta: { ...metaFromForm({ ...form, items: {} }) } }
+}
 
 /** Writes that bring the remote from `meta` to the local list, plus the meta entries they settle. */
 export const diffLocal = (list: List, meta: ListMeta | undefined): LocalDiff => {

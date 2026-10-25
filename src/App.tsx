@@ -3,6 +3,7 @@ import { ListsProvider } from './contexts/ListsContext'
 import { DarkModeProvider } from './contexts/DarkModeContext'
 import { LanguageProvider } from './contexts/LanguageContext'
 import { SyncProvider } from './contexts/SyncContext'
+import { SharedSyncProvider } from './contexts/SharedSyncContext'
 import { loadBackend } from './lib/firebase/loadBackend'
 import { Landing } from './components/Landing/Landing'
 import { Dashboard } from './components/Dashboard/Dashboard'
@@ -48,6 +49,7 @@ function App() {
       <DarkModeProvider>
         <ListsProvider>
           <SyncProvider loadBackend={loadBackend}>
+            <SharedSyncProvider>
             <HashRouter>
               <Routes>
                 <Route path="/" element={<HomeRoute />} />
@@ -59,6 +61,7 @@ function App() {
                 </Route>
               </Routes>
             </HashRouter>
+            </SharedSyncProvider>
           </SyncProvider>
         </ListsProvider>
       </DarkModeProvider>
