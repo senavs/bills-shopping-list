@@ -113,6 +113,18 @@ describe('mergeSnapshot', () => {
     expect(list.sections[0].collapsed).toBe(true)
   })
 
+  it('without meta, the remote wins for what it has and local-only entities are kept', () => {
+    const L = base()
+    const s = server(L)
+    s.write(base({ name: 'Pub', items: [item('a', { quantity: 5 }), item('b')] }), synced(L))
+    const local = base({ items: [item('a'), item('b'), item('mine')] })
+    const { list, meta } = mergeSnapshot(local, s.parent, s.items(), undefined)
+    expect(list.name).toBe('Pub')
+    expect(list.items.find(i => i.id === 'a')!.quantity).toBe(5)
+    expect(list.items.some(i => i.id === 'mine')).toBe(true)
+    expect(diffLocal(list, meta).items).toEqual([expect.objectContaining({ id: 'mine' })])
+  })
+
   it('items not loaded yet keep the local items', () => {
     const L = base()
     const s = server(L)

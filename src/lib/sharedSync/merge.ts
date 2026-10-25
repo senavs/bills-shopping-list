@@ -51,7 +51,6 @@ export const mergeSnapshot = (
   items: Record<string, RemoteItem> | null,
   meta: ListMeta | undefined,
 ): { list: List; meta: ListMeta } => {
-  const m = meta ?? emptyListMeta()
   const localForm = local ? toForm(local, meta) : null
   const localMeta = localForm ? metaFromForm(localForm) : emptyListMeta()
 
@@ -66,6 +65,18 @@ export const mergeSnapshot = (
     items: remoteItems,
   }
   const remoteMeta = metaFromForm(remoteForm)
+
+  // No meta (lost storage, other account, first sight of a local copy): nothing
+  // local is known to be newer, so the remote wins for whatever it has; only
+  // local-only entities stay dirty and get pushed
+  const known = <M,>(local: Record<string, M>, remote: Record<string, unknown>) =>
+    Object.fromEntries(Object.entries(local).filter(([id]) => id in remote))
+  const m: ListMeta = meta ?? {
+    fields: known(localMeta.fields, remoteMeta.fields),
+    people: known(localMeta.people, remoteMeta.people),
+    sections: known(localMeta.sections, remoteMeta.sections),
+    items: items === null ? {} : known(localMeta.items, remoteMeta.items),
+  }
 
   const fields = mergeEntities(localForm && fieldValues(localForm), localMeta.fields, fieldValues(remoteForm), remoteMeta.fields, m.fields)
   const people = mergeEntities(localForm?.people ?? null, localMeta.people, remoteForm.people, remoteMeta.people, m.people)

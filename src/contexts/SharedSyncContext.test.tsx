@@ -194,6 +194,89 @@ describe('SharedSyncProvider', () => {
     await waitFor(() => expect(remote.peek(id)!.parent.deleted).toBe(true))
   })
 
+  it('a leave the server refuses is dropped and other lists keep syncing', async () => {
+    const memory = createMemorySharedRemote()
+    const refusing: SharedRemote = { ...memory, leave: async () => { throw Object.assign(new Error('denied'), { code: 'permission-denied' }) } }
+    const A = device(memory, 'u1')
+    const id = createShared(A)
+    await waitFor(() => expect(memory.peek(id)).toBeDefined())
+    const B = device(refusing, 'u2')
+    await act(async () => { await B.get().shared.joinList(id, A.list(id)!.shared!.inviteToken) })
+    await waitFor(() => expect(B.list(id)).toBeDefined())
+    const own = createShared(B, 'u2', 'Bia')
+    await waitFor(() => expect(memory.peek(own)).toBeDefined())
+    act(() => B.get().shared.leaveList(id))
+    await waitFor(() => expect(B.stored()!.pendingOps).toEqual([]))
+    act(() => { B.get().lists.addItem(own, item('fries')) })
+    await waitFor(() => expect(Object.values(memory.peek(own)!.items)).toHaveLength(1))
+  })
+
+  it('a remote change landing during our push of the same item is not lost', async () => {
+    const memory = createMemorySharedRemote()
+    let hold: Promise<void> | null = null
+    let release: (() => void) | null = null
+    const slow: SharedRemote = {
+      ...memory,
+      push: async (...args) => {
+        await memory.push(...args)
+        if (hold) await hold
+      },
+    }
+    const A = device(slow, 'u1')
+    const id = createShared(A)
+    let itemId = ''
+    act(() => { itemId = A.get().lists.addItem(id, item('beer')) })
+    await waitFor(() => expect(memory.peek(id)?.items[itemId]).toBeDefined())
+    await waitFor(() => expect(A.stored()!.lists[id].items[itemId]).toBeDefined())
+    hold = new Promise<void>(r => { release = r })
+    act(() => A.get().lists.updateItem(id, itemId, { name: 'IPA' }))
+    await waitFor(() => expect(memory.peek(id)!.items[itemId]).toMatchObject({ name: 'IPA' }))
+    // Another member's write lands after ours while our push is still awaiting
+    const theirs = { ...(memory.peek(id)!.items[itemId] as object), name: 'Stout' } as never
+    await act(async () => { await memory.push('u1', id, { set: {}, remove: [] }, [theirs]) })
+    hold = null
+    act(() => release!())
+    await waitFor(() => expect(A.list(id)!.items[0].name).toBe('Stout'))
+  })
+
+  it('deleting a list while its create is in flight keeps it deleted', async () => {
+    const memory = createMemorySharedRemote()
+    let release: (() => void) | null = null
+    const slow: SharedRemote = {
+      ...memory,
+      create: async (...args) => {
+        await new Promise<void>(r => { release = r })
+        return memory.create(...args)
+      },
+    }
+    const A = device(slow, 'u1')
+    const id = createShared(A)
+    await waitFor(() => expect(release).not.toBeNull())
+    act(() => A.get().shared.deleteSharedList(id))
+    expect(A.list(id)).toBeUndefined()
+    act(() => release!())
+    await waitFor(() => expect(memory.peek(id)?.parent.deleted).toBe(true))
+    await new Promise(r => setTimeout(r, 30))
+    expect(A.list(id)).toBeUndefined()
+  })
+
+  it('a stale local copy without meta does not overwrite newer remote content', async () => {
+    const { A, B, remote, id } = await twoDevices()
+    let itemId = ''
+    act(() => { itemId = A.get().lists.addItem(id, item('beer')) })
+    await waitFor(() => expect(B.list(id)!.items).toHaveLength(1))
+    await waitFor(() => expect(A.stored()!.lists[id].items[itemId]).toBeDefined())
+    const stale = A.list(id)!
+    act(() => B.get().lists.updateItem(id, itemId, { name: 'IPA' }))
+    await waitFor(() => expect(remote.peek(id)!.items[itemId]).toMatchObject({ name: 'IPA' }))
+    cleanup()
+    // Same owner on a device whose shared-sync-meta was lost
+    const A2 = device(remote, 'u1', [stale])
+    await waitFor(() => expect(A2.list(id)!.items[0].name).toBe('IPA'))
+    await new Promise(r => setTimeout(r, 50))
+    expect(remote.peek(id)!.items[itemId]).toMatchObject({ name: 'IPA' })
+  })
+
   it('archived lists get no item updates until unarchived', async () => {
     const { A, B, id } = await twoDevices()
     act(() => B.get().lists.archiveList(id))

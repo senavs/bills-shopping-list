@@ -52,16 +52,19 @@ export const createMemorySharedRemote = (): MemorySharedRemote => {
     peek: listId => (lists.has(listId) ? clone(lists.get(listId)!) : undefined),
     setOnline: value => { online = value },
 
-    create: (uid, doc) => write(() => {
+    async create(uid, doc) {
+      if (!online) throw fail('unavailable')
       if (lists.has(doc.id)) {
         if (!isMember(uid, lists.get(doc.id))) throw fail('permission-denied')
-        return
+        return 'exists'
       }
       if (doc.ownerUid !== uid || doc.members.length !== 1 || doc.members[0] !== uid || doc.inviteToken.length < 20) {
         throw fail('permission-denied')
       }
       lists.set(doc.id, { parent: clone(doc), items: {} })
-    }),
+      notify()
+      return 'created'
+    },
 
     async join(uid, listId, token) {
       if (!online) throw fail('unavailable')

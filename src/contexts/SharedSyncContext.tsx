@@ -119,6 +119,13 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
 
   const fail = (error: unknown) => setStatus(classifyError(error) === 'offline' ? 'offline' : 'error')
 
+  const dropOp = (op: SharedMeta['pendingOps'][number]) => {
+    const meta = metaRef.current
+    if (!meta) return
+    const { [op.listId]: _done, ...rest } = meta.lists
+    saveMeta({ ...meta, lists: rest, pendingOps: meta.pendingOps.filter(o => !(o.kind === op.kind && o.listId === op.listId)) })
+  }
+
   const hasPendingOp = (listId: string) => !!metaRef.current?.pendingOps.some(op => op.listId === listId)
 
   // Signed out (or session expired) we still know who we were: leave/delete get queued under that account
@@ -143,7 +150,12 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
     const meta = metaRef.current
     if (!parent || !meta || hasPendingOp(listId)) return
     const local = listsRef.current.find(l => l.id === listId)
-    const merged = mergeSnapshot(local, parent, itemsRef.current.get(listId) ?? null, meta.lists[listId])
+    const items = itemsRef.current.get(listId) ?? null
+    // A pendingCreate placeholder is not sync state: the list turned out to exist remotely
+    const lm = meta.lists[listId]?.pendingCreate ? undefined : meta.lists[listId]
+    // Without a meta, a local copy can only be compared once the items have arrived
+    if (local && !lm && items === null) return
+    const merged = mergeSnapshot(local, parent, items, lm)
     putLocal(merged.list)
     setListMeta(listId, merged.meta)
   }
@@ -161,6 +173,9 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
           notify('deleted', local.name)
         }
         setListMeta(doc.id, null)
+        // Leaving a deleted list is moot (a pending delete stays: it may be our own unacknowledged write)
+        const leave = metaRef.current?.pendingOps.find(o => o.kind === 'leave' && o.listId === doc.id)
+        if (leave) dropOp(leave)
         continue
       }
       parentsRef.current.set(doc.id, doc)
@@ -192,10 +207,15 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
     setStatus('syncing')
     try {
       for (const op of [...metaRef.current.pendingOps]) {
-        await timed(op.kind === 'leave' ? backend.shared.leave(uid, op.listId) : backend.shared.deleteList(uid, op.listId))
-        const meta = metaRef.current!
-        const { [op.listId]: _done, ...rest } = meta.lists
-        saveMeta({ ...meta, lists: rest, pendingOps: meta.pendingOps.filter(o => o !== op && !(o.kind === op.kind && o.listId === op.listId)) })
+        try {
+          await timed(op.kind === 'leave' ? backend.shared.leave(uid, op.listId) : backend.shared.deleteList(uid, op.listId))
+        } catch (error) {
+          // Refused means the intent already holds (we're not a member, or the
+          // list is gone, or an earlier attempt landed): drop it, don't retry forever
+          const code = (error as { code?: unknown } | null)?.code
+          if (classifyError(error) !== 'auth' && code !== 'not-found') throw error
+        }
+        dropOp(op)
       }
       for (const { id } of listsRef.current.filter(l => l.shared)) {
         let list = listsRef.current.find(l => l.id === id)
@@ -208,7 +228,19 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
         }
         if (lm.pendingCreate) {
           const created = newParentDoc(list, uid, Date.now())
-          await timed(backend.shared.create(uid, created.doc))
+          const result = await timed(backend.shared.create(uid, created.doc))
+          if (!listsRef.current.some(l => l.id === id)) {
+            // Deleted while the create was in flight: the queued delete tombstones it next
+            setListMeta(id, null)
+            continue
+          }
+          if (result === 'exists') {
+            // Already on the server (e.g. this device lost its meta): let the snapshot
+            // settle the meta instead of treating every local entity as new
+            setListMeta(id, null)
+            applyRemote(id)
+            continue
+          }
           setListMeta(id, created.meta)
         }
         list = listsRef.current.find(l => l.id === id)
@@ -219,6 +251,8 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
         // Apply only what was pushed: edits made meanwhile stay dirty for the next cycle
         const latest = metaRef.current?.lists[id]
         if (latest) setListMeta(id, applyMetaPatch(latest, diff.pushed))
+        // A remote change that arrived while our entity was dirty was skipped: merge it again now
+        applyRemote(id)
       }
       if (uidRef.current === uid) setStatus('idle')
     } catch (error) {
@@ -318,13 +352,8 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
 
   const deleteSharedList = (listId: string) => {
     if (roleOf(listId) !== 'owner') return
-    if (isPendingCreate(listId)) {
-      // Never reached the server: nothing to tombstone
-      deleteList(listId)
-      listsRef.current = listsRef.current.filter(l => l.id !== listId)
-      setListMeta(listId, null)
-      return
-    }
+    // Even while the create may be in flight: the queued op keeps snapshots from
+    // bringing the list back, and a delete of a list that never reached the server is refused and dropped
     enqueue('delete', listId)
   }
 

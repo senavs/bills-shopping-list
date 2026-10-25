@@ -58,8 +58,8 @@ export interface ListMeta {
  * user; Firestore takes it from auth, the in-memory fake enforces the rules with it.
  */
 export interface SharedRemote {
-  /** Idempotent: resolves without writing when the list already exists. */
-  create(uid: string, doc: SharedParentDoc): Promise<void>
+  /** Idempotent: 'exists' (and no write) when the list is already on the server. */
+  create(uid: string, doc: SharedParentDoc): Promise<'created' | 'exists'>
   join(uid: string, listId: string, token: string): Promise<'joined' | 'already'>
   /** Removes uid from members and its memberPeople entry. */
   leave(uid: string, listId: string): Promise<void>

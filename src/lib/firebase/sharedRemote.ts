@@ -28,8 +28,9 @@ export const createFirestoreSharedRemote = (): SharedRemote => {
 
   return {
     async create(uid, parent) {
-      if (await readAsMember(uid, parent.id)) return
+      if (await readAsMember(uid, parent.id)) return 'exists'
       await setDoc(listRef(parent.id), { ...parent, syncedAt: serverTimestamp() })
+      return 'created'
     },
 
     async join(uid, listId, token) {

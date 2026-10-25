@@ -24,9 +24,9 @@ describe('memorySharedRemote', () => {
 
   it('create is idempotent', async () => {
     const r = createMemorySharedRemote()
-    await r.create('alice', parent())
+    await expect(r.create('alice', parent())).resolves.toBe('created')
     await r.push('alice', 'L', { set: { name: 'Pub' }, remove: [] }, [])
-    await r.create('alice', parent())
+    await expect(r.create('alice', parent())).resolves.toBe('exists')
     expect(r.peek('L')!.parent.name).toBe('Pub')
   })
 
