@@ -5,6 +5,8 @@ import { loadState, saveState } from '../lib/storage'
 interface ListsContextType {
   lists: List[]
   createList: (list: Omit<List, 'id' | 'items' | 'sections' | 'archived'>) => void
+  createSharedList: (list: Omit<List, 'id' | 'items' | 'sections' | 'archived' | 'people' | 'shared'>, owner: { uid: string; name: string }) => string
+  addMemberPerson: (listId: string, uid: string, name: string) => void
   updateList: (id: string, updates: Partial<List>) => void
   deleteList: (id: string) => void
   archiveList: (id: string) => void
@@ -27,7 +29,7 @@ interface ListsContextType {
   deleteSection: (listId: string, sectionId: string) => void
   reorderSection: (listId: string, fromIndex: number, toIndex: number) => void
   reorderItemInSection: (listId: string, sectionId: string, fromIndex: number, toIndex: number) => void
-  replaceLists: (lists: List[]) => void
+  replaceLists: (lists: List[] | ((prev: List[]) => List[])) => void
 }
 
 const ListsContext = createContext<ListsContextType | undefined>(undefined)
@@ -49,6 +51,30 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     setLists(prev => [...prev, touch({ ...list, id: crypto.randomUUID(), items: [], sections: [], archived: false })])
   }
 
+  const createSharedList: ListsContextType['createSharedList'] = (list, owner) => {
+    const id = crypto.randomUUID()
+    const personId = crypto.randomUUID()
+    setLists(prev => [...prev, touch({
+      ...list,
+      id,
+      items: [],
+      sections: [],
+      archived: false,
+      people: [{ id: personId, name: owner.name }],
+      shared: { ownerUid: owner.uid, inviteToken: crypto.randomUUID(), memberPeople: { [owner.uid]: personId } },
+    })])
+    return id
+  }
+
+  const addMemberPerson = (listId: string, uid: string, name: string) => {
+    const personId = crypto.randomUUID()
+    updateListById(listId, l => l.shared ? ({
+      ...l,
+      people: [...(l.people || []), { id: personId, name }],
+      shared: { ...l.shared, memberPeople: { ...l.shared.memberPeople, [uid]: personId } },
+    }) : l)
+  }
+
   const updateList = (id: string, updates: Partial<List>) => {
     updateListById(id, l => ({ ...l, ...updates }))
   }
@@ -60,9 +86,11 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
   const archiveList = (id: string) => updateList(id, { archived: true })
   const unarchiveList = (id: string) => updateList(id, { archived: false })
 
+  // Copies of a shared list are private
   const duplicateList = (id: string) => {
-    const list = lists.find(l => l.id === id)
-    if (list) {
+    const found = lists.find(l => l.id === id)
+    if (found) {
+      const { shared: _shared, ...list } = found
       const itemIdMap: Record<string, string> = {}
       const items = list.items.map(item => {
         const newId = crypto.randomUUID()
@@ -79,7 +107,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
   }
 
   // Adds a fresh copy (new ids, nothing selected or collapsed) as a template or a regular list
-  const addTemplateCopy = (source: List, isTemplate: boolean) => {
+  const addTemplateCopy = ({ shared: _shared, ...source }: List, isTemplate: boolean) => {
     const itemIdMap: Record<string, string> = {}
     const items = source.items.map(item => {
       const newId = crypto.randomUUID()
@@ -229,11 +257,11 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
   }
 
   // Applies state that came from sync: keeps remote updatedAt instead of stamping
-  const replaceLists = (next: List[]) => setLists(next)
+  const replaceLists = (next: List[] | ((prev: List[]) => List[])) => setLists(next)
 
   return (
     <ListsContext.Provider value={{
-      lists, createList, updateList, deleteList, archiveList, unarchiveList, duplicateList,
+      lists, createList, createSharedList, addMemberPerson, updateList, deleteList, archiveList, unarchiveList, duplicateList,
       saveAsTemplate, createFromTemplate, deleteTemplate, createFromPreset, copyPresetToTemplates,
       addPerson, removePerson,
       addItem, duplicateItem, updateItem, deleteItem, reorderItem,

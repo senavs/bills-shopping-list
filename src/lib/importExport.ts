@@ -103,6 +103,39 @@ export const normalizeImportedState = (state: AppState, now: number = Date.now()
   })),
 })
 
+/** A shared list as a private one (exports and imports never carry sharing). */
+export const stripShared = ({ shared: _shared, ...list }: List): List => list
+
+const withFreshIds = (list: List): List => {
+  const itemIdMap: Record<string, string> = {}
+  const items = list.items.map(item => {
+    const newId = crypto.randomUUID()
+    itemIdMap[item.id] = newId
+    return { ...item, id: newId }
+  })
+  const sections = list.sections.map(s => ({
+    ...s,
+    id: crypto.randomUUID(),
+    itemIds: s.itemIds.map(iid => itemIdMap[iid] ?? iid),
+  }))
+  return { ...list, id: crypto.randomUUID(), items, sections }
+}
+
+/**
+ * Import replaces the whole state, but shared lists live on the server: keep
+ * the local ones, import everything else as private, and re-id imported lists
+ * that would collide with a shared list.
+ */
+export const mergeImportWithShared = (imported: AppState, current: List[]): AppState => {
+  const sharedLocal = current.filter(l => l.shared)
+  const sharedIds = new Set(sharedLocal.map(l => l.id))
+  const lists = imported.lists.map(l => {
+    const priv = stripShared(l)
+    return sharedIds.has(priv.id) ? withFreshIds(priv) : priv
+  })
+  return { ...imported, lists: [...lists, ...sharedLocal] }
+}
+
 export const importData = (file: File): Promise<AppState> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()

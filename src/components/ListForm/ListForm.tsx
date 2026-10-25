@@ -3,14 +3,19 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useLists } from '../../hooks/useLists'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { parseLocaleNumber } from '../../lib/format'
+import { useSync } from '../../contexts/SyncContext'
+import { loadSharedName, saveSharedName } from '../../lib/sharedSync/sharedName'
 
 export const ListForm = () => {
   const navigate = useNavigate()
   const { id } = useParams()
   const location = useLocation()
   const locationState = location.state as { activeTab?: 'active' | 'archived' | 'templates'; from?: string } | null
-  const { lists, createList, updateList } = useLists()
+  const { lists, createList, createSharedList, updateList } = useLists()
   const { t, isBR } = useLanguage()
+  const sync = useSync()
+  // Sharing needs Firebase, and only applies when creating
+  const canShare = !id && sync.status !== 'disabled'
   
   const existingList = id ? lists.find(l => l.id === id) : null
   
@@ -19,6 +24,8 @@ export const ListForm = () => {
   const [currency, setCurrency] = useState<'BRL' | 'USD'>(existingList?.currency || (isBR ? 'BRL' : 'USD'))
   const [taxPercentage, setTaxPercentage] = useState(existingList?.taxPercentage.toString() || '0')
   const [error, setError] = useState('')
+  const [shared, setShared] = useState(false)
+  const [myName, setMyName] = useState(loadSharedName)
 
   useEffect(() => {
     if (existingList) {
@@ -55,6 +62,16 @@ export const ListForm = () => {
 
     if (id && existingList) {
       updateList(id, { name: name.trim(), type, currency, taxPercentage: tax })
+    } else if (shared && sync.uid) {
+      if (!myName.trim()) {
+        setError(t.yourNameRequired)
+        return
+      }
+      saveSharedName(myName.trim())
+      const newId = createSharedList({ name: name.trim(), type, currency, taxPercentage: tax }, { uid: sync.uid, name: myName.trim() })
+      // Straight to the list, where the invite button is
+      navigate(`/lists/${newId}`)
+      return
     } else {
       createList({ name: name.trim(), type, currency, taxPercentage: tax })
     }
@@ -135,6 +152,52 @@ export const ListForm = () => {
               placeholder="0"
             />
           </div>
+
+          {canShare && (
+            <div className="mb-6">
+              <label className="flex items-start gap-3 min-h-[44px]">
+                <input
+                  type="checkbox"
+                  checked={shared}
+                  disabled={!sync.uid}
+                  onChange={(e) => setShared(e.target.checked)}
+                  className="mt-1 w-5 h-5 accent-accent"
+                  aria-labelledby="shared-list-label"
+                  aria-describedby="shared-list-hint"
+                />
+                <span>
+                  <span id="shared-list-label" className="block text-sm font-medium text-ink">{t.sharedList}</span>
+                  <span id="shared-list-hint" className="block text-sm text-muted">{t.sharedListHint}</span>
+                </span>
+              </label>
+              {!sync.uid && (
+                <button
+                  type="button"
+                  onPointerDown={sync.prepare}
+                  onClick={() => { void sync.signIn() }}
+                  className="mt-2 px-4 min-h-[44px] text-accent rounded-xl hover:bg-fill text-sm font-semibold"
+                >
+                  {t.signInToShare}
+                </button>
+              )}
+              {shared && sync.uid && (
+                <div className="mt-3">
+                  <label htmlFor="shared-my-name" className="block text-sm font-medium text-ink mb-2">
+                    {t.yourNameInList} *
+                  </label>
+                  <input
+                    id="shared-my-name"
+                    type="text"
+                    value={myName}
+                    onChange={(e) => setMyName(e.target.value)}
+                    autoCapitalize="words"
+                    autoComplete="off"
+                    className="w-full px-3 py-2 border border-hairline rounded bg-surface text-ink"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex gap-3">
             <button

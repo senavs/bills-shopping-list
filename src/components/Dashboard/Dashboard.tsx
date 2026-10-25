@@ -7,10 +7,11 @@ import { ListCard } from './ListCard'
 import { TemplateCard } from './TemplateCard'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
-import { exportData, importData } from '../../lib/importExport'
+import { exportData, importData, mergeImportWithShared, stripShared } from '../../lib/importExport'
 import { getPresetTemplates } from '../../lib/presetTemplates'
 import { CloudCheckIcon, CloudIcon, DownloadIcon, EllipsisIcon, GlobeIcon, InfoIcon, MoonIcon, PlusIcon, ShareIcon, SunIcon } from '../shared/icons'
 import { useSync } from '../../contexts/SyncContext'
+import { useSharedSync } from '../../contexts/SharedSyncContext'
 import { SyncStatusButton } from '../Sync/SyncStatusButton'
 import { AccountSheet } from '../Sync/AccountSheet'
 import { SyncBanner } from '../Sync/SyncBanner'
@@ -25,6 +26,7 @@ export const Dashboard = () => {
   const { mode, setMode, isDark } = useDarkMode()
   const { locale, setLocale, t, isBR } = useLanguage()
   const sync = useSync()
+  const sharedSync = useSharedSync()
   const [showAccount, setShowAccount] = useState(false)
   const [showSyncHint, setShowSyncHint] = useState(false)
   const [pendingImport, setPendingImport] = useState<AppState | null>(null)
@@ -63,7 +65,7 @@ export const Dashboard = () => {
 
   // Called straight from the tap so the share sheet keeps the user gesture
   const handleExport = () => {
-    exportData({ lists })
+    exportData({ lists: lists.map(stripShared) })
       .then(() => {
         if (sync.status === 'signedOut') {
           setShowSyncHint(true)
@@ -76,8 +78,16 @@ export const Dashboard = () => {
       })
   }
 
+  // Shared lists: the owner deletes for everyone, members leave
+  const handleDeleteList = (id: string) => {
+    const role = sharedSync.roleOf(id)
+    if (role === 'owner') sharedSync.deleteSharedList(id)
+    else if (role === 'member') sharedSync.leaveList(id)
+    else deleteList(id)
+  }
+
   const applyImport = (data: AppState) => {
-    localStorage.setItem('app', JSON.stringify(data))
+    localStorage.setItem('app', JSON.stringify(mergeImportWithShared(data, lists)))
     window.location.reload()
   }
 
@@ -260,7 +270,7 @@ export const Dashboard = () => {
                   activeTab={activeTab}
                   onArchive={() => archiveList(list.id)}
                   onUnarchive={() => unarchiveList(list.id)}
-                  onDelete={() => deleteList(list.id)}
+                  onDelete={() => handleDeleteList(list.id)}
                   onDuplicate={() => duplicateList(list.id)}
                   onSaveAsTemplate={() => saveAsTemplate(list.id)}
                 />

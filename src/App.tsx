@@ -3,11 +3,14 @@ import { ListsProvider } from './contexts/ListsContext'
 import { DarkModeProvider } from './contexts/DarkModeContext'
 import { LanguageProvider } from './contexts/LanguageContext'
 import { SyncProvider } from './contexts/SyncContext'
+import { SharedSyncProvider } from './contexts/SharedSyncContext'
 import { loadBackend } from './lib/firebase/loadBackend'
 import { Landing } from './components/Landing/Landing'
 import { Dashboard } from './components/Dashboard/Dashboard'
 import { ListForm } from './components/ListForm/ListForm'
 import { ListDetail } from './components/ListDetail/ListDetail'
+import { JoinPage } from './components/Join/JoinPage'
+import { SharedNotices } from './components/shared/SharedNotices'
 import { AdLayout } from './components/ads/AdLayout'
 
 /**
@@ -48,17 +51,21 @@ function App() {
       <DarkModeProvider>
         <ListsProvider>
           <SyncProvider loadBackend={loadBackend}>
-            <HashRouter>
-              <Routes>
-                <Route path="/" element={<HomeRoute />} />
-                <Route element={<AppWithAds />}>
-                  <Route path="/app" element={<Dashboard />} />
-                  <Route path="/lists/new" element={<ListForm />} />
-                  <Route path="/lists/:id" element={<ListDetail />} />
-                  <Route path="/lists/:id/edit" element={<ListForm />} />
-                </Route>
-              </Routes>
-            </HashRouter>
+            <SharedSyncProvider>
+              <HashRouter>
+                <Routes>
+                  <Route path="/" element={<HomeRoute />} />
+                  <Route element={<AppWithAds />}>
+                    <Route path="/app" element={<Dashboard />} />
+                    <Route path="/lists/new" element={<ListForm />} />
+                    <Route path="/lists/:id" element={<ListDetail />} />
+                    <Route path="/lists/:id/edit" element={<ListForm />} />
+                    <Route path="/join/:listId" element={<JoinPage />} />
+                  </Route>
+                </Routes>
+              </HashRouter>
+              <SharedNotices />
+            </SharedSyncProvider>
           </SyncProvider>
         </ListsProvider>
       </DarkModeProvider>

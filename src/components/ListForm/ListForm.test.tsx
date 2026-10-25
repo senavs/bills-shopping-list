@@ -5,6 +5,9 @@ import { ListForm } from './ListForm'
 import { LanguageProvider } from '../../contexts/LanguageContext'
 import * as useListsModule from '../../hooks/useLists'
 import type { List } from '../../types'
+import { SyncContext, type SyncContextValue } from '../../contexts/SyncContext'
+
+const routeParams = vi.hoisted(() => ({ current: {} as Record<string, string> }))
 
 vi.mock('../../hooks/useLists')
 vi.mock('react-router-dom', async () => {
@@ -12,7 +15,7 @@ vi.mock('react-router-dom', async () => {
   return {
     ...actual,
     useNavigate: () => vi.fn(),
-    useParams: () => ({}),
+    useParams: () => routeParams.current,
   }
 })
 
@@ -20,6 +23,8 @@ describe('ListForm', () => {
   const mockUseLists = {
     lists: [] as List[],
     createList: vi.fn(),
+    createSharedList: vi.fn(() => 'new-id'),
+    addMemberPerson: vi.fn(),
     updateList: vi.fn(),
     deleteList: vi.fn(),
     archiveList: vi.fn(),
@@ -148,5 +153,67 @@ describe('ListForm', () => {
     const taxInput = screen.getByPlaceholderText('0')
     expect(taxInput.getAttribute('type')).toBe('text')
     expect(taxInput.getAttribute('inputmode')).toBe('decimal')
+  })
+
+  describe('shared list option', () => {
+    const syncValue = (over: Partial<SyncContextValue> = {}): SyncContextValue => ({
+      status: 'idle', errorKind: null, lastSyncedAt: null, uid: 'u1', backend: null,
+      prepare: vi.fn(), signIn: vi.fn(async () => {}), signOut: vi.fn(async () => {}), syncNow: vi.fn(),
+      ...over,
+    })
+    const renderWithSync = (v: SyncContextValue) => render(
+      <BrowserRouter><LanguageProvider><SyncContext.Provider value={v}><ListForm /></SyncContext.Provider></LanguageProvider></BrowserRouter>,
+    )
+    const sharedBox = () => screen.queryByRole('checkbox', { name: 'Shared list' })
+
+    beforeEach(() => { localStorage.clear(); routeParams.current = {} })
+
+    it('is hidden when sync is not configured', () => {
+      renderForm()
+      expect(sharedBox()).toBeNull()
+    })
+
+    it('is hidden when editing a list', () => {
+      routeParams.current = { id: '1' }
+      renderWithSync(syncValue())
+      expect(sharedBox()).toBeNull()
+    })
+
+    it('is disabled when signed out and offers sign-in', () => {
+      const v = syncValue({ status: 'signedOut', uid: null })
+      renderWithSync(v)
+      expect((sharedBox() as HTMLInputElement).disabled).toBe(true)
+      fireEvent.click(screen.getByText('Sign in with Google to share'))
+      expect(v.signIn).toHaveBeenCalled()
+    })
+
+    it('requires your name', () => {
+      const { container } = renderWithSync(syncValue())
+      fireEvent.change(screen.getByPlaceholderText('e.g., Weekly Groceries'), { target: { value: 'Bar' } })
+      fireEvent.click(sharedBox()!)
+      fireEvent.submit(container.querySelector('form')!)
+      expect(screen.getByText('Enter your name')).toBeDefined()
+      expect(mockUseLists.createSharedList).not.toHaveBeenCalled()
+    })
+
+    it('creates a shared list owned by you and remembers your name', () => {
+      const { container } = renderWithSync(syncValue())
+      fireEvent.change(screen.getByPlaceholderText('e.g., Weekly Groceries'), { target: { value: 'Bar' } })
+      fireEvent.click(sharedBox()!)
+      fireEvent.change(screen.getByLabelText(/Your name in this list/), { target: { value: ' Ana ' } })
+      fireEvent.submit(container.querySelector('form')!)
+      expect(mockUseLists.createSharedList).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Bar', taxPercentage: 0 }), { uid: 'u1', name: 'Ana' },
+      )
+      expect(mockUseLists.createList).not.toHaveBeenCalled()
+      expect(localStorage.getItem('shared-name')).toBe('Ana')
+    })
+
+    it('prefills your name from the last one used', () => {
+      localStorage.setItem('shared-name', 'Ana')
+      renderWithSync(syncValue())
+      fireEvent.click(sharedBox()!)
+      expect((screen.getByLabelText(/Your name in this list/) as HTMLInputElement).value).toBe('Ana')
+    })
   })
 })

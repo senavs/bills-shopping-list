@@ -11,8 +11,11 @@ import { PeopleManager } from '../PeopleManager/PeopleManager'
 import { SplitModal } from '../SplitModal/SplitModal'
 import { SortableContainer } from '../shared/SortableContainer'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useSync } from '../../contexts/SyncContext'
+import { useSharedSync } from '../../contexts/SharedSyncContext'
+import { buildInviteUrl, shareInvite } from '../../lib/sharedSync/invite'
 import type { Item } from '../../types'
-import { ChevronLeftIcon, PencilIcon, PlusIcon, UsersIcon } from '../shared/icons'
+import { ChevronLeftIcon, PencilIcon, PlusIcon, ShareIcon, UsersIcon } from '../shared/icons'
 
 interface PendingDelete {
   listId: string
@@ -39,6 +42,9 @@ export const ListDetail = () => {
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null)
   const [reorderMode, setReorderMode] = useState(false)
+  const [inviteNotice, setInviteNotice] = useState<string | null>(null)
+  const sync = useSync()
+  const sharedSync = useSharedSync()
 
   const list = lists.find(l => l.id === id)
 
@@ -107,6 +113,18 @@ export const ListDetail = () => {
   const assignedItemIds = new Set(list.sections.flatMap(s => s.itemIds))
   const unassignedItems = list.items.filter(i => !assignedItemIds.has(i.id))
   const isTemplate = !!list.isTemplate
+  const shared = list.shared
+  const inviteDisabled = !sync.uid || sharedSync.isPendingCreate(list.id)
+
+  const handleInvite = async () => {
+    if (!shared) return
+    const url = buildInviteUrl(`${window.location.origin}${window.location.pathname}`, list.id, shared.inviteToken)
+    const result = await shareInvite(url, t.inviteShareText.replace('{name}', list.name))
+    if (result === 'copied') {
+      setInviteNotice(t.inviteLinkCopied)
+      setTimeout(() => setInviteNotice(null), 3000)
+    }
+  }
 
   const handleAddItem = (item: Omit<Item, 'id'>, sectionId: string) => {
     const newId = addItem(list.id, item)
@@ -193,6 +211,17 @@ export const ListDetail = () => {
                 {reorderMode ? t.done : t.reorder}
               </button>
             )}
+            {shared && (
+              <button
+                onClick={() => { void handleInvite() }}
+                disabled={inviteDisabled}
+                className="w-11 h-11 flex items-center justify-center rounded-full text-accent hover:bg-accent/10 disabled:opacity-50"
+                title={t.invite}
+                aria-label={t.invite}
+              >
+                <ShareIcon className="w-6 h-6" />
+              </button>
+            )}
             {(list.people || []).length > 0 && !isTemplate && (
               <button
                 onClick={() => setShowSplitModal(true)}
@@ -228,6 +257,12 @@ export const ListDetail = () => {
               </span>
             )}
           </p>
+          {shared && !sync.uid && (
+            <p className="mt-2 text-footnote text-muted">{t.sharedSignInToSync}</p>
+          )}
+          {inviteNotice && (
+            <p role="status" className="mt-2 text-footnote text-accent">{inviteNotice}</p>
+          )}
         </div>
 
         {/* People manager */}
@@ -236,6 +271,12 @@ export const ListDetail = () => {
             people={list.people || []}
             onAddPerson={(name) => addPerson(list.id, name)}
             onRemovePerson={(personId) => removePerson(list.id, personId)}
+            shared={shared && {
+              myPersonId: sync.uid ? shared.memberPeople?.[sync.uid] : undefined,
+              memberPersonIds: Object.values(shared.memberPeople ?? {}),
+              onInvite: () => { void handleInvite() },
+              inviteDisabled,
+            }}
           />
         )}
 

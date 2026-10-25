@@ -3,11 +3,13 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { LanguageProvider } from '../../contexts/LanguageContext'
 import { SyncContext, type SyncContextValue } from '../../contexts/SyncContext'
 import { SyncStatusButton } from './SyncStatusButton'
+import { SharedSyncContext, type SharedSyncValue } from '../../contexts/SharedSyncContext'
+import { en } from '../../i18n/en'
 import { AccountSheet } from './AccountSheet'
 import { SyncBanner } from './SyncBanner'
 
 const value = (over: Partial<SyncContextValue> = {}): SyncContextValue => ({
-  status: 'idle', errorKind: null, lastSyncedAt: null,
+  status: 'idle', errorKind: null, lastSyncedAt: null, uid: 'u1', backend: null,
   prepare: vi.fn(), signIn: vi.fn(async () => {}), signOut: vi.fn(async () => {}), syncNow: vi.fn(),
   ...over,
 })
@@ -20,6 +22,19 @@ const wrap = (ui: React.ReactNode, v: SyncContextValue) => {
 afterEach(() => cleanup())
 
 describe('SyncStatusButton', () => {
+  it('shows a shared-sync error even when the personal sync is fine', () => {
+    const shared: SharedSyncValue = {
+      status: 'error', roleOf: () => null, isPendingCreate: () => false, joinList: vi.fn(),
+      leaveList: vi.fn(), deleteSharedList: vi.fn(), notices: [], dismissNotice: vi.fn(),
+    }
+    render(
+      <LanguageProvider><SyncContext.Provider value={value({ status: 'idle' })}>
+        <SharedSyncContext.Provider value={shared}><SyncStatusButton onOpen={vi.fn()} /></SharedSyncContext.Provider>
+      </SyncContext.Provider></LanguageProvider>,
+    )
+    expect(screen.getByRole('button', { name: en.syncStatusError })).toBeDefined()
+  })
+
   it('shows a red warning when sync is not configured and opens the sheet', () => {
     const onOpen = vi.fn()
     wrap(<SyncStatusButton onOpen={onOpen} />, value({ status: 'disabled' }))

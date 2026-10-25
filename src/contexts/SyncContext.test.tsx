@@ -3,6 +3,7 @@ import { render, act, waitFor, cleanup } from '@testing-library/react'
 import { ListsProvider, useLists } from './ListsContext'
 import { SyncProvider, useSync } from './SyncContext'
 import { createMemoryRemote } from '../lib/sync/memoryRemote'
+import { createMemorySharedRemote } from '../lib/sharedSync/memorySharedRemote'
 import { emptySyncMeta, loadSyncMeta, saveSyncMeta } from '../lib/sync/syncMeta'
 import type { List } from '../types'
 import type { AuthProvider, RemoteStore } from '../lib/sync/types'
@@ -29,7 +30,7 @@ const setup = (opts: { remote?: RemoteStore; auth?: AuthProvider; local?: List[]
   localStorage.setItem('app', JSON.stringify({ lists: opts.local ?? [] }))
   const remote = opts.remote ?? createMemoryRemote()
   const auth = opts.auth ?? createFakeAuth()
-  const loadBackend = opts.configured === false ? null : vi.fn(async () => ({ auth, remote }))
+  const loadBackend = opts.configured === false ? null : vi.fn(async () => ({ auth, remote, shared: createMemorySharedRemote() }))
   let ctx!: Ctx
   const Capture = () => { ctx = { lists: useLists(), sync: useSync() }; return null }
   render(
@@ -210,5 +211,38 @@ describe('SyncProvider', () => {
     expect(loadSyncMeta()?.uid).toBe('u1')
     expect(remote.all('u1').some(d => d.deleted)).toBe(false)
     await waitFor(() => expect(get().sync.status).toBe('idle'))
+  })
+})
+
+describe('SyncProvider with shared lists', () => {
+  const shared = (id: string): List => ({ ...mk(id), shared: { ownerUid: 'u1', inviteToken: 't'.repeat(36) } })
+
+  it('never pushes a shared list and keeps it through a pull', async () => {
+    const remote = createMemoryRemote()
+    await remote.push('u1', [mk('cloud')], [])
+    const { get } = setup({ remote, local: [shared('S'), mk('a')] })
+    await act(async () => { await get().sync.signIn() })
+    await waitFor(() => expect(get().sync.status).toBe('idle'))
+    expect(remote.all('u1').map(d => d.id).sort()).toEqual(['a', 'cloud'])
+    expect(get().lists.lists.map(l => l.id)).toEqual(['S', 'a', 'cloud'])
+  })
+
+  it('deleting a shared list locally creates no personal tombstone', async () => {
+    const remote = createMemoryRemote()
+    const { get } = setup({ remote, local: [shared('S')] })
+    await act(async () => { await get().sync.signIn() })
+    await waitFor(() => expect(get().sync.status).toBe('idle'))
+    act(() => get().lists.deleteList('S'))
+    await new Promise(r => setTimeout(r, 50))
+    await waitFor(() => expect(get().sync.status).toBe('idle'))
+    expect(remote.all('u1')).toEqual([])
+  })
+
+  it('exposes the signed-in uid', async () => {
+    const { get } = setup()
+    await act(async () => { await get().sync.signIn() })
+    await waitFor(() => expect(get().sync.uid).toBe('u1'))
+    await act(async () => { await get().sync.signOut() })
+    expect(get().sync.uid).toBeNull()
   })
 })

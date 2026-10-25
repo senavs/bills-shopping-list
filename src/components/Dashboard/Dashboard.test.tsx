@@ -7,6 +7,7 @@ import { LanguageProvider } from '../../contexts/LanguageContext'
 import * as useListsModule from '../../hooks/useLists'
 import type { List } from '../../types'
 import { SyncContext, type SyncContextValue } from '../../contexts/SyncContext'
+import { SharedSyncContext, type SharedSyncValue } from '../../contexts/SharedSyncContext'
 import * as importExport from '../../lib/importExport'
 
 vi.mock('../../hooks/useLists')
@@ -33,6 +34,8 @@ describe('Dashboard', () => {
     addPerson: vi.fn(),
     removePerson: vi.fn(),
     createList: vi.fn(),
+    createSharedList: vi.fn(() => 'new-id'),
+    addMemberPerson: vi.fn(),
     updateList: vi.fn(),
     addItem: vi.fn(),
     duplicateItem: vi.fn(),
@@ -170,9 +173,66 @@ describe('Dashboard', () => {
     expect(mockUseLists.deleteList).toHaveBeenCalledWith('1')
   })
 
+  describe('shared lists', () => {
+    const sharedList: List = {
+      id: 'S', name: 'Bar', type: 'bar', currency: 'BRL', taxPercentage: 0, items: [], sections: [], archived: false,
+      shared: { ownerUid: 'u1', inviteToken: 't' },
+    }
+    const sharedValue = (role: 'owner' | 'member'): SharedSyncValue => ({
+      status: 'idle', roleOf: () => role, isPendingCreate: () => false, joinList: vi.fn(),
+      leaveList: vi.fn(), deleteSharedList: vi.fn(), notices: [], dismissNotice: vi.fn(),
+    })
+    const sync = (uid: string | null): SyncContextValue => ({
+      status: uid ? 'idle' : 'signedOut', errorKind: null, lastSyncedAt: null, uid, backend: null,
+      prepare: vi.fn(), signIn: vi.fn(async () => {}), signOut: vi.fn(async () => {}), syncNow: vi.fn(),
+    })
+    const renderShared = (s: SharedSyncValue, uid: string | null = 'u1') => {
+      mockUseLists.lists = [sharedList]
+      render(
+        <BrowserRouter><LanguageProvider><DarkModeProvider>
+          <SyncContext.Provider value={sync(uid)}><SharedSyncContext.Provider value={s}><Dashboard /></SharedSyncContext.Provider></SyncContext.Provider>
+        </DarkModeProvider></LanguageProvider></BrowserRouter>,
+      )
+    }
+    afterEach(() => { mockUseLists.lists = [] })
+
+    it('marks the card as shared', () => {
+      renderShared(sharedValue('owner'))
+      expect(screen.getByText('Shared')).toBeDefined()
+      expect(screen.queryByText('Sign in to sync this shared list')).toBeNull()
+    })
+
+    it('asks to sign in on the card when signed out', () => {
+      renderShared(sharedValue('owner'), null)
+      expect(screen.getByText('Sign in to sync this shared list')).toBeDefined()
+    })
+
+    it('members leave the list instead of deleting it', async () => {
+      const s = sharedValue('member')
+      renderShared(s)
+      await act(async () => { fireEvent.click(screen.getByLabelText('More options')) })
+      await act(async () => { fireEvent.click(screen.getByText('Leave list')) })
+      expect(screen.getByText('You will no longer see this list. The other members keep it.')).toBeDefined()
+      await act(async () => { fireEvent.click(screen.getByText('Confirm')) })
+      expect(s.leaveList).toHaveBeenCalledWith('S')
+      expect(mockUseLists.deleteList).not.toHaveBeenCalled()
+    })
+
+    it('the owner deletes for everyone', async () => {
+      const s = sharedValue('owner')
+      renderShared(s)
+      await act(async () => { fireEvent.click(screen.getByLabelText('More options')) })
+      await act(async () => { fireEvent.click(screen.getByText('Delete for everyone')) })
+      expect(screen.getByText('The list will be deleted for all members.')).toBeDefined()
+      await act(async () => { fireEvent.click(screen.getByText('Confirm')) })
+      expect(s.deleteSharedList).toHaveBeenCalledWith('S')
+      expect(mockUseLists.deleteList).not.toHaveBeenCalled()
+    })
+  })
+
   describe('cloud sync entry', () => {
     const syncValue = (over: Partial<SyncContextValue> = {}): SyncContextValue => ({
-      status: 'signedOut', errorKind: null, lastSyncedAt: null,
+      status: 'signedOut', errorKind: null, lastSyncedAt: null, uid: null, backend: null,
       prepare: vi.fn(), signIn: vi.fn(async () => {}), signOut: vi.fn(async () => {}), syncNow: vi.fn(),
       ...over,
     })
@@ -202,6 +262,40 @@ describe('Dashboard', () => {
       openSettings()
       fireEvent.click(screen.getByText(/^export$|^exportar$/i))
       expect(await screen.findByText(/sync with google so you don't need to export|sincronize com o google para não precisar exportar/i)).toBeTruthy()
+    })
+
+    it('exports shared lists without their sharing data', async () => {
+      const sharedList: List = {
+        id: 'S', name: 'Bar', type: 'bar', currency: 'BRL', taxPercentage: 0, items: [], sections: [], archived: false,
+        shared: { ownerUid: 'u1', inviteToken: 't' },
+      }
+      mockUseLists.lists = [sharedList]
+      vi.mocked(importExport.exportData).mockResolvedValue()
+      renderWithSync(syncValue({ status: 'idle' }))
+      openSettings()
+      fireEvent.click(screen.getByText(/^export$|^exportar$/i))
+      mockUseLists.lists = []
+      expect(vi.mocked(importExport.exportData).mock.lastCall![0].lists[0].shared).toBeUndefined()
+    })
+
+    it('importing keeps local shared lists', async () => {
+      const sharedList: List = {
+        id: 'S', name: 'Bar', type: 'bar', currency: 'BRL', taxPercentage: 0, items: [], sections: [], archived: false,
+        shared: { ownerUid: 'u1', inviteToken: 't' },
+      }
+      mockUseLists.lists = [sharedList]
+      vi.mocked(importExport.importData).mockResolvedValue({ lists: [] })
+      const setItem = vi.spyOn(Storage.prototype, 'setItem')
+      const reload = vi.fn()
+      vi.spyOn(window, 'location', 'get').mockReturnValue({ ...window.location, reload } as Location)
+      const { container } = renderWithSync(syncValue())
+      const input = container.querySelector('input[type="file"]') as HTMLInputElement
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [new File(['{}'], 'b.json', { type: 'application/json' })] } })
+      })
+      mockUseLists.lists = []
+      const saved = setItem.mock.calls.find(([k]) => k === 'app')!
+      expect(JSON.parse(saved[1]).lists.map((l: List) => l.id)).toEqual(['S'])
     })
 
     it('asks for confirmation before importing while signed in', async () => {

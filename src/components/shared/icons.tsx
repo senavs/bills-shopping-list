@@ -127,6 +127,13 @@ export const UsersIcon = (p: IconProps) => (
   </Icon>
 )
 
+export const PhoneIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="7" y="3" width="10" height="18" rx="2" />
+    <path d="M11 18h2" />
+  </Icon>
+)
+
 export const GripIcon = (p: IconProps) => <Icon {...p}><path d="M6 8h12M6 12h12M6 16h12" /></Icon>
 
 const CLOUD = 'M7 18a4 4 0 01-.5-7.97A6 6 0 0118 9a4.5 4.5 0 01-1 9H7z'

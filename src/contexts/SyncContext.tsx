@@ -6,11 +6,14 @@ import { clearSyncMeta, emptySyncMeta, loadSyncMeta, saveSyncMeta } from '../lib
 import { mergeRemote, nextSyncMeta, recordDeletions } from '../lib/sync/merge'
 import { classifyError, withTimeout } from '../lib/sync/errors'
 import { hasPendingToken } from '../lib/sync/oauthRedirect'
+import { withSharedPreserved } from '../lib/sync/preserveShared'
 
 export interface SyncContextValue {
   status: SyncStatus
   errorKind: SyncErrorKind | null
   lastSyncedAt: number | null
+  uid: string | null
+  backend: SyncBackend | null
   prepare: () => void
   signIn: () => Promise<void>
   signOut: () => Promise<void>
@@ -18,7 +21,7 @@ export interface SyncContextValue {
 }
 
 const DISABLED: SyncContextValue = {
-  status: 'disabled', errorKind: null, lastSyncedAt: null,
+  status: 'disabled', errorKind: null, lastSyncedAt: null, uid: null, backend: null,
   prepare: () => {}, signIn: async () => {}, signOut: async () => {}, syncNow: () => {},
 }
 
@@ -51,6 +54,8 @@ export const SyncProvider = ({ children, loadBackend, pushDebounceMs = 2000, net
   const [status, setStatus] = useState<SyncStatus>(loadBackend ? 'signedOut' : 'disabled')
   const [errorKind, setErrorKind] = useState<SyncErrorKind | null>(null)
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null)
+  const [uid, setUid] = useState<string | null>(null)
+  const [backend, setBackend] = useState<SyncBackend | null>(null)
 
   const fail = (error: unknown) => {
     const kind = classifyError(error)
@@ -76,9 +81,10 @@ export const SyncProvider = ({ children, loadBackend, pushDebounceMs = 2000, net
         ? await withTimeout(backend.remote.pullSince(uid, metaRef.current.lastPulledAt), networkTimeoutMs)
         : []
       if (uidRef.current !== uid || !metaRef.current) return
-      // Read lists after the await so edits made during the pull are merged, not overwritten
-      const result = mergeRemote(listsRef.current, pulled, metaRef.current, Date.now())
-      if (pulled.length > 0) replaceLists(result.lists)
+      // Read lists after the await so edits made during the pull are merged, not overwritten.
+      // Shared lists have their own sync and never enter the personal one.
+      const result = mergeRemote(listsRef.current.filter(l => !l.shared), pulled, metaRef.current, Date.now())
+      if (pulled.length > 0) replaceLists(prev => withSharedPreserved(prev, result.lists))
       if (result.toPush.length > 0 || result.tombstones.length > 0) {
         await withTimeout(backend.remote.push(uid, result.toPush, result.tombstones), networkTimeoutMs)
       }
@@ -115,6 +121,7 @@ export const SyncProvider = ({ children, loadBackend, pushDebounceMs = 2000, net
 
   const handleUid = useCallback((uid: string | null) => {
     uidRef.current = uid
+    setUid(uid)
     if (!uid) {
       // A returning user whose session expired keeps their sync-meta and is asked to sign in again
       if (metaRef.current) {
@@ -137,6 +144,7 @@ export const SyncProvider = ({ children, loadBackend, pushDebounceMs = 2000, net
     if (!backendPromiseRef.current) {
       backendPromiseRef.current = loadBackend().then(backend => {
         backendRef.current = backend
+        setBackend(backend)
         backend.auth.onChange(handleUid)
         return backend
       })
@@ -160,6 +168,7 @@ export const SyncProvider = ({ children, loadBackend, pushDebounceMs = 2000, net
 
   const signOut = useCallback(async () => {
     uidRef.current = null
+    setUid(null)
     metaRef.current = null
     clearSyncMeta()
     setStatus('signedOut')
@@ -178,7 +187,7 @@ export const SyncProvider = ({ children, loadBackend, pushDebounceMs = 2000, net
   // Record deletions as they happen, then debounce a push
   useEffect(() => {
     if (!metaRef.current) return
-    const updated = recordDeletions(metaRef.current, lists, Date.now())
+    const updated = recordDeletions(metaRef.current, lists.filter(l => !l.shared), Date.now())
     if (updated !== metaRef.current) {
       metaRef.current = updated
       saveSyncMeta(updated)
@@ -204,7 +213,7 @@ export const SyncProvider = ({ children, loadBackend, pushDebounceMs = 2000, net
   }, [schedule])
 
   const value: SyncContextValue = loadBackend
-    ? { status, errorKind, lastSyncedAt, prepare, signIn, signOut, syncNow }
+    ? { status, errorKind, lastSyncedAt, uid, backend, prepare, signIn, signOut, syncNow }
     : DISABLED
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>

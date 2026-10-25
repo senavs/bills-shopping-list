@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { hashList } from './hash'
+import { hashList, hashValue } from './hash'
 import type { List } from '../../types'
 
 const list = (over: Partial<List> = {}): List => ({
@@ -32,5 +32,12 @@ describe('hashList', () => {
     const moved = list()
     moved.items[0] = { ...moved.items[0], quantity: 3 }
     expect(hashList(moved)).not.toBe(hashList(list()))
+  })
+})
+
+describe('hashValue', () => {
+  it('ignores key order and undefined fields', () => {
+    expect(hashValue({ a: 1, b: [2], c: undefined })).toBe(hashValue({ b: [2], a: 1 }))
+    expect(hashValue({ a: 1 })).not.toBe(hashValue({ a: 2 }))
   })
 })
