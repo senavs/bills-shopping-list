@@ -251,4 +251,11 @@ export const ptBR: TranslationKeys = {
   joinNetworkError: 'Não foi possível conectar. Verifique sua internet e tente de novo.',
   joinRetry: 'Tentar de novo',
   joinContinue: 'Continuar',
+  sharedBadge: 'Compartilhada',
+  leaveList: 'Sair da lista',
+  leaveListMessage: 'Você deixará de ver esta lista. Os outros membros continuam com ela.',
+  deleteForEveryone: 'Excluir para todos',
+  deleteForEveryoneMessage: 'A lista será excluída para todos os membros.',
+  sharedListDeletedNotice: '"{name}" foi excluída por quem a criou',
+  sharedListRemovedNotice: 'Você não tem mais acesso a "{name}"',
 }

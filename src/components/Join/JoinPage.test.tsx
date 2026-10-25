@@ -21,7 +21,7 @@ const syncValue = (over: Partial<SyncContextValue> = {}): SyncContextValue => ({
 })
 
 const sharedValue = (joinList: SharedSyncValue['joinList']): SharedSyncValue => ({
-  status: 'idle', isPendingCreate: () => false, joinList, leaveList: vi.fn(), deleteSharedList: vi.fn(),
+  status: 'idle', roleOf: () => null, isPendingCreate: () => false, joinList, leaveList: vi.fn(), deleteSharedList: vi.fn(),
   notices: [], dismissNotice: vi.fn(),
 })
 

@@ -1,5 +1,7 @@
 import { useSync } from '../../contexts/SyncContext'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useSharedSync } from '../../contexts/SharedSyncContext'
+import { combineStatus } from '../../lib/sharedSync/status'
 import { CloudAlertIcon, CloudCheckIcon, CloudIcon, CloudOffIcon } from '../shared/icons'
 
 /**
@@ -7,7 +9,8 @@ import { CloudAlertIcon, CloudCheckIcon, CloudIcon, CloudOffIcon } from '../shar
  * the account sheet (which explains the problem when sync is not configured).
  */
 export const SyncStatusButton = ({ onOpen }: { onOpen: () => void }) => {
-  const { status, prepare, signIn } = useSync()
+  const { status: personal, prepare, signIn } = useSync()
+  const status = combineStatus(personal, useSharedSync().status)
   const { t } = useLanguage()
 
   const { label, icon } = {

@@ -10,6 +10,7 @@ import { Dashboard } from './components/Dashboard/Dashboard'
 import { ListForm } from './components/ListForm/ListForm'
 import { ListDetail } from './components/ListDetail/ListDetail'
 import { JoinPage } from './components/Join/JoinPage'
+import { SharedNotices } from './components/shared/SharedNotices'
 import { AdLayout } from './components/ads/AdLayout'
 
 /**
@@ -63,6 +64,7 @@ function App() {
                   </Route>
                 </Routes>
               </HashRouter>
+              <SharedNotices />
             </SharedSyncProvider>
           </SyncProvider>
         </ListsProvider>

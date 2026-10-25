@@ -11,6 +11,7 @@ import { exportData, importData, mergeImportWithShared, stripShared } from '../.
 import { getPresetTemplates } from '../../lib/presetTemplates'
 import { CloudCheckIcon, CloudIcon, DownloadIcon, EllipsisIcon, GlobeIcon, InfoIcon, MoonIcon, PlusIcon, ShareIcon, SunIcon } from '../shared/icons'
 import { useSync } from '../../contexts/SyncContext'
+import { useSharedSync } from '../../contexts/SharedSyncContext'
 import { SyncStatusButton } from '../Sync/SyncStatusButton'
 import { AccountSheet } from '../Sync/AccountSheet'
 import { SyncBanner } from '../Sync/SyncBanner'
@@ -25,6 +26,7 @@ export const Dashboard = () => {
   const { mode, setMode, isDark } = useDarkMode()
   const { locale, setLocale, t, isBR } = useLanguage()
   const sync = useSync()
+  const sharedSync = useSharedSync()
   const [showAccount, setShowAccount] = useState(false)
   const [showSyncHint, setShowSyncHint] = useState(false)
   const [pendingImport, setPendingImport] = useState<AppState | null>(null)
@@ -74,6 +76,14 @@ export const Dashboard = () => {
         setImportError(t.exportFailed)
         setTimeout(() => setImportError(null), 3000)
       })
+  }
+
+  // Shared lists: the owner deletes for everyone, members leave
+  const handleDeleteList = (id: string) => {
+    const role = sharedSync.roleOf(id)
+    if (role === 'owner') sharedSync.deleteSharedList(id)
+    else if (role === 'member') sharedSync.leaveList(id)
+    else deleteList(id)
   }
 
   const applyImport = (data: AppState) => {
@@ -260,7 +270,7 @@ export const Dashboard = () => {
                   activeTab={activeTab}
                   onArchive={() => archiveList(list.id)}
                   onUnarchive={() => unarchiveList(list.id)}
-                  onDelete={() => deleteList(list.id)}
+                  onDelete={() => handleDeleteList(list.id)}
                   onDuplicate={() => duplicateList(list.id)}
                   onSaveAsTemplate={() => saveAsTemplate(list.id)}
                 />

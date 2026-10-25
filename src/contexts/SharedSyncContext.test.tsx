@@ -182,6 +182,18 @@ describe('SharedSyncProvider', () => {
     expect(B.stored()?.uid).toBe('u2')
   })
 
+  it('knows the role while signed out and queues the owner delete', async () => {
+    const { A, B, remote, id } = await twoDevices()
+    A.setUid(null)
+    expect(A.get().shared.roleOf(id)).toBe('owner')
+    expect(B.get().shared.roleOf(id)).toBe('member')
+    act(() => A.get().shared.deleteSharedList(id))
+    expect(A.list(id)).toBeUndefined()
+    expect(A.stored()!.pendingOps).toEqual([{ kind: 'delete', listId: id }])
+    A.setUid('u1')
+    await waitFor(() => expect(remote.peek(id)!.parent.deleted).toBe(true))
+  })
+
   it('archived lists get no item updates until unarchived', async () => {
     const { A, B, id } = await twoDevices()
     act(() => B.get().lists.archiveList(id))

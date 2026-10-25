@@ -17,6 +17,7 @@ export interface SharedNotice {
 
 export interface SharedSyncValue {
   status: SharedSyncStatus
+  roleOf: (listId: string) => 'owner' | 'member' | null
   isPendingCreate: (listId: string) => boolean
   joinList: (listId: string, token: string) => Promise<'ok' | 'invalid' | 'network'>
   leaveList: (listId: string) => void
@@ -27,6 +28,7 @@ export interface SharedSyncValue {
 
 const INERT: SharedSyncValue = {
   status: 'idle',
+  roleOf: () => null,
   isPendingCreate: () => false,
   joinList: async () => 'network',
   leaveList: () => {},
@@ -119,11 +121,21 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
 
   const hasPendingOp = (listId: string) => !!metaRef.current?.pendingOps.some(op => op.listId === listId)
 
+  // Signed out (or session expired) we still know who we were: leave/delete get queued under that account
+  const myUid = () => uidRef.current ?? metaRef.current?.uid ?? null
+
+  const roleOf = (listId: string): 'owner' | 'member' | null => {
+    const list = listsRef.current.find(l => l.id === listId)
+    const me = myUid()
+    if (!list?.shared || !me) return null
+    return list.shared.ownerUid === me ? 'owner' : 'member'
+  }
+
   /** Created here but not confirmed by the server yet. */
   const isPendingCreate = (listId: string) => {
     const list = listsRef.current.find(l => l.id === listId)
     const lm = metaRef.current?.lists[listId]
-    return !!list?.shared && (lm ? !!lm.pendingCreate : list.shared.ownerUid === uidRef.current)
+    return !!list?.shared && (lm ? !!lm.pendingCreate : list.shared.ownerUid === myUid())
   }
 
   const applyRemote = (listId: string) => {
@@ -300,14 +312,12 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
   }
 
   const leaveList = (listId: string) => {
-    const list = listsRef.current.find(l => l.id === listId)
-    if (!list?.shared || list.shared.ownerUid === uidRef.current) return
+    if (roleOf(listId) !== 'member') return
     enqueue('leave', listId)
   }
 
   const deleteSharedList = (listId: string) => {
-    const list = listsRef.current.find(l => l.id === listId)
-    if (!list?.shared || list.shared.ownerUid !== uidRef.current) return
+    if (roleOf(listId) !== 'owner') return
     if (isPendingCreate(listId)) {
       // Never reached the server: nothing to tombstone
       deleteList(listId)
@@ -332,6 +342,6 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
 
   const dismissNotice = (id: string) => setNotices(prev => prev.filter(n => n.id !== id))
 
-  const value: SharedSyncValue = { status, isPendingCreate, joinList, leaveList, deleteSharedList, notices, dismissNotice }
+  const value: SharedSyncValue = { status, roleOf, isPendingCreate, joinList, leaveList, deleteSharedList, notices, dismissNotice }
   return <SharedSyncContext.Provider value={value}>{children}</SharedSyncContext.Provider>
 }

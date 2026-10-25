@@ -249,6 +249,13 @@ export const en = {
   joinNetworkError: 'Could not connect. Check your internet and try again.',
   joinRetry: 'Try again',
   joinContinue: 'Continue',
+  sharedBadge: 'Shared',
+  leaveList: 'Leave list',
+  leaveListMessage: 'You will no longer see this list. The other members keep it.',
+  deleteForEveryone: 'Delete for everyone',
+  deleteForEveryoneMessage: 'The list will be deleted for all members.',
+  sharedListDeletedNotice: '"{name}" was deleted by its owner',
+  sharedListRemovedNotice: 'You no longer have access to "{name}"',
 }
 
 export type TranslationKeys = typeof en
