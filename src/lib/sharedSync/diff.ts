@@ -27,8 +27,28 @@ export interface LocalDiff {
 
 type Collection = 'people' | 'sections' | 'items'
 
+/** Applies a ParentPatch to a parent doc like Firestore's updateDoc (paths are at most two levels deep). */
+export const applyParentPatch = <T extends object>(doc: T, patch: ParentPatch): T => {
+  const next: Record<string, unknown> = { ...(doc as Record<string, unknown>) }
+  const write = (path: string, value: unknown, remove: boolean) => {
+    const [head, key] = path.split('.')
+    if (key === undefined) {
+      if (remove) delete next[head]
+      else next[head] = value
+      return
+    }
+    const child = { ...(next[head] as Record<string, unknown> | undefined) }
+    if (remove) delete child[key]
+    else child[key] = value
+    next[head] = child
+  }
+  for (const [path, value] of Object.entries(patch.set)) write(path, value, false)
+  for (const path of patch.remove) write(path, undefined, true)
+  return next as T
+}
+
 /** Field path → value of everything stored as a plain parent field. */
-const fieldValues = (form: SharedForm): Record<string, unknown> => ({
+export const fieldValues = (form: SharedForm): Record<string, unknown> => ({
   ...form.fields,
   ...Object.fromEntries(Object.entries(form.memberPeople).map(([uid, pid]) => [`memberPeople.${uid}`, pid])),
 })
