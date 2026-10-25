@@ -62,6 +62,10 @@ export const ListForm = () => {
 
     if (id && existingList) {
       updateList(id, { name: name.trim(), type, currency, taxPercentage: tax })
+    } else if (shared && canShare && !sync.uid) {
+      // Signed out after ticking "shared": never fall back to a private list silently
+      setError(t.signInToShare)
+      return
     } else if (shared && sync.uid) {
       if (!myName.trim()) {
         setError(t.yourNameRequired)

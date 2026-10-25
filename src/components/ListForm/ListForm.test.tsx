@@ -209,6 +209,17 @@ describe('ListForm', () => {
       expect(localStorage.getItem('shared-name')).toBe('Ana')
     })
 
+    it('does not silently create a private list when sign-in was lost', () => {
+      const { container, rerender } = renderWithSync(syncValue())
+      fireEvent.change(screen.getByPlaceholderText('e.g., Weekly Groceries'), { target: { value: 'Bar' } })
+      fireEvent.click(sharedBox()!)
+      rerender(<BrowserRouter><LanguageProvider><SyncContext.Provider value={syncValue({ status: 'signedOut', uid: null })}><ListForm /></SyncContext.Provider></LanguageProvider></BrowserRouter>)
+      fireEvent.submit(container.querySelector('form')!)
+      expect(mockUseLists.createList).not.toHaveBeenCalled()
+      expect(mockUseLists.createSharedList).not.toHaveBeenCalled()
+      expect(screen.getAllByText('Sign in with Google to share').length).toBeGreaterThan(1)
+    })
+
     it('prefills your name from the last one used', () => {
       localStorage.setItem('shared-name', 'Ana')
       renderWithSync(syncValue())
