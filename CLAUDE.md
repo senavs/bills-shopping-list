@@ -39,11 +39,12 @@ Before calling work done, run `npx tsc --noEmit` and `npx vitest run`.
 - Section membership lives on the section (`Section.itemIds`, ordered), not on the item. Deleting an item must also remove it from its section; deleting a section keeps its items (they fall back to "Other items").
 - `duplicateList` gives items new ids and remaps `Section.itemIds`; `Person` ids are copied as-is, so `Item.assignedTo` stays valid. Any new field that references item ids must be remapped there too.
 - Every `ListsContext` mutation stamps `List.updatedAt` (drives sync conflict resolution). `replaceLists` deliberately does not.
-- `localStorage` keys: `app` (state), `sync-meta`, `theme`, `locale`, `billbuddy_visited`.
+- `localStorage` keys: `app` (state), `sync-meta`, `shared-sync-meta`, `shared-name`, `theme`, `locale`, `billbuddy_visited`.
+- `List.shared` marks a shared list (synced via `sharedLists/{id}`, see `docs/sync.md`). Copies, templates, exports and imports of a shared list are private (no `shared`).
 
 ## Sync
 
-Read `docs/sync.md` before touching `src/lib/sync/`, `src/lib/firebase/`, `SyncContext`, `src/components/Sync/`, `firestore.rules` or the OAuth code in `main.tsx`. Key constraints: the Firebase SDK must stay lazy-loaded (`import()`), and sign-in is a full-page redirect, not a popup (popups break the iOS PWA).
+Read `docs/sync.md` before touching `src/lib/sync/`, `src/lib/sharedSync/`, `src/lib/firebase/`, `SyncContext`, `SharedSyncContext`, `src/components/Sync/`, `firestore.rules` or the OAuth code in `main.tsx`. Key constraints: the Firebase SDK must stay lazy-loaded (`import()`), and sign-in is a full-page redirect, not a popup (popups break the iOS PWA).
 
 ## Git
 
