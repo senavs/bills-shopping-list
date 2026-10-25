@@ -7,7 +7,7 @@ import { AccountSheet } from './AccountSheet'
 import { SyncBanner } from './SyncBanner'
 
 const value = (over: Partial<SyncContextValue> = {}): SyncContextValue => ({
-  status: 'idle', errorKind: null, lastSyncedAt: null,
+  status: 'idle', errorKind: null, lastSyncedAt: null, uid: 'u1', backend: null,
   prepare: vi.fn(), signIn: vi.fn(async () => {}), signOut: vi.fn(async () => {}), syncNow: vi.fn(),
   ...over,
 })

@@ -174,7 +174,7 @@ describe('Dashboard', () => {
 
   describe('cloud sync entry', () => {
     const syncValue = (over: Partial<SyncContextValue> = {}): SyncContextValue => ({
-      status: 'signedOut', errorKind: null, lastSyncedAt: null,
+      status: 'signedOut', errorKind: null, lastSyncedAt: null, uid: null, backend: null,
       prepare: vi.fn(), signIn: vi.fn(async () => {}), signOut: vi.fn(async () => {}), syncNow: vi.fn(),
       ...over,
     })
