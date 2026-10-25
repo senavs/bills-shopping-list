@@ -4,7 +4,7 @@ import { useLists } from '../../hooks/useLists'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useSync } from '../../contexts/SyncContext'
 import { useSharedSync } from '../../contexts/SharedSyncContext'
-import { loadSharedName, saveSharedName } from '../../lib/sharedSync/sharedName'
+import { MemberNameForm } from './MemberNameForm'
 
 type JoinState = 'joining' | 'waiting' | 'invalid' | 'network'
 
@@ -24,8 +24,6 @@ export const JoinPage = () => {
 
   const [state, setState] = useState<JoinState>('joining')
   const [attempt, setAttempt] = useState(0)
-  const [name, setName] = useState(loadSharedName)
-  const [nameError, setNameError] = useState(false)
   const startedRef = useRef(-1)
 
   const list = lists.find(l => l.id === listId && l.shared)
@@ -43,16 +41,8 @@ export const JoinPage = () => {
     void joinList(listId, token).then(result => setState(result === 'ok' ? 'waiting' : result))
   }, [token, sync.uid, list, attempt, listId, joinList])
 
-  const handleContinue = (e: React.FormEvent) => {
-    e.preventDefault()
-    const trimmed = name.trim()
-    if (!trimmed) {
-      setNameError(true)
-      return
-    }
-    if (!list || !sync.uid) return
-    saveSharedName(trimmed)
-    addMemberPerson(list.id, sync.uid, trimmed)
+  const handleName = (name: string) => {
+    if (list && sync.uid) addMemberPerson(list.id, sync.uid, name)
   }
 
   const content = () => {
@@ -82,24 +72,10 @@ export const JoinPage = () => {
     }
     if (!list || linked) return <p className="text-body text-muted">{t.joinJoining}</p>
     return (
-      <form onSubmit={handleContinue}>
+      <div>
         <p className="text-title font-semibold text-ink mb-3">{list.name}</p>
-        <label htmlFor="join-name" className="block text-sm font-medium text-ink mb-2">{t.yourNameInList} *</label>
-        <input
-          id="join-name"
-          type="text"
-          value={name}
-          onChange={(e) => { setName(e.target.value); setNameError(false) }}
-          autoCapitalize="words"
-          autoComplete="off"
-          enterKeyHint="done"
-          className="w-full px-3 py-2 border border-hairline rounded bg-surface text-ink text-base mb-2"
-        />
-        {nameError && <p className="text-footnote text-danger mb-2">{t.yourNameRequired}</p>}
-        <button type="submit" className="mt-2 px-5 min-h-[44px] bg-accent text-on-accent font-semibold active:opacity-80 rounded-xl">
-          {t.joinContinue}
-        </button>
-      </form>
+        <MemberNameForm onSubmit={handleName} />
+      </div>
     )
   }
 

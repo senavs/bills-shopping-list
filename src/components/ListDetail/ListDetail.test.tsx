@@ -56,6 +56,21 @@ describe('ListDetail with a shared list', () => {
     expect(screen.getByText('you')).toBeDefined()
   })
 
+  it('a member without a person is asked for their name', async () => {
+    renderDetail(syncValue({ uid: 'u2' }))
+    fireEvent.change(screen.getByLabelText(/Your name in this list/), { target: { value: 'Bia' } })
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Continue' })) })
+    expect(screen.queryByLabelText(/Your name in this list/)).toBeNull()
+    fireEvent.click(screen.getByText('People & members'))
+    expect(screen.getByText('Bia')).toBeDefined()
+    expect(screen.getByText('you')).toBeDefined()
+  })
+
+  it('a linked member is not asked for a name', () => {
+    renderDetail(syncValue())
+    expect(screen.queryByLabelText(/Your name in this list/)).toBeNull()
+  })
+
   it('asks to sign in when signed out', () => {
     renderDetail(syncValue({ status: 'signedOut', uid: null }))
     expect(screen.getByText('Sign in to sync this shared list')).toBeDefined()
