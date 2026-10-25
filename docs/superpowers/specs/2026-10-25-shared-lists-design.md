@@ -58,14 +58,16 @@ Em listas compartilhadas, o `PeopleManager` vira **"Pessoas e membros"**. Ele é
 gerenciar quem está na conta. Nas listas privadas, nada muda.
 
 - Lista **todas** as `people` da lista.
-- Uma pessoa vinculada a um membro (está em `memberPeople`) tem um ícone de "no app". A sua tem o rótulo
-  **"você"**. As outras são só nomes para a divisão, como hoje.
+- **O app sabe quem é quem:** cada membro tem uma `Person` própria, criada com o nome que ele digitou ao entrar
+  (§ Entrar) e vinculada ao `uid` em `memberPeople`. Ninguém escolhe ou troca qual pessoa é. A pessoa de um
+  membro tem um ícone de "no app", e a do usuário logado tem o rótulo **"você"**. As outras são só nomes para
+  a divisão, como hoje.
 - Abaixo da lista ficam **"Adicionar pessoa"** (o campo atual) e **"Convidar mais"** (§ Convidar).
-- **Remover** (×) tira a pessoa **só da divisão**: é o mesmo `removePerson` de hoje, que limpa os `assignedTo`.
-  Se a pessoa era de um membro, a entrada dele em `memberPeople` também é limpa, mas **o membro continua com
-  acesso à lista**. Na próxima vez que esse membro abrir a lista, ele cai na tela "Quem é você nesta lista?".
-  A confirmação ao remover uma pessoa vinculada avisa isso. Remover o acesso de um membro está fora do MVP.
-- "Trocar quem sou eu": o membro pode se desvincular da pessoa atual e escolher outra, ou criar uma nova.
+- **Sem regra de negócio nova:** quem participa da divisão continua sendo definido pela seleção de pessoas em
+  cada item (`assignedTo`). Um membro que não está em nenhum item simplesmente não aparece na divisão. O ×
+  continua exatamente como hoje (`removePerson`). Se ele for usado na pessoa de um membro, o vínculo em
+  `memberPeople` fica órfão e é limpo, e na próxima vez que o membro abrir a lista o app pede o nome dele de
+  novo (o mesmo passo da primeira entrada). Remover o acesso de um membro está fora do MVP.
 - O cabeçalho recolhido mostra a contagem de pessoas e um ícone de compartilhado.
 
 ### Convidar
@@ -84,11 +86,13 @@ gerenciar quem está na conta. Nas listas privadas, nada muda.
 2. Deslogado: tela explicando "Você foi convidado para uma lista compartilhada" + "Entrar com Google". O
    `startOAuthRedirect` já guarda `returnHash`, então depois do login a pessoa volta para o mesmo `#/join/...`.
 3. Logado: o app grava o próprio `uid` em `members` provando o token (ver §4). Se o usuário já é membro, só abre a lista.
-4. Depois de entrar, a tela **"Quem é você nesta lista?"** mostra as `people` existentes e a opção de se adicionar
-   com um nome novo. A escolha grava `memberPeople[uid] = personId` e é **obrigatória**: não dá para pular, para
-   todo membro aparecer em "Pessoas e membros". A lista só mostra como opção as pessoas que ainda não estão
-   vinculadas a outro membro. A mesma tela aparece sempre que um membro abre a lista sem vínculo (ex.: a pessoa
-   dele foi removida).
+4. Na primeira entrada, o app pede **"Seu nome nesta lista"** (obrigatório). Não há lista de pessoas para
+   escolher, então ninguém consegue se passar por outra pessoa. O nome cria uma `Person` nova, e o app grava
+   `memberPeople[uid] = personId`. Esse é o nome que aparece em "Pessoas e membros" e na seleção de pessoas dos
+   itens. O **nome do Google não é lido**: o escopo do login continua `openid email` (requisito de privacidade
+   do spec de sync). O campo pode vir pré-preenchido com o último nome que o usuário digitou neste aparelho,
+   guardado só no `localStorage`. *(Decisão do design.)* O mesmo passo aparece se um membro abrir a lista e não
+   tiver vínculo.
 5. Navega para `/lists/:id`.
 6. Erros: o Firestore devolve `permission-denied` para token errado, lista excluída, lista inexistente e limite
    de membros, sem distinguir os casos (quem não é membro não pode ler o doc). Por isso há **uma mensagem
@@ -279,7 +283,7 @@ Um caminho de sync separado do pessoal, com a mesma filosofia: `localStorage` é
   - funções puras de `src/lib/sharedSync/` (conversão ida e volta preservando ordem e seções, diff, merge por item,
     incluindo dois "clientes" adicionando itens à mesma seção sem perda);
   - fluxo em `SyncContext` com `memorySharedRemote` e auth fake;
-  - componentes (`ListForm` com a opção e o nome do criador, join, escolha obrigatória de pessoa, `PeopleManager` em lista compartilhada com membros, "você", "Convidar mais" e remover pessoa vinculada sem tirar o acesso, "Sair da lista");
+  - componentes (`ListForm` com a opção e o nome do criador, join pedindo o nome e criando a pessoa vinculada, `PeopleManager` em lista compartilhada com membros, "você" e "Convidar mais", "Sair da lista");
   - sync pessoal ignorando listas `shared`;
   - import removendo `shared`; `duplicateList` de lista compartilhada gerando cópia privada.
 - Testes de regras em `npm run test:rules` (§4).
@@ -288,7 +292,7 @@ Um caminho de sync separado do pessoal, com a mesma filosofia: `localStorage` é
 
 - Se a orquestração fica no `SyncContext` ou num contexto novo.
 - Técnica exata de `position` (fração vs. inteiro com renormalização).
-- Componentes exatos e visual do selo, do atalho "Convidar", de "Pessoas e membros" e da tela de escolha de pessoa.
+- Componentes exatos e visual do selo, do atalho "Convidar", de "Pessoas e membros" e do passo "Seu nome nesta lista".
 - Debounce exato e estratégia de reconexão dos listeners.
 - Ordem de implementação (sugestão: modelo + conversões puras → regras + testes de regras → remote/memória →
   orquestração → UI de criar/convidar/entrar → sair/excluir → polimento).
