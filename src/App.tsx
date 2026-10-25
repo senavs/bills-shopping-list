@@ -9,6 +9,7 @@ import { Landing } from './components/Landing/Landing'
 import { Dashboard } from './components/Dashboard/Dashboard'
 import { ListForm } from './components/ListForm/ListForm'
 import { ListDetail } from './components/ListDetail/ListDetail'
+import { JoinPage } from './components/Join/JoinPage'
 import { AdLayout } from './components/ads/AdLayout'
 
 /**
@@ -58,6 +59,7 @@ function App() {
                     <Route path="/lists/new" element={<ListForm />} />
                     <Route path="/lists/:id" element={<ListDetail />} />
                     <Route path="/lists/:id/edit" element={<ListForm />} />
+                    <Route path="/join/:listId" element={<JoinPage />} />
                   </Route>
                 </Routes>
               </HashRouter>

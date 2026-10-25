@@ -244,4 +244,11 @@ export const ptBR: TranslationKeys = {
   inviteLinkCopied: 'Link do convite copiado',
   inviteWaitingConnection: 'Aguardando conexão',
   sharedSignInToSync: 'Entre para sincronizar esta lista compartilhada',
+  joinTitle: 'Você foi convidado para uma lista compartilhada',
+  joinSignIn: 'Entrar com Google',
+  joinJoining: 'Entrando…',
+  joinInvalid: 'Convite inválido ou expirado',
+  joinNetworkError: 'Não foi possível conectar. Verifique sua internet e tente de novo.',
+  joinRetry: 'Tentar de novo',
+  joinContinue: 'Continuar',
 }

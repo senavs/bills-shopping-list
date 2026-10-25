@@ -242,6 +242,13 @@ export const en = {
   inviteLinkCopied: 'Invite link copied',
   inviteWaitingConnection: 'Waiting for connection',
   sharedSignInToSync: 'Sign in to sync this shared list',
+  joinTitle: 'You were invited to a shared list',
+  joinSignIn: 'Sign in with Google',
+  joinJoining: 'Joining…',
+  joinInvalid: 'Invalid or expired invite',
+  joinNetworkError: 'Could not connect. Check your internet and try again.',
+  joinRetry: 'Try again',
+  joinContinue: 'Continue',
 }
 
 export type TranslationKeys = typeof en
