@@ -67,7 +67,47 @@ VITE_FIREBASE_APP_ID=
 VITE_GOOGLE_CLIENT_ID=   # Google Cloud → Credentials → "Web client (auto created by Google Service)"
 ```
 
-Without it the app builds and runs fully local, with sync hidden.
+Without it the app builds and runs fully local, with the header sync icon in red.
+
+#### Working in a git worktree
+
+`.env.local` is git-ignored, so a new worktree (e.g. `.claude/worktrees/<name>`) does
+not have it. Copy it from the main checkout before running `npm run dev` or
+`npm run deploy` there (the deploy aborts without it):
+
+```bash
+# from the worktree root
+cp "$(git rev-parse --path-format=absolute --git-common-dir)/../.env.local" .env.local
+```
+
+#### SOP: recover the `.env.local` values (new machine, or file lost)
+
+1. **Firebase values** — open the [Firebase console](https://console.firebase.google.com/),
+   select the BillBuddy project → ⚙️ **Project settings** → **General** → **Your apps** →
+   the web app → **SDK setup and configuration** → **Config**. Copy from the `firebaseConfig`
+   object:
+
+   | `firebaseConfig` field | `.env.local` variable       |
+   |------------------------|-----------------------------|
+   | `apiKey`               | `VITE_FIREBASE_API_KEY`     |
+   | `authDomain`           | `VITE_FIREBASE_AUTH_DOMAIN` |
+   | `projectId`            | `VITE_FIREBASE_PROJECT_ID`  |
+   | `appId`                | `VITE_FIREBASE_APP_ID`      |
+
+2. **Google OAuth client id** — open the [Google Cloud console](https://console.cloud.google.com/)
+   with the same project selected → **APIs & Services** → **Credentials** → under
+   **OAuth 2.0 Client IDs**, open **Web client (auto created by Google Service)** and copy
+   the **Client ID** (ends in `.apps.googleusercontent.com`) into `VITE_GOOGLE_CLIENT_ID`.
+   While there, confirm the **Authorized redirect URIs** listed below.
+3. Save the file as `.env.local` in the repo root (never commit it) and check it:
+
+   ```bash
+   node scripts/check-deploy-env.js   # prints "Deploy env check passed."
+   npm run dev                        # header cloud icon is no longer red
+   ```
+
+4. To deploy Firestore rules from the new machine, install the Firebase CLI and run
+   `firebase login` once (see the rules commands below).
 
 Sign-in uses a full-page Google OAuth redirect (popups never return to an
 installed iOS PWA). The OAuth client must list these **Authorized redirect URIs**:
@@ -85,7 +125,7 @@ it is not a secret. Access is protected by the Firestore rules, the Auth authori
 domains and the API key's referrer restriction.
 
 ```bash
-# Build and deploy to GitHub Pages (runs predeploy → build automatically)
+# Build and deploy to GitHub Pages (predeploy checks the VITE_* vars above, then builds)
 npm run deploy
 ```
 
