@@ -230,4 +230,9 @@ export const ptBR: TranslationKeys = {
   syncBannerBody: 'Sincronize com o Google para recuperar suas listas em um celular novo.',
   notNow: 'Agora não',
   lists: 'Listas',
+  sharedList: 'Lista compartilhada',
+  sharedListHint: 'Quem você convidar pode adicionar e editar itens',
+  signInToShare: 'Entrar com Google para compartilhar',
+  yourNameInList: 'Seu nome nesta lista',
+  yourNameRequired: 'Digite seu nome',
 }

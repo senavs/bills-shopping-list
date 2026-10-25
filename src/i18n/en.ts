@@ -228,6 +228,11 @@ export const en = {
   syncBannerBody: 'Sync with Google to restore your lists on a new phone.',
   notNow: 'Not now',
   lists: 'Lists',
+  sharedList: 'Shared list',
+  sharedListHint: 'Everyone you invite can add and edit items',
+  signInToShare: 'Sign in with Google to share',
+  yourNameInList: 'Your name in this list',
+  yourNameRequired: 'Enter your name',
 }
 
 export type TranslationKeys = typeof en
