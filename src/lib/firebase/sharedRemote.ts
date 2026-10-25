@@ -16,25 +16,30 @@ export const createFirestoreSharedRemote = (): SharedRemote => {
   const itemsOf = (listId: string) => collection(db, 'sharedLists', listId, 'items')
 
   // A non-member's get is denied even when the doc doesn't exist
-  const readAsMember = async (uid: string, listId: string) => {
+  const readAsMember = async (uid: string, listId: string): Promise<'member' | 'deleted' | 'no'> => {
     try {
       const snap = await getDoc(listRef(listId))
-      return snap.exists() && (snap.data().members as string[]).includes(uid)
+      if (!snap.exists() || !(snap.data().members as string[]).includes(uid)) return 'no'
+      return snap.data().deleted === true ? 'deleted' : 'member'
     } catch (error) {
-      if (classifyError(error) === 'auth') return false
+      if (classifyError(error) === 'auth') return 'no'
       throw error
     }
   }
+  const denied = () => Object.assign(new Error('List was deleted'), { code: 'permission-denied' })
 
   return {
     async create(uid, parent) {
-      if (await readAsMember(uid, parent.id)) return 'exists'
+      if (await readAsMember(uid, parent.id) !== 'no') return 'exists'
       await setDoc(listRef(parent.id), { ...parent, syncedAt: serverTimestamp() })
       return 'created'
     },
 
     async join(uid, listId, token) {
-      if (await readAsMember(uid, listId)) return 'already'
+      const membership = await readAsMember(uid, listId)
+      // Members can still read a tombstoned list: joining it must fail like a bad invite
+      if (membership === 'deleted') throw denied()
+      if (membership === 'member') return 'already'
       const batch = writeBatch(db)
       batch.set(doc(db, 'sharedLists', listId, 'joins', uid), { token })
       batch.update(listRef(listId), { members: arrayUnion(uid) })

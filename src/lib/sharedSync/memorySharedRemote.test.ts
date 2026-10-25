@@ -22,6 +22,14 @@ describe('memorySharedRemote', () => {
     expect(r.peek('L')!.parent.members).toEqual(['alice', 'bob'])
   })
 
+  it('joining a deleted list is refused even for a member', async () => {
+    const r = createMemorySharedRemote()
+    await r.create('alice', parent())
+    await r.join('bob', 'L', TOKEN)
+    await r.deleteList('alice', 'L')
+    await expect(r.join('bob', 'L', TOKEN)).rejects.toEqual(denied)
+  })
+
   it('create is idempotent', async () => {
     const r = createMemorySharedRemote()
     await expect(r.create('alice', parent())).resolves.toBe('created')

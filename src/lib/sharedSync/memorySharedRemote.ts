@@ -69,8 +69,9 @@ export const createMemorySharedRemote = (): MemorySharedRemote => {
     async join(uid, listId, token) {
       if (!online) throw fail('unavailable')
       const e = lists.get(listId)
+      if (e?.parent.deleted) throw fail('permission-denied')
       if (isMember(uid, e)) return 'already'
-      if (!e || e.parent.deleted || e.parent.inviteToken !== token || e.parent.members.length >= MAX_MEMBERS) {
+      if (!e || e.parent.inviteToken !== token || e.parent.members.length >= MAX_MEMBERS) {
         throw fail('permission-denied')
       }
       e.parent.members = [...e.parent.members, uid]
