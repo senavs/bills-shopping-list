@@ -9,7 +9,7 @@
     "build": "tsc && node --require ./crypto-polyfill.cjs ./node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "test": "vitest",
-    "predeploy": "npm run build",
+    "predeploy": "node scripts/check-deploy-env.js && npm run build",
     "deploy": "gh-pages -d dist",
     "test:rules": "firebase emulators:exec --only firestore --project demo-billbuddy \"vitest run --config vitest.rules.config.ts\""
   },

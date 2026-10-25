@@ -85,7 +85,7 @@ it is not a secret. Access is protected by the Firestore rules, the Auth authori
 domains and the API key's referrer restriction.
 
 ```bash
-# Build and deploy to GitHub Pages (runs predeploy → build automatically)
+# Build and deploy to GitHub Pages (predeploy checks the VITE_* vars above, then builds)
 npm run deploy
 ```
 
