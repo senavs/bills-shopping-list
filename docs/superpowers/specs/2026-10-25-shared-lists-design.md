@@ -277,7 +277,7 @@ Um caminho de sync separado do pessoal, com a mesma filosofia: `localStorage` é
 ## 6. i18n, dark mode, testes
 
 - Toda string nova passa por `useLanguage().t`, com chaves em `en.ts` e `ptBR.ts`: opção do form, "Seu nome nesta lista", "Pessoas e membros", "você", "Convidar mais", botão Convidar,
-  texto do share, telas de join e de escolha de pessoa, erros, "Sair da lista", selo, avisos.
+  texto do share, telas de join e do passo "Seu nome nesta lista", erros, "Sair da lista", selo, avisos.
 - Toda UI nova tem `dark:`.
 - Testes Vitest:
   - funções puras de `src/lib/sharedSync/` (conversão ida e volta preservando ordem e seções, diff, merge por item,
