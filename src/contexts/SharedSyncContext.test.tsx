@@ -17,7 +17,8 @@ const item = (id: string): Omit<Item, 'id'> => ({ name: id, quantity: 1, unitPri
 const device = (remote: SharedRemote, initialUid: string | null, local: List[] = []) => {
   localStorage.setItem('app', JSON.stringify({ lists: local }))
   let stored: SharedMeta | null = null
-  const metaStorage = { load: () => stored, save: (m: SharedMeta) => { stored = m } }
+  let saves = 0
+  const metaStorage = { load: () => stored, save: (m: SharedMeta) => { stored = m; saves++ } }
   const backend = { auth: { signIn: vi.fn(), signOut: vi.fn(), onChange: () => () => {} }, remote: createMemoryRemote(), shared: remote }
   let ctx!: Ctx
   let setUid!: (uid: string | null) => void
@@ -42,6 +43,7 @@ const device = (remote: SharedRemote, initialUid: string | null, local: List[] =
     get: () => ctx,
     list: (id: string) => ctx.lists.lists.find(l => l.id === id),
     stored: () => stored,
+    saves: () => saves,
     setUid: (uid: string | null) => act(() => setUid(uid)),
   }
 }
@@ -149,6 +151,18 @@ describe('SharedSyncProvider', () => {
     await waitFor(() => expect(B.list(id)).toBeUndefined())
     expect(B.get().shared.notices).toEqual([expect.objectContaining({ kind: 'deleted', listName: 'Bar' })])
     expect(A.get().shared.notices).toEqual([])
+  })
+
+  it('a deleted list left in the query does not rewrite the meta on every snapshot', async () => {
+    const { A, B, id } = await twoDevices()
+    act(() => A.get().shared.deleteSharedList(id))
+    await waitFor(() => expect(B.list(id)).toBeUndefined())
+    await new Promise(r => setTimeout(r, 30))
+    const before = B.saves()
+    // Any write on the server sends B a new snapshot that still contains the tombstone
+    createShared(A)
+    await new Promise(r => setTimeout(r, 50))
+    expect(B.saves()).toBe(before)
   })
 
   it('a member cannot delete for everyone', async () => {

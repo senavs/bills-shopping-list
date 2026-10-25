@@ -101,7 +101,8 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
   }
   const setListMeta = (listId: string, lm: ListMeta | null) => {
     const meta = metaRef.current
-    if (!meta) return
+    // Tombstones stay in the members query forever: don't rewrite storage for nothing
+    if (!meta || (lm === null && !(listId in meta.lists))) return
     const { [listId]: _old, ...rest } = meta.lists
     saveMeta({ ...meta, lists: lm ? { ...rest, [listId]: lm } : rest })
   }
