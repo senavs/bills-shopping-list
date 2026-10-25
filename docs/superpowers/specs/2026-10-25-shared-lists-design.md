@@ -47,11 +47,31 @@ regenerar o convite; QR code; mostrar quem está online; histórico de "quem edi
   configurado (`loadBackend !== null`) e não aparece no modo de edição (`/lists/:id/edit`).
 - Se o usuário não estiver logado, a opção fica desabilitada, com um botão "Entrar com Google para compartilhar"
   que usa o `signIn` existente. *(Decisão do design: não salvamos rascunho do formulário antes do redirect.)*
+- Com a opção marcada, o form pede também **"Seu nome nesta lista"** (obrigatório). Esse nome vira uma `Person`,
+  e o criador fica vinculado a ela (`memberPeople[ownerUid]`), para que ele também apareça entre as pessoas.
+  *(Decisão do design.)*
 - Ao salvar, a lista é criada localmente e no Firestore. O criador é o **dono** (`ownerUid`).
+
+### Pessoas e membros (`PeopleManager`)
+
+Em listas compartilhadas, o `PeopleManager` vira **"Pessoas e membros"**. Ele é o lugar principal para ver e
+gerenciar quem está na conta. Nas listas privadas, nada muda.
+
+- Lista **todas** as `people` da lista.
+- Uma pessoa vinculada a um membro (está em `memberPeople`) tem um ícone de "no app". A sua tem o rótulo
+  **"você"**. As outras são só nomes para a divisão, como hoje.
+- Abaixo da lista ficam **"Adicionar pessoa"** (o campo atual) e **"Convidar mais"** (§ Convidar).
+- **Remover** (×) tira a pessoa **só da divisão**: é o mesmo `removePerson` de hoje, que limpa os `assignedTo`.
+  Se a pessoa era de um membro, a entrada dele em `memberPeople` também é limpa, mas **o membro continua com
+  acesso à lista**. Na próxima vez que esse membro abrir a lista, ele cai na tela "Quem é você nesta lista?".
+  A confirmação ao remover uma pessoa vinculada avisa isso. Remover o acesso de um membro está fora do MVP.
+- "Trocar quem sou eu": o membro pode se desvincular da pessoa atual e escolher outra, ou criar uma nova.
+- O cabeçalho recolhido mostra a contagem de pessoas e um ícone de compartilhado.
 
 ### Convidar
 
-- No `ListDetail` de uma lista compartilhada aparece o botão **"Convidar"**. Ele abre `navigator.share` com o
+- O botão **"Convidar mais"** fica dentro de "Pessoas e membros". O `ListDetail` também mostra um atalho
+  "Convidar" perto do título, para não depender de expandir o painel. Os dois abrem `navigator.share` com o
   link de convite e, se a Web Share API não existir, copia o link para a área de transferência com um aviso.
 - Formato do link: `https://senavs.github.io/bills-shopping-list/#/join/{listId}?t={inviteToken}`.
 - Qualquer membro, não só o dono, pode mandar o convite. O link vale enquanto a lista existir.
@@ -65,8 +85,10 @@ regenerar o convite; QR code; mostrar quem está online; histórico de "quem edi
    `startOAuthRedirect` já guarda `returnHash`, então depois do login a pessoa volta para o mesmo `#/join/...`.
 3. Logado: o app grava o próprio `uid` em `members` provando o token (ver §4). Se o usuário já é membro, só abre a lista.
 4. Depois de entrar, a tela **"Quem é você nesta lista?"** mostra as `people` existentes e a opção de se adicionar
-   com um nome novo. A escolha grava `memberPeople[uid] = personId`. Dá para pular e escolher depois no
-   `PeopleManager`.
+   com um nome novo. A escolha grava `memberPeople[uid] = personId` e é **obrigatória**: não dá para pular, para
+   todo membro aparecer em "Pessoas e membros". A lista só mostra como opção as pessoas que ainda não estão
+   vinculadas a outro membro. A mesma tela aparece sempre que um membro abre a lista sem vínculo (ex.: a pessoa
+   dele foi removida).
 5. Navega para `/lists/:id`.
 6. Erros: o Firestore devolve `permission-denied` para token errado, lista excluída, lista inexistente e limite
    de membros, sem distinguir os casos (quem não é membro não pode ler o doc). Por isso há **uma mensagem
@@ -82,7 +104,6 @@ regenerar o convite; QR code; mostrar quem está online; histórico de "quem edi
 - "Sair" e "Excluir" feitos offline ou deslogado ficam numa fila de operações pendentes no `shared-sync-meta`
   e são enviados quando houver conexão e login com o mesmo `uid`.
 - **Arquivar é por pessoa** e não é sincronizado. O mesmo vale para o estado `collapsed` das seções.
-- `PeopleManager` mostra qual `Person` é "você" (`memberPeople[meuUid]`) e permite trocar.
 
 ## 3. Modelo de dados
 
@@ -251,14 +272,14 @@ Um caminho de sync separado do pessoal, com a mesma filosofia: `localStorage` é
 
 ## 6. i18n, dark mode, testes
 
-- Toda string nova passa por `useLanguage().t`, com chaves em `en.ts` e `ptBR.ts`: opção do form, botão Convidar,
+- Toda string nova passa por `useLanguage().t`, com chaves em `en.ts` e `ptBR.ts`: opção do form, "Seu nome nesta lista", "Pessoas e membros", "você", "Convidar mais", botão Convidar,
   texto do share, telas de join e de escolha de pessoa, erros, "Sair da lista", selo, avisos.
 - Toda UI nova tem `dark:`.
 - Testes Vitest:
   - funções puras de `src/lib/sharedSync/` (conversão ida e volta preservando ordem e seções, diff, merge por item,
     incluindo dois "clientes" adicionando itens à mesma seção sem perda);
   - fluxo em `SyncContext` com `memorySharedRemote` e auth fake;
-  - componentes (`ListForm` com a opção, join, escolha de pessoa, "Sair da lista");
+  - componentes (`ListForm` com a opção e o nome do criador, join, escolha obrigatória de pessoa, `PeopleManager` em lista compartilhada com membros, "você", "Convidar mais" e remover pessoa vinculada sem tirar o acesso, "Sair da lista");
   - sync pessoal ignorando listas `shared`;
   - import removendo `shared`; `duplicateList` de lista compartilhada gerando cópia privada.
 - Testes de regras em `npm run test:rules` (§4).
@@ -267,7 +288,7 @@ Um caminho de sync separado do pessoal, com a mesma filosofia: `localStorage` é
 
 - Se a orquestração fica no `SyncContext` ou num contexto novo.
 - Técnica exata de `position` (fração vs. inteiro com renormalização).
-- Componentes exatos e posição do selo, do botão Convidar e da tela de escolha de pessoa.
+- Componentes exatos e visual do selo, do atalho "Convidar", de "Pessoas e membros" e da tela de escolha de pessoa.
 - Debounce exato e estratégia de reconexão dos listeners.
 - Ordem de implementação (sugestão: modelo + conversões puras → regras + testes de regras → remote/memória →
   orquestração → UI de criar/convidar/entrar → sair/excluir → polimento).
