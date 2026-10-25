@@ -219,3 +219,54 @@ describe('preset templates', () => {
     expect(copy.sections).toHaveLength(2)
   })
 })
+
+describe('shared lists', () => {
+  const create = (getCtx: () => ReturnType<typeof useLists>) => {
+    let id = ''
+    act(() => { id = getCtx().createSharedList({ name: 'Bar', type: 'bar', currency: 'BRL', taxPercentage: 10 }, { uid: 'u1', name: 'Ana' }) })
+    return id
+  }
+  const byId = (ctx: ReturnType<typeof useLists>, id: string) => ctx.lists.find(l => l.id === id)!
+
+  it('createSharedList creates the owner person and links it', () => {
+    const getCtx = setup()
+    const id = create(getCtx)
+    const list = byId(getCtx(), id)
+    expect(list.shared?.ownerUid).toBe('u1')
+    expect(list.shared?.inviteToken).toHaveLength(36)
+    expect(list.people?.[0].name).toBe('Ana')
+    expect(list.shared?.memberPeople?.u1).toBe(list.people?.[0].id)
+    expect(list.updatedAt).toBeTypeOf('number')
+  })
+
+  it('addMemberPerson adds a person linked to the member', () => {
+    const getCtx = setup()
+    const id = create(getCtx)
+    act(() => getCtx().addMemberPerson(id, 'u2', 'Bia'))
+    const list = byId(getCtx(), id)
+    const bia = list.people!.find(p => p.name === 'Bia')!
+    expect(list.shared?.memberPeople?.u2).toBe(bia.id)
+    expect(list.shared?.memberPeople?.u1).toBe(list.people![0].id)
+  })
+
+  it('duplicates and templates of a shared list are private', () => {
+    const getCtx = setup()
+    const id = create(getCtx)
+    act(() => getCtx().duplicateList(id))
+    act(() => getCtx().saveAsTemplate(id))
+    const template = getCtx().lists.find(l => l.isTemplate)!
+    act(() => getCtx().createFromTemplate(template.id))
+    const copies = getCtx().lists.filter(l => l.id !== id && l.id !== LIST_ID)
+    expect(copies).toHaveLength(3)
+    for (const c of copies) expect(c.shared).toBeUndefined()
+  })
+
+  it('replaceLists accepts an updater without stamping', () => {
+    const getCtx = setup()
+    const id = create(getCtx)
+    const before = byId(getCtx(), id).updatedAt
+    act(() => getCtx().replaceLists(prev => prev.filter(l => l.id !== LIST_ID)))
+    expect(getCtx().lists.map(l => l.id)).toEqual([id])
+    expect(byId(getCtx(), id).updatedAt).toBe(before)
+  })
+})

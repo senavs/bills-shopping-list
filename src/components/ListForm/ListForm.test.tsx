@@ -20,6 +20,8 @@ describe('ListForm', () => {
   const mockUseLists = {
     lists: [] as List[],
     createList: vi.fn(),
+    createSharedList: vi.fn(() => 'new-id'),
+    addMemberPerson: vi.fn(),
     updateList: vi.fn(),
     deleteList: vi.fn(),
     archiveList: vi.fn(),

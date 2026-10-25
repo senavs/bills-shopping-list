@@ -12,15 +12,20 @@ const stable = (value: unknown): string => {
   return JSON.stringify(value)
 }
 
-/** Content hash (FNV-1a) of a list, ignoring updatedAt. */
-export const hashList = (list: List): string => {
-  const content: Record<string, unknown> = { ...list }
-  delete content.updatedAt
-  const s = stable(content)
+/** Content hash (FNV-1a) of any JSON-like value; key order and undefined fields don't matter. */
+export const hashValue = (value: unknown): string => {
+  const s = stable(value)
   let h = 0x811c9dc5
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i)
     h = Math.imul(h, 0x01000193)
   }
   return `${(h >>> 0).toString(16)}-${s.length}`
+}
+
+/** Content hash of a list, ignoring updatedAt. */
+export const hashList = (list: List): string => {
+  const content: Record<string, unknown> = { ...list }
+  delete content.updatedAt
+  return hashValue(content)
 }

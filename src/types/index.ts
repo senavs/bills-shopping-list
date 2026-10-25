@@ -25,6 +25,12 @@ export interface Person {
   name: string;
 }
 
+export interface SharedInfo {
+  ownerUid: string
+  inviteToken: string
+  memberPeople?: Record<string, string>  // uid → person id
+}
+
 export interface List {
   id: string;
   name: string;
@@ -37,6 +43,7 @@ export interface List {
   isTemplate?: boolean;
   people?: Person[];
   updatedAt?: number;  // epoch ms of the last local edit; drives sync conflict resolution
+  shared?: SharedInfo;  // present only on shared lists (synced via sharedLists/{id}, not users/{uid}/lists)
 }
 
 export interface AppState {

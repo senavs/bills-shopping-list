@@ -33,6 +33,8 @@ describe('Dashboard', () => {
     addPerson: vi.fn(),
     removePerson: vi.fn(),
     createList: vi.fn(),
+    createSharedList: vi.fn(() => 'new-id'),
+    addMemberPerson: vi.fn(),
     updateList: vi.fn(),
     addItem: vi.fn(),
     duplicateItem: vi.fn(),
