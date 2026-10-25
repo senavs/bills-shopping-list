@@ -7,7 +7,7 @@ import { ListCard } from './ListCard'
 import { TemplateCard } from './TemplateCard'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
-import { exportData, importData } from '../../lib/importExport'
+import { exportData, importData, mergeImportWithShared, stripShared } from '../../lib/importExport'
 import { getPresetTemplates } from '../../lib/presetTemplates'
 import { CloudCheckIcon, CloudIcon, DownloadIcon, EllipsisIcon, GlobeIcon, InfoIcon, MoonIcon, PlusIcon, ShareIcon, SunIcon } from '../shared/icons'
 import { useSync } from '../../contexts/SyncContext'
@@ -63,7 +63,7 @@ export const Dashboard = () => {
 
   // Called straight from the tap so the share sheet keeps the user gesture
   const handleExport = () => {
-    exportData({ lists })
+    exportData({ lists: lists.map(stripShared) })
       .then(() => {
         if (sync.status === 'signedOut') {
           setShowSyncHint(true)
@@ -77,7 +77,7 @@ export const Dashboard = () => {
   }
 
   const applyImport = (data: AppState) => {
-    localStorage.setItem('app', JSON.stringify(data))
+    localStorage.setItem('app', JSON.stringify(mergeImportWithShared(data, lists)))
     window.location.reload()
   }
 

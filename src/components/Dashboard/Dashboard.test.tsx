@@ -206,6 +206,40 @@ describe('Dashboard', () => {
       expect(await screen.findByText(/sync with google so you don't need to export|sincronize com o google para não precisar exportar/i)).toBeTruthy()
     })
 
+    it('exports shared lists without their sharing data', async () => {
+      const sharedList: List = {
+        id: 'S', name: 'Bar', type: 'bar', currency: 'BRL', taxPercentage: 0, items: [], sections: [], archived: false,
+        shared: { ownerUid: 'u1', inviteToken: 't' },
+      }
+      mockUseLists.lists = [sharedList]
+      vi.mocked(importExport.exportData).mockResolvedValue()
+      renderWithSync(syncValue({ status: 'idle' }))
+      openSettings()
+      fireEvent.click(screen.getByText(/^export$|^exportar$/i))
+      mockUseLists.lists = []
+      expect(vi.mocked(importExport.exportData).mock.lastCall![0].lists[0].shared).toBeUndefined()
+    })
+
+    it('importing keeps local shared lists', async () => {
+      const sharedList: List = {
+        id: 'S', name: 'Bar', type: 'bar', currency: 'BRL', taxPercentage: 0, items: [], sections: [], archived: false,
+        shared: { ownerUid: 'u1', inviteToken: 't' },
+      }
+      mockUseLists.lists = [sharedList]
+      vi.mocked(importExport.importData).mockResolvedValue({ lists: [] })
+      const setItem = vi.spyOn(Storage.prototype, 'setItem')
+      const reload = vi.fn()
+      vi.spyOn(window, 'location', 'get').mockReturnValue({ ...window.location, reload } as Location)
+      const { container } = renderWithSync(syncValue())
+      const input = container.querySelector('input[type="file"]') as HTMLInputElement
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [new File(['{}'], 'b.json', { type: 'application/json' })] } })
+      })
+      mockUseLists.lists = []
+      const saved = setItem.mock.calls.find(([k]) => k === 'app')!
+      expect(JSON.parse(saved[1]).lists.map((l: List) => l.id)).toEqual(['S'])
+    })
+
     it('asks for confirmation before importing while signed in', async () => {
       vi.mocked(importExport.importData).mockResolvedValue({ lists: [] })
       const setItem = vi.spyOn(Storage.prototype, 'setItem')

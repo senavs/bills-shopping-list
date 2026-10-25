@@ -50,17 +50,17 @@ function App() {
         <ListsProvider>
           <SyncProvider loadBackend={loadBackend}>
             <SharedSyncProvider>
-            <HashRouter>
-              <Routes>
-                <Route path="/" element={<HomeRoute />} />
-                <Route element={<AppWithAds />}>
-                  <Route path="/app" element={<Dashboard />} />
-                  <Route path="/lists/new" element={<ListForm />} />
-                  <Route path="/lists/:id" element={<ListDetail />} />
-                  <Route path="/lists/:id/edit" element={<ListForm />} />
-                </Route>
-              </Routes>
-            </HashRouter>
+              <HashRouter>
+                <Routes>
+                  <Route path="/" element={<HomeRoute />} />
+                  <Route element={<AppWithAds />}>
+                    <Route path="/app" element={<Dashboard />} />
+                    <Route path="/lists/new" element={<ListForm />} />
+                    <Route path="/lists/:id" element={<ListDetail />} />
+                    <Route path="/lists/:id/edit" element={<ListForm />} />
+                  </Route>
+                </Routes>
+              </HashRouter>
             </SharedSyncProvider>
           </SyncProvider>
         </ListsProvider>
