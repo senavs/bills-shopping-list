@@ -39,6 +39,7 @@ export interface SharedParentDoc {
 export interface EntityMeta {
   hash: string
   position?: number
+  sectionId?: string | null   // items only: a known position is reused only within the same group
 }
 
 /** Last synced state of one shared list, per entity. */

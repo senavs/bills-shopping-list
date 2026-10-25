@@ -32,10 +32,12 @@ export const toForm = (list: List, meta: ListMeta | undefined): SharedForm => {
   const sectionPos = assignPositions(list.sections.map(s => s.id), knownPositions(meta?.sections))
 
   const byId = new Map(list.items.map(i => [i.id, i]))
-  const knownItems = knownPositions(meta?.items)
   const items: Record<string, SharedItem> = {}
   const addGroup = (ids: string[], sectionId: string | null) => {
-    const pos = assignPositions(ids, knownItems)
+    const sameGroup = Object.fromEntries(ids
+      .filter(id => meta?.items[id] && (meta.items[id].sectionId ?? null) === sectionId)
+      .map(id => [id, meta!.items[id]]))
+    const pos = assignPositions(ids, knownPositions(sameGroup))
     for (const id of ids) items[id] = { ...byId.get(id)!, sectionId, position: pos[id] }
   }
   for (const s of list.sections) addGroup(s.itemIds.filter(id => byId.has(id) && !(id in items)), s.id)

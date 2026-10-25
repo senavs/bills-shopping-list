@@ -46,7 +46,7 @@ describe('toForm / fromForm', () => {
 
   it('keeps known positions when the order did not change', () => {
     const L = list()
-    const meta: ListMeta = { fields: {}, people: {}, sections: {}, items: { b: { hash: 'x', position: 10 }, a: { hash: 'y', position: 20 } } }
+    const meta: ListMeta = { fields: {}, people: {}, sections: {}, items: { b: { hash: 'x', position: 10, sectionId: 's1' }, a: { hash: 'y', position: 20, sectionId: 's1' } } }
     const form = toForm(L, meta)
     expect(form.items.b.position).toBe(10)
     expect(form.items.a.position).toBe(20)
