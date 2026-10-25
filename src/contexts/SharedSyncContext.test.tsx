@@ -345,6 +345,47 @@ describe('SharedSyncProvider', () => {
     expect(remote.peek(id)!.items[itemId]).toMatchObject({ name: 'IPA' })
   })
 
+  it('two devices reordering different items converge on the same order', async () => {
+    const { A, B, id } = await twoDevices()
+    for (const name of ['a', 'b', 'c', 'd']) act(() => { A.get().lists.addItem(id, item(name)) })
+    await waitFor(() => expect(B.list(id)!.items.map(i => i.name)).toEqual(['a', 'b', 'c', 'd']))
+    await waitFor(() => expect(Object.keys(B.stored()!.lists[id].items)).toHaveLength(4))
+    act(() => A.get().lists.reorderItem(id, 0, 3))
+    act(() => B.get().lists.reorderItem(id, 3, 0))
+    const names = (d: typeof A) => d.list(id)!.items.map(i => i.name)
+    await waitFor(() => {
+      expect(names(A)).toEqual(['d', 'b', 'c', 'a'])
+      expect(names(B)).toEqual(['d', 'b', 'c', 'a'])
+    })
+  })
+
+  it('an item deleted offline on one device and edited online on the other ends up deleted on both', async () => {
+    const memory = createMemorySharedRemote()
+    let bOffline = false
+    const offline = () => Promise.reject(Object.assign(new Error('offline'), { code: 'unavailable' }))
+    const bRemote: SharedRemote = { ...memory, push: (...args) => (bOffline ? offline() : memory.push(...args)) }
+    const A = device(memory, 'u1')
+    const id = createShared(A)
+    await waitFor(() => expect(memory.peek(id)).toBeDefined())
+    const B = device(bRemote, 'u2')
+    await act(async () => { await B.get().shared.joinList(id, A.list(id)!.shared!.inviteToken) })
+    let itemId = ''
+    act(() => { itemId = A.get().lists.addItem(id, item('beer')) })
+    await waitFor(() => expect(B.list(id)?.items).toHaveLength(1))
+    await waitFor(() => expect(B.stored()!.lists[id].items[itemId]).toBeDefined())
+    bOffline = true
+    act(() => B.get().lists.deleteItem(id, itemId))
+    await waitFor(() => expect(B.get().shared.status).toBe('offline'))
+    act(() => A.get().lists.updateItem(id, itemId, { name: 'IPA' }))
+    await waitFor(() => expect(memory.peek(id)!.items[itemId]).toMatchObject({ name: 'IPA' }))
+    await new Promise(r => setTimeout(r, 30))
+    expect(B.list(id)!.items).toEqual([])
+    bOffline = false
+    act(() => { window.dispatchEvent(new Event('online')) })
+    await waitFor(() => expect(A.list(id)!.items).toEqual([]))
+    expect(memory.peek(id)!.items[itemId]).toEqual({ id: itemId, deleted: true })
+  })
+
   it('archived lists get no item updates until unarchived', async () => {
     const { A, B, id } = await twoDevices()
     act(() => B.get().lists.archiveList(id))
