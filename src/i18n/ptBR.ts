@@ -235,4 +235,13 @@ export const ptBR: TranslationKeys = {
   signInToShare: 'Entrar com Google para compartilhar',
   yourNameInList: 'Seu nome nesta lista',
   yourNameRequired: 'Digite seu nome',
+  peopleAndMembers: 'Pessoas e membros',
+  you: 'você',
+  usingApp: 'Usando o app',
+  invite: 'Convidar',
+  inviteMore: 'Convidar mais',
+  inviteShareText: 'Entre na minha lista "{name}" no BillBuddy',
+  inviteLinkCopied: 'Link do convite copiado',
+  inviteWaitingConnection: 'Aguardando conexão',
+  sharedSignInToSync: 'Entre para sincronizar esta lista compartilhada',
 }

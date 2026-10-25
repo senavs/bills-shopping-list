@@ -233,6 +233,15 @@ export const en = {
   signInToShare: 'Sign in with Google to share',
   yourNameInList: 'Your name in this list',
   yourNameRequired: 'Enter your name',
+  peopleAndMembers: 'People & members',
+  you: 'you',
+  usingApp: 'Using the app',
+  invite: 'Invite',
+  inviteMore: 'Invite more',
+  inviteShareText: 'Join my list "{name}" on BillBuddy',
+  inviteLinkCopied: 'Invite link copied',
+  inviteWaitingConnection: 'Waiting for connection',
+  sharedSignInToSync: 'Sign in to sync this shared list',
 }
 
 export type TranslationKeys = typeof en
