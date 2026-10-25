@@ -8,5 +8,65 @@ service cloud.firestore {
       // Deletions are tombstones (updates), never document deletes
       allow delete: if false;
     }
+
+    // Shared lists: docs/superpowers/specs/2026-10-25-shared-lists-design.md §4
+    match /sharedLists/{listId} {
+      function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+      function isMember(d) { return request.auth.uid in d.members; }
+      function ownMemberPeopleOnly() {
+        return !changed().hasAny(['memberPeople'])
+          || request.resource.data.memberPeople.diff(resource.data.memberPeople).affectedKeys().hasOnly([request.auth.uid]);
+      }
+      function memberEdit() {
+        return isMember(resource.data)
+          && !changed().hasAny(['id', 'ownerUid', 'inviteToken', 'members'])
+          && ownMemberPeopleOnly()
+          && (request.resource.data.deleted == false || request.auth.uid == resource.data.ownerUid);
+      }
+      // The token is proven by joins/{uid}, written in the same batch: a token
+      // field on this doc would stay behind and let anyone join after the first guest
+      function join() {
+        return !isMember(resource.data)
+          && changed().hasOnly(['members'])
+          && request.resource.data.members == resource.data.members.concat([request.auth.uid])
+          && request.resource.data.members.size() <= 10
+          && getAfter(/databases/$(database)/documents/sharedLists/$(listId)/joins/$(request.auth.uid)).data.token == resource.data.inviteToken;
+      }
+      function leave() {
+        return isMember(resource.data) && request.auth.uid != resource.data.ownerUid
+          && changed().hasOnly(['members', 'memberPeople'])
+          && request.resource.data.members == resource.data.members.removeAll([request.auth.uid])
+          && ownMemberPeopleOnly();
+      }
+
+      allow get, list: if request.auth != null && isMember(resource.data);
+      allow create: if request.auth != null
+        && request.resource.data.id == listId
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.members == [request.auth.uid]
+        && request.resource.data.deleted == false
+        && request.resource.data.inviteToken is string
+        && request.resource.data.inviteToken.size() >= 20;
+      allow update: if request.auth != null && resource.data.deleted == false
+        && (memberEdit() || join() || leave());
+      allow delete: if false;
+
+      match /joins/{uid} {
+        allow get: if request.auth != null && request.auth.uid == uid;
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['token'])
+          && request.resource.data.token is string;
+      }
+
+      match /items/{itemId} {
+        function parent() { return get(/databases/$(database)/documents/sharedLists/$(listId)).data; }
+        allow read: if request.auth != null && request.auth.uid in parent().members;
+        allow create, update: if request.auth != null
+          && request.resource.data.id == itemId
+          && request.auth.uid in parent().members
+          && parent().deleted == false;
+        allow delete: if false;
+      }
+    }
   }
 }
