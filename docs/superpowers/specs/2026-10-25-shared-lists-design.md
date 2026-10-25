@@ -1,7 +1,7 @@
 # Listas compartilhadas — Design
 
 - **Data:** 2026-10-25
-- **Status:** revisado; aguardando aprovação do dono do produto
+- **Status:** aprovado
 - **Leitura obrigatória antes:** `docs/sync.md` e `docs/superpowers/specs/2026-10-15-google-sync-design.md`
 
 ## 1. Objetivo e contexto
@@ -86,7 +86,8 @@ gerenciar quem está na conta. Nas listas privadas, nada muda.
    `startOAuthRedirect` já guarda `returnHash`, então depois do login a pessoa volta para o mesmo `#/join/...`.
 3. Logado: o app grava o próprio `uid` em `members` provando o token (ver §4). Se o usuário já é membro, só abre a lista.
 4. Na primeira entrada na lista, o app pede **"Seu nome nesta lista"** (obrigatório). O app cria uma `Person`
-   com esse nome e grava `memberPeople[uid] = personId`, tudo no mesmo batch da entrada. **Não existe escolher
+   com esse nome e grava `memberPeople[uid] = personId` numa escrita de membro logo depois da entrada (a regra
+   de entrada só permite mudar `members`). **Não existe escolher
    uma pessoa já cadastrada**: cada usuário logado é sempre a própria pessoa, e ninguém se passa por outro.
    O nome do Google **não** é usado (mantém o requisito de privacidade do sync). O campo vem preenchido com o
    último nome usado neste aparelho, guardado no `localStorage`. *(Decisão do design.)*
@@ -192,7 +193,8 @@ Sem mudança nas regras de `users/{uid}/lists`. Novas regras, todas com `request
   - `get`: se `uid in resource.data.members`. **`list`**: só queries com `members array-contains uid`.
   - `create`: `ownerUid == uid`, `members == [uid]`, `id == listId`, `deleted == false`, `inviteToken` é string com 20+ caracteres.
   - `update` por **membro**: pode mudar qualquer campo, **exceto** `id`, `ownerUid`, `inviteToken`, `members`;
-    `deleted` só pode virar `true` se `uid == ownerUid`.
+    `deleted` só pode virar `true` se `uid == ownerUid`; em `memberPeople`, só a chave do próprio `uid` pode
+    mudar (ninguém se vincula à pessoa de outro membro).
   - `update` de **entrada** (não membro): feita num **batch** com a criação de `joins/{uid}`.
     `affectedKeys` só `members`; `members` novo == antigo + `[uid]`; tamanho ≤ 10; `deleted == false`; e
     `getAfter(/sharedLists/{listId}/joins/{uid}).data.token == resource.data.inviteToken`.
@@ -206,7 +208,6 @@ Sem mudança nas regras de `users/{uid}/lists`. Novas regras, todas com `request
 - **`sharedLists/{listId}/joins/{uid}`**: `create` e `update` só pelo próprio `uid` (`request.auth.uid == uid`);
   `read` só pelo próprio `uid`; `delete` nunca. A entrada só vale se o token gravado for igual ao `inviteToken`,
   e quem garante isso é a regra de entrada acima.
-  - `delete`: nunca (exclusão é tombstone).
 - **`sharedLists/{listId}/items/{itemId}`**
   - `read`, `create`, `update`: se `uid in get(/sharedLists/{listId}).data.members` e o pai não está `deleted`; `id == itemId`.
   - `delete`: nunca.
