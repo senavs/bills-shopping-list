@@ -14,7 +14,7 @@ type Ctx = { lists: ReturnType<typeof useLists>; shared: ReturnType<typeof useSh
 const item = (id: string): Omit<Item, 'id'> => ({ name: id, quantity: 1, unitPrice: 1, selected: false, includeInTax: true })
 
 /** One simulated device: its own lists, its own shared-sync-meta, a controllable uid. */
-const device = (remote: SharedRemote, initialUid: string | null, local: List[] = []) => {
+const device = (remote: SharedRemote, initialUid: string | null, local: List[] = [], retryMs = 20) => {
   localStorage.setItem('app', JSON.stringify({ lists: local }))
   let stored: SharedMeta | null = null
   let saves = 0
@@ -32,7 +32,7 @@ const device = (remote: SharedRemote, initialUid: string | null, local: List[] =
     }
     return (
       <SyncContext.Provider value={value}>
-        <SharedSyncProvider pushDebounceMs={10} networkTimeoutMs={500} metaStorage={metaStorage}>
+        <SharedSyncProvider pushDebounceMs={10} networkTimeoutMs={500} listenerRetryMs={retryMs} metaStorage={metaStorage}>
           <Capture />
         </SharedSyncProvider>
       </SyncContext.Provider>
@@ -163,6 +163,43 @@ describe('SharedSyncProvider', () => {
     createShared(A)
     await new Promise(r => setTimeout(r, 50))
     expect(B.saves()).toBe(before)
+  })
+
+  it('changing the set of lists does not resubscribe the other item listeners', async () => {
+    const memory = createMemorySharedRemote()
+    const calls: string[] = []
+    const counting: SharedRemote = { ...memory, subscribeItems: (...args) => { calls.push(args[1]); return memory.subscribeItems(...args) } }
+    const A = device(counting, 'u1')
+    const first = createShared(A)
+    await waitFor(() => expect(calls).toContain(first))
+    const second = createShared(A)
+    await waitFor(() => expect(calls).toContain(second))
+    act(() => A.get().lists.archiveList(second))
+    await new Promise(r => setTimeout(r, 50))
+    expect(calls.filter(id => id === first)).toHaveLength(1)
+  })
+
+  it('the lists listener is restarted after an error', async () => {
+    const memory = createMemorySharedRemote()
+    let attempts = 0
+    const flaky: SharedRemote = {
+      ...memory,
+      subscribeLists: (uid, cb, onError) => {
+        attempts++
+        if (attempts === 1) {
+          queueMicrotask(() => onError(Object.assign(new Error('x'), { code: 'unauthenticated' })))
+          return () => {}
+        }
+        return memory.subscribeLists(uid, cb, onError)
+      },
+    }
+    const A = device(memory, 'u1')
+    const id = createShared(A)
+    await waitFor(() => expect(memory.peek(id)).toBeDefined())
+    const B = device(flaky, 'u2')
+    await act(async () => { await B.get().shared.joinList(id, A.list(id)!.shared!.inviteToken) })
+    await waitFor(() => expect(B.list(id)).toBeDefined())
+    expect(attempts).toBeGreaterThan(1)
   })
 
   it('a member cannot delete for everyone', async () => {
