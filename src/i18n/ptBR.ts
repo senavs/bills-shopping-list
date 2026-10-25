@@ -216,6 +216,8 @@ export const ptBR: TranslationKeys = {
   syncStatusSyncing: 'Sincronizando…',
   syncStatusOffline: 'Offline — alterações salvas neste aparelho',
   syncStatusError: 'Falha ao sincronizar',
+  syncUnavailable: 'Sincronização indisponível',
+  syncUnavailableHint: 'Esta versão do app foi publicada sem as configurações de sincronização. Suas listas continuam salvas neste aparelho.',
   syncNow: 'Sincronizar agora',
   signInAgain: 'Entrar novamente',
   signOut: 'Sair',
