@@ -17,8 +17,12 @@ const item = (id: string): Omit<Item, 'id'> => ({ name: id, quantity: 1, unitPri
 const device = (remote: SharedRemote, initialUid: string | null, local: List[] = [], retryMs = 20) => {
   localStorage.setItem('app', JSON.stringify({ lists: local }))
   let stored: SharedMeta | null = null
+  const byUid: Record<string, SharedMeta> = {}
   let saves = 0
-  const metaStorage = { load: () => stored, save: (m: SharedMeta) => { stored = m; saves++ } }
+  const metaStorage = {
+    load: (uid?: string) => (uid ? byUid[uid] ?? null : stored),
+    save: (m: SharedMeta) => { stored = m; byUid[m.uid] = m; saves++ },
+  }
   const backend = { auth: { signIn: vi.fn(), signOut: vi.fn(), onChange: () => () => {} }, remote: createMemoryRemote(), shared: remote }
   let ctx!: Ctx
   let setUid!: (uid: string | null) => void
@@ -220,6 +224,19 @@ describe('SharedSyncProvider', () => {
     act(() => { window.dispatchEvent(new Event('online')) })
     await waitFor(() => expect(remote.peek(id)!.parent.members).toEqual(['u1']))
     await waitFor(() => expect(B.stored()!.pendingOps).toEqual([]))
+    expect(B.list(id)).toBeUndefined()
+  })
+
+  it('a leave queued under one account survives switching accounts and back', async () => {
+    const { B, remote, id } = await twoDevices()
+    ;(remote as MemorySharedRemote).setOnline(false)
+    act(() => B.get().shared.leaveList(id))
+    await waitFor(() => expect(B.get().shared.status).toBe('offline'))
+    B.setUid('u3')
+    await waitFor(() => expect(B.stored()!.uid).toBe('u3'))
+    ;(remote as MemorySharedRemote).setOnline(true)
+    B.setUid('u2')
+    await waitFor(() => expect(remote.peek(id)!.parent.members).toEqual(['u1']))
     expect(B.list(id)).toBeUndefined()
   })
 

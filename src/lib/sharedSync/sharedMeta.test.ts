@@ -22,4 +22,22 @@ describe('shared-sync-meta storage', () => {
     clearSharedMeta()
     expect(loadSharedMeta()).toBeNull()
   })
+
+  it('keeps one meta per account and loads the last one by default', () => {
+    const u1 = { ...emptySharedMeta('u1'), pendingOps: [{ kind: 'leave' as const, listId: 'L' }] }
+    saveSharedMeta(u1)
+    saveSharedMeta(emptySharedMeta('u2'))
+    expect(loadSharedMeta()?.uid).toBe('u2')
+    expect(loadSharedMeta('u1')).toEqual(u1)
+    expect(loadSharedMeta('u3')).toBeNull()
+  })
+
+  it('reads the single-account format written by earlier versions', () => {
+    const legacy = { uid: 'u1', lists: {}, pendingOps: [{ kind: 'delete', listId: 'L' }] }
+    localStorage.setItem('shared-sync-meta', JSON.stringify(legacy))
+    expect(loadSharedMeta()).toEqual(legacy)
+    expect(loadSharedMeta('u1')).toEqual(legacy)
+    saveSharedMeta(emptySharedMeta('u2'))
+    expect(loadSharedMeta('u1')).toEqual(legacy)
+  })
 })

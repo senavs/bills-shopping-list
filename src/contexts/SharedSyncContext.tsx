@@ -43,7 +43,7 @@ export const SharedSyncContext = createContext<SharedSyncValue>(INERT)
 export const useSharedSync = () => useContext(SharedSyncContext)
 
 interface MetaStorage {
-  load: () => SharedMeta | null
+  load: (uid?: string) => SharedMeta | null
   save: (meta: SharedMeta) => void
 }
 
@@ -289,7 +289,8 @@ export const SharedSyncProvider = ({
   // Signed in: make sure the meta belongs to this account, then listen to our shared lists
   useEffect(() => {
     if (!uid || !backend) return
-    if (metaRef.current?.uid !== uid) saveMeta(emptySharedMeta(uid))
+    // Each account keeps its own meta, so switching back sends its queued leaves/deletes
+    if (metaRef.current?.uid !== uid) saveMeta(metaStorage.load(uid) ?? emptySharedMeta(uid))
     const unsubscribe = backend.shared.subscribeLists(uid, onParents, error => {
       fail(error)
       retryListeners()
