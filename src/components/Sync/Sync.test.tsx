@@ -20,9 +20,25 @@ const wrap = (ui: React.ReactNode, v: SyncContextValue) => {
 afterEach(() => cleanup())
 
 describe('SyncStatusButton', () => {
-  it.each(['disabled', 'signedOut'] as const)('renders nothing when %s', status => {
-    wrap(<SyncStatusButton onOpen={() => {}} />, value({ status }))
-    expect(screen.queryByRole('button')).toBeNull()
+  it('shows a red warning when sync is not configured and opens the sheet', () => {
+    const onOpen = vi.fn()
+    wrap(<SyncStatusButton onOpen={onOpen} />, value({ status: 'disabled' }))
+    const button = screen.getByRole('button', { name: 'Sync unavailable' })
+    expect(button.querySelector('svg')?.getAttribute('class')).toContain('text-danger')
+    fireEvent.click(button)
+    expect(onOpen).toHaveBeenCalled()
+  })
+
+  it('starts sign-in when signed out, preloading the SDK on press', () => {
+    const onOpen = vi.fn()
+    const v = value({ status: 'signedOut' })
+    wrap(<SyncStatusButton onOpen={onOpen} />, v)
+    const button = screen.getByRole('button', { name: 'Sync with Google' })
+    fireEvent.pointerDown(button)
+    expect(v.prepare).toHaveBeenCalled()
+    fireEvent.click(button)
+    expect(v.signIn).toHaveBeenCalled()
+    expect(onOpen).not.toHaveBeenCalled()
   })
 
   it.each([
@@ -45,6 +61,13 @@ describe('AccountSheet', () => {
     expect(screen.getByText('Your lists stay on this device.')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Sync now' }))
     expect(v.syncNow).toHaveBeenCalled()
+  })
+
+  it('explains that sync is unavailable when not configured, with no actions', () => {
+    wrap(<AccountSheet isOpen onClose={() => {}} />, value({ status: 'disabled' }))
+    expect(screen.getByText('Sync unavailable')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Sync now' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Sign out' })).toBeNull()
   })
 
   it('offers sign in again on auth error', () => {

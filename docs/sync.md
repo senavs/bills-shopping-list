@@ -1,6 +1,6 @@
 # Google / Firestore sync
 
-Optional cloud sync. `localStorage` stays the source of truth; sync is `disabled` when the `VITE_FIREBASE_*` / `VITE_GOOGLE_CLIENT_ID` env vars are missing (`src/lib/firebase/config.ts`).
+Optional cloud sync. `localStorage` stays the source of truth; sync is `disabled` when the `VITE_FIREBASE_*` / `VITE_GOOGLE_CLIENT_ID` env vars are missing (`src/lib/firebase/config.ts`); the header cloud icon then turns red and the account sheet explains it. `npm run deploy` refuses to run without them (`scripts/check-deploy-env.js`).
 
 ## Layout
 

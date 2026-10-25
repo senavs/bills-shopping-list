@@ -214,6 +214,8 @@ export const en = {
   syncStatusSyncing: 'Syncing…',
   syncStatusOffline: 'Offline — changes saved on this device',
   syncStatusError: 'Sync failed',
+  syncUnavailable: 'Sync unavailable',
+  syncUnavailableHint: 'This version of the app was published without the cloud sync settings. Your lists are still saved on this device.',
   syncNow: 'Sync now',
   signInAgain: 'Sign in again',
   signOut: 'Sign out',
