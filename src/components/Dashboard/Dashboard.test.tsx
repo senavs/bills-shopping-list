@@ -131,6 +131,7 @@ describe('Dashboard', () => {
 
     renderDashboard()
     expect(screen.getByText('Groceries')).toBeDefined()
+    expect(screen.queryByRole('img', { name: 'Shared' })).toBeNull()
   })
 
   it('opens bottom sheet and shows delete option via more button', async () => {
@@ -198,7 +199,7 @@ describe('Dashboard', () => {
 
     it('marks the card as shared', () => {
       renderShared(sharedValue('owner'))
-      expect(screen.getByText('Shared')).toBeDefined()
+      expect(screen.getByRole('img', { name: 'Shared' })).toBeDefined()
       expect(screen.queryByText('Sign in to sync this shared list')).toBeNull()
     })
 

@@ -9,7 +9,7 @@ import { calcTotals } from '../../lib/calculations'
 import { useLongPress } from '../../hooks/useLongPress'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
-import { ArchiveIcon, BookmarkIcon, CopyIcon, EllipsisIcon, OpenIcon, PencilIcon, TrashIcon, UnarchiveIcon } from '../shared/icons'
+import { ArchiveIcon, BookmarkIcon, CopyIcon, EllipsisIcon, OpenIcon, PencilIcon, TrashIcon, UnarchiveIcon, UsersIcon } from '../shared/icons'
 
 interface ListCardProps {
   list: List
@@ -90,7 +90,7 @@ export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, on
   return (
     <>
       <div
-        className={`relative flex items-center bg-surface active:bg-fill no-callout after:absolute after:top-0 after:right-0 after:left-[4.25rem] after:h-px after:bg-hairline first:after:hidden ${list.archived ? 'opacity-80' : ''}`}
+        className={`group relative flex items-center bg-surface active:bg-fill no-callout after:absolute after:top-0 after:right-0 after:left-[4.25rem] after:h-px after:bg-hairline first:after:hidden ${list.archived ? 'opacity-80' : ''}`}
         {...handlers}
       >
         <Link
@@ -99,16 +99,21 @@ export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, on
           className="flex-1 min-w-0 flex items-center gap-3 pl-4 py-3 min-h-[64px]"
           onClick={handleCardClick}
         >
-          <span aria-hidden="true" className="shrink-0 w-10 h-10 rounded-full bg-fill flex items-center justify-center text-xl">
-            {icon}
+          <span className="relative shrink-0 w-10 h-10 rounded-full bg-fill flex items-center justify-center text-xl">
+            <span aria-hidden="true">{icon}</span>
+            {list.shared && (
+              <span
+                role="img"
+                aria-label={t.sharedBadge}
+                title={t.sharedBadge}
+                className="absolute -bottom-0.5 -right-1 w-5 h-5 rounded-full bg-accent text-on-accent ring-2 ring-surface group-active:ring-fill flex items-center justify-center"
+              >
+                <UsersIcon className="w-3.5 h-3.5" />
+              </span>
+            )}
           </span>
           <span className="flex-1 min-w-0">
-            <span className="flex items-center gap-2 min-w-0">
-              <span className="text-body font-semibold text-ink truncate">{list.name}</span>
-              {list.shared && (
-                <span className="shrink-0 text-footnote font-semibold bg-accent/15 text-accent px-2 py-0.5 rounded-full">{t.sharedBadge}</span>
-              )}
-            </span>
+            <span className="block text-body font-semibold text-ink truncate">{list.name}</span>
             <span className="block text-footnote text-muted truncate">
               {list.items.length} {list.items.length === 1 ? t.item : t.items}
               {list.sections.length > 0 && `, ${list.sections.length} ${t.sections}`}
