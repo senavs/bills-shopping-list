@@ -235,6 +235,7 @@ export const ptBR: TranslationKeys = {
   signInToShare: 'Entrar com Google para compartilhar',
   yourNameInList: 'Seu nome nesta lista',
   yourNameRequired: 'Digite seu nome',
+  sharedSignedOut: 'Você saiu da conta. Entre de novo ou desmarque "Lista compartilhada".',
   peopleAndMembers: 'Pessoas e membros',
   you: 'você',
   usingApp: 'Usando o app',

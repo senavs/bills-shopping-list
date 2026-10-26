@@ -217,7 +217,14 @@ describe('ListForm', () => {
       fireEvent.submit(container.querySelector('form')!)
       expect(mockUseLists.createList).not.toHaveBeenCalled()
       expect(mockUseLists.createSharedList).not.toHaveBeenCalled()
-      expect(screen.getAllByText('Sign in with Google to share').length).toBeGreaterThan(1)
+      expect(screen.getByText('You were signed out. Sign in again or untick "Shared list".')).toBeDefined()
+      // Not stuck: the box can still be unticked to create a private list
+      const box = sharedBox() as HTMLInputElement
+      expect(box.disabled).toBe(false)
+      fireEvent.click(box)
+      expect(box.disabled).toBe(true)
+      fireEvent.submit(container.querySelector('form')!)
+      expect(mockUseLists.createList).toHaveBeenCalledWith(expect.objectContaining({ name: 'Bar' }))
     })
 
     it('prefills your name from the last one used', () => {

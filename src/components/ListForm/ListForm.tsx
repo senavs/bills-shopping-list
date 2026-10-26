@@ -64,7 +64,7 @@ export const ListForm = () => {
       updateList(id, { name: name.trim(), type, currency, taxPercentage: tax })
     } else if (shared && canShare && !sync.uid) {
       // Signed out after ticking "shared": never fall back to a private list silently
-      setError(t.signInToShare)
+      setError(t.sharedSignedOut)
       return
     } else if (shared && sync.uid) {
       if (!myName.trim()) {
@@ -163,7 +163,8 @@ export const ListForm = () => {
                 <input
                   type="checkbox"
                   checked={shared}
-                  disabled={!sync.uid}
+                  // Stays editable while ticked, so losing sign-in never traps the form
+                  disabled={!sync.uid && !shared}
                   onChange={(e) => setShared(e.target.checked)}
                   className="mt-1 w-5 h-5 accent-accent"
                   aria-labelledby="shared-list-label"
