@@ -240,6 +240,33 @@ describe('SharedSyncProvider', () => {
     expect(B.list(id)).toBeUndefined()
   })
 
+  it('an account coming back on a shared device does not overwrite newer remote edits', async () => {
+    const { A, remote, id } = await twoDevices()
+    const token = A.list(id)!.shared!.inviteToken
+    let itemId = ''
+    act(() => { itemId = A.get().lists.addItem(id, item('milk')) })
+    await waitFor(() => expect(remote.peek(id)?.items[itemId]).toBeDefined())
+    // A tablet used by u4 then u5, both members
+    const T = device(remote, 'u4')
+    await act(async () => { await T.get().shared.joinList(id, token) })
+    await waitFor(() => expect(T.list(id)?.items).toHaveLength(1))
+    await waitFor(() => expect(T.stored()!.lists[id]?.items[itemId]).toBeDefined())
+    T.setUid('u5')
+    await act(async () => { await T.get().shared.joinList(id, token) })
+    await waitFor(() => expect(T.stored()!.uid).toBe('u5'))
+    await waitFor(() => expect(T.stored()!.lists[id]?.items[itemId]).toBeDefined())
+    act(() => T.get().lists.updateItem(id, itemId, { name: 'milk2' }))
+    await waitFor(() => expect(remote.peek(id)!.items[itemId]).toMatchObject({ name: 'milk2' }))
+    T.setUid(null)
+    await waitFor(() => expect(A.list(id)!.items[0].name).toBe('milk2'))
+    act(() => A.get().lists.updateItem(id, itemId, { name: 'oat milk' }))
+    await waitFor(() => expect(remote.peek(id)!.items[itemId]).toMatchObject({ name: 'oat milk' }))
+    T.setUid('u4')
+    await waitFor(() => expect(T.list(id)!.items[0].name).toBe('oat milk'))
+    await new Promise(r => setTimeout(r, 50))
+    expect(remote.peek(id)!.items[itemId]).toMatchObject({ name: 'oat milk' })
+  })
+
   it('after sign-out remote changes stop arriving and the meta is kept', async () => {
     const { A, B, id } = await twoDevices()
     B.setUid(null)

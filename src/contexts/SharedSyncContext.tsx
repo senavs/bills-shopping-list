@@ -289,8 +289,15 @@ export const SharedSyncProvider = ({
   // Signed in: make sure the meta belongs to this account, then listen to our shared lists
   useEffect(() => {
     if (!uid || !backend) return
-    // Each account keeps its own meta, so switching back sends its queued leaves/deletes
-    if (metaRef.current?.uid !== uid) saveMeta(metaStorage.load(uid) ?? emptySharedMeta(uid))
+    if (metaRef.current?.uid !== uid) {
+      // Switching back to an account restores only its intents (queued leaves/deletes,
+      // creates not yet sent). Its old hashes are stale: the local copies kept changing
+      // under the other account, so they'd look like local edits and overwrite newer
+      // remote ones. Without them, lists merge on the safe "remote wins" path.
+      const stored = metaStorage.load(uid)
+      const pendingCreates = Object.fromEntries(Object.entries(stored?.lists ?? {}).filter(([, lm]) => lm.pendingCreate))
+      saveMeta({ ...emptySharedMeta(uid), lists: pendingCreates, pendingOps: stored?.pendingOps ?? [] })
+    }
     const unsubscribe = backend.shared.subscribeLists(uid, onParents, error => {
       fail(error)
       retryListeners()
