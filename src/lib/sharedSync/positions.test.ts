@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest'
 import fc from 'fast-check'
 import { assignPositions, positionBetween } from './positions'
 
+// Display order is (position, id): equal positions are ordered by id
+const before = (a: string, b: string, pos: Record<string, number>) => pos[a] < pos[b] || (pos[a] === pos[b] && a < b)
 const increasing = (order: string[], pos: Record<string, number>) =>
-  order.every((id, i) => i === 0 || pos[order[i - 1]] < pos[id])
+  order.every((id, i) => i === 0 || before(order[i - 1], id, pos))
 
 describe('positionBetween', () => {
   it('handles open ends', () => {
@@ -39,13 +41,21 @@ describe('assignPositions', () => {
         ids.forEach((id, i) => { if (i < values.length) known[id] = values[i] })
         const result = assignPositions(ids, known)
         expect(increasing(ids, result)).toBe(true)
-        const sorted = [...ids].sort((x, y) => (known[x] ?? 0) - (known[y] ?? 0))
-        const distinct = new Set(Object.values(known)).size === Object.keys(known).length
-        if (ids.length === Object.keys(known).length && distinct) {
+        const sorted = [...ids].sort((x, y) => (before(x, y, known) ? -1 : before(y, x, known) ? 1 : 0))
+        if (ids.length === Object.keys(known).length) {
           expect(assignPositions(sorted, known)).toEqual(known)
         }
       },
     ))
+  })
+
+  it('keeps equal positions that are already in id order (concurrent adds)', () => {
+    expect(assignPositions(['a', 'b', 'c'], { a: 0, b: 1, c: 1 })).toEqual({ a: 0, b: 1, c: 1 })
+  })
+
+  it('inserting between two equal positions renumbers the group', () => {
+    const result = assignPositions(['a', 'x', 'b'], { a: 1, b: 1 })
+    expect(increasing(['a', 'x', 'b'], result)).toBe(true)
   })
 
   it('renumbers when repeated inserts exhaust precision', () => {

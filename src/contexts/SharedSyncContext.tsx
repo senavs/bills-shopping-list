@@ -43,7 +43,7 @@ export const SharedSyncContext = createContext<SharedSyncValue>(INERT)
 export const useSharedSync = () => useContext(SharedSyncContext)
 
 interface MetaStorage {
-  load: () => SharedMeta | null
+  load: (uid?: string) => SharedMeta | null
   save: (meta: SharedMeta) => void
 }
 
@@ -53,6 +53,7 @@ interface SharedSyncProviderProps {
   children: ReactNode
   pushDebounceMs?: number
   networkTimeoutMs?: number
+  listenerRetryMs?: number
   metaStorage?: MetaStorage
 }
 
@@ -70,7 +71,9 @@ const replaceById = (lists: List[], list: List) => {
  * edits are diffed against shared-sync-meta and pushed per entity; snapshots
  * are merged per entity.
  */
-export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTimeoutMs = 15000, metaStorage = defaultStorage }: SharedSyncProviderProps) => {
+export const SharedSyncProvider = ({
+  children, pushDebounceMs = 1000, networkTimeoutMs = 15000, listenerRetryMs = 5000, metaStorage = defaultStorage,
+}: SharedSyncProviderProps) => {
   const { uid, backend } = useSync()
   const { lists, replaceLists, deleteList } = useLists()
 
@@ -93,6 +96,12 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
   const [notices, setNotices] = useState<SharedNotice[]>([])
   const [, setMetaVersion] = useState(0)
   const [parentsVersion, setParentsVersion] = useState(0)
+  // Bumped to restart listeners that died with an error (e.g. an expired token), each with its own backoff
+  const [listsEpoch, setListsEpoch] = useState(0)
+  const [itemsEpoch, setItemsEpoch] = useState(0)
+  const listsRetry = useRef({ timer: null as ReturnType<typeof setTimeout> | null, failures: 0 })
+  const itemsRetry = useRef({ timer: null as ReturnType<typeof setTimeout> | null, failures: 0 })
+  const itemSubsRef = useRef(new Map<string, () => void>())
 
   const saveMeta = (meta: SharedMeta) => {
     metaRef.current = meta
@@ -101,7 +110,8 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
   }
   const setListMeta = (listId: string, lm: ListMeta | null) => {
     const meta = metaRef.current
-    if (!meta) return
+    // Tombstones stay in the members query forever: don't rewrite storage for nothing
+    if (!meta || (lm === null && !(listId in meta.lists))) return
     const { [listId]: _old, ...rest } = meta.lists
     saveMeta({ ...meta, lists: lm ? { ...rest, [listId]: lm } : rest })
   }
@@ -192,6 +202,7 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
         notify('removed', local.name)
       }
     }
+    listsRetry.current.failures = 0
     setParentsVersion(v => v + 1)
   }
 
@@ -281,15 +292,40 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
   // Signed in: make sure the meta belongs to this account, then listen to our shared lists
   useEffect(() => {
     if (!uid || !backend) return
-    if (metaRef.current?.uid !== uid) saveMeta(emptySharedMeta(uid))
-    const unsubscribe = backend.shared.subscribeLists(uid, onParents, fail)
+    if (metaRef.current?.uid !== uid) {
+      // Switching back to an account restores only its intents (queued leaves/deletes,
+      // creates not yet sent). Its old hashes are stale: the local copies kept changing
+      // under the other account, so they'd look like local edits and overwrite newer
+      // remote ones. Without them, lists merge on the safe "remote wins" path.
+      const stored = metaStorage.load(uid)
+      const pendingCreates = Object.fromEntries(Object.entries(stored?.lists ?? {}).filter(([, lm]) => lm.pendingCreate))
+      saveMeta({ ...emptySharedMeta(uid), lists: pendingCreates, pendingOps: stored?.pendingOps ?? [] })
+    }
+    const unsubscribe = backend.shared.subscribeLists(uid, onParents, error => {
+      fail(error)
+      retryLater(listsRetry.current, setListsEpoch)
+    })
     schedule()
     return () => {
       unsubscribe()
       parentsRef.current = new Map()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uid, backend, schedule])
+  }, [uid, backend, schedule, listsEpoch])
+
+  // Exponential backoff (listenerRetryMs, x2 per failure, up to 5 min), reset by the next good snapshot
+  const retryLater = (retry: { timer: ReturnType<typeof setTimeout> | null; failures: number }, bump: (f: (e: number) => number) => void) => {
+    if (retry.timer) return
+    const delay = Math.min(listenerRetryMs * 2 ** retry.failures, 5 * 60_000)
+    retry.failures++
+    retry.timer = setTimeout(() => {
+      retry.timer = null
+      bump(e => e + 1)
+    }, delay)
+  }
+  useEffect(() => () => {
+    for (const retry of [listsRetry.current, itemsRetry.current]) if (retry.timer) clearTimeout(retry.timer)
+  }, [])
 
   // Item listeners for every known, alive, non-archived shared list
   const itemListKey = useMemo(() => {
@@ -300,22 +336,45 @@ export const SharedSyncProvider = ({ children, pushDebounceMs = 1000, networkTim
       .join(',')
   }, [lists, parentsVersion])
 
+  // Signed out or account switch: drop every item listener
   useEffect(() => {
-    if (!uid || !backend || !itemListKey) return
-    const ids = itemListKey.split(',')
-    const unsubscribes = ids.map(id => backend.shared.subscribeItems(uid, id, items => {
-      itemsRef.current.set(id, items)
-      applyRemote(id)
-    }, error => {
-      // Losing access to one list is reported by the parent listener
-      if (classifyError(error) !== 'auth') fail(error)
-    }))
+    const subs = itemSubsRef.current
     return () => {
-      unsubscribes.forEach(u => u())
-      ids.forEach(id => itemsRef.current.delete(id))
+      subs.forEach(unsubscribe => unsubscribe())
+      subs.clear()
+      itemsRef.current.clear()
+    }
+  }, [uid, backend])
+
+  // Subscribe only the lists that appeared and drop those that went away (no re-read of the others)
+  useEffect(() => {
+    if (!uid || !backend) return
+    const subs = itemSubsRef.current
+    const wanted = new Set(itemListKey ? itemListKey.split(',') : [])
+    for (const [id, unsubscribe] of subs) {
+      if (wanted.has(id)) continue
+      unsubscribe()
+      subs.delete(id)
+      itemsRef.current.delete(id)
+    }
+    for (const id of wanted) {
+      if (subs.has(id)) continue
+      subs.set(id, backend.shared.subscribeItems(uid, id, items => {
+        itemsRetry.current.failures = 0
+        itemsRef.current.set(id, items)
+        applyRemote(id)
+      }, error => {
+        subs.get(id)?.()
+        subs.delete(id)
+        // Losing access to one list is reported by the parent listener
+        if (classifyError(error) !== 'auth') {
+          fail(error)
+          retryLater(itemsRetry.current, setItemsEpoch)
+        }
+      }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uid, backend, itemListKey])
+  }, [uid, backend, itemListKey, itemsEpoch])
 
   // Debounce a push after local edits to shared lists
   useEffect(() => {

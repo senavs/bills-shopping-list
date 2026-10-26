@@ -67,9 +67,11 @@ describe('mergeSnapshot', () => {
     const B = withSection(L, 'i2')
     const metaA = s.write(A, synced(L))
     s.write(B, synced(L))
-    const { list } = mergeSnapshot(A, s.parent, s.items(), metaA)
+    const { list, meta } = mergeSnapshot(A, s.parent, s.items(), metaA)
     expect(list.sections[0].itemIds.sort()).toEqual(['a', 'i1', 'i2'])
     expect(list.items.map(i => i.id).sort()).toEqual(['a', 'b', 'i1', 'i2'])
+    // Both got the same position: the tie is a valid order, nothing is rewritten
+    expect(diffLocal(list, meta).empty).toBe(true)
   })
 
   it('a dirty local item wins over a remote change and is pushed again', () => {

@@ -233,6 +233,7 @@ export const en = {
   signInToShare: 'Sign in with Google to share',
   yourNameInList: 'Your name in this list',
   yourNameRequired: 'Enter your name',
+  sharedSignedOut: 'You were signed out. Sign in again or untick "Shared list".',
   peopleAndMembers: 'People & members',
   you: 'you',
   usingApp: 'Using the app',

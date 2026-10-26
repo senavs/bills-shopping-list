@@ -209,6 +209,24 @@ describe('ListForm', () => {
       expect(localStorage.getItem('shared-name')).toBe('Ana')
     })
 
+    it('does not silently create a private list when sign-in was lost', () => {
+      const { container, rerender } = renderWithSync(syncValue())
+      fireEvent.change(screen.getByPlaceholderText('e.g., Weekly Groceries'), { target: { value: 'Bar' } })
+      fireEvent.click(sharedBox()!)
+      rerender(<BrowserRouter><LanguageProvider><SyncContext.Provider value={syncValue({ status: 'signedOut', uid: null })}><ListForm /></SyncContext.Provider></LanguageProvider></BrowserRouter>)
+      fireEvent.submit(container.querySelector('form')!)
+      expect(mockUseLists.createList).not.toHaveBeenCalled()
+      expect(mockUseLists.createSharedList).not.toHaveBeenCalled()
+      expect(screen.getByText('You were signed out. Sign in again or untick "Shared list".')).toBeDefined()
+      // Not stuck: the box can still be unticked to create a private list
+      const box = sharedBox() as HTMLInputElement
+      expect(box.disabled).toBe(false)
+      fireEvent.click(box)
+      expect(box.disabled).toBe(true)
+      fireEvent.submit(container.querySelector('form')!)
+      expect(mockUseLists.createList).toHaveBeenCalledWith(expect.objectContaining({ name: 'Bar' }))
+    })
+
     it('prefills your name from the last one used', () => {
       localStorage.setItem('shared-name', 'Ana')
       renderWithSync(syncValue())

@@ -14,6 +14,7 @@ import { useLanguage } from '../../contexts/LanguageContext'
 import { useSync } from '../../contexts/SyncContext'
 import { useSharedSync } from '../../contexts/SharedSyncContext'
 import { buildInviteUrl, shareInvite } from '../../lib/sharedSync/invite'
+import { MemberNameForm } from '../Join/MemberNameForm'
 import type { Item } from '../../types'
 import { ChevronLeftIcon, PencilIcon, PlusIcon, ShareIcon, UsersIcon } from '../shared/icons'
 
@@ -32,7 +33,7 @@ export const ListDetail = () => {
   const {
     lists, addItem, updateItem, deleteItem, reorderItem,
     addSection, updateSection, deleteSection, reorderSection, reorderItemInSection,
-    addPerson, removePerson, duplicateItem,
+    addPerson, removePerson, duplicateItem, addMemberPerson,
   } = useLists()
   const { t } = useLanguage()
   const [showItemForm, setShowItemForm] = useState(false)
@@ -259,6 +260,12 @@ export const ListDetail = () => {
           </p>
           {shared && !sync.uid && (
             <p className="mt-2 text-footnote text-muted">{t.sharedSignInToSync}</p>
+          )}
+          {shared && sync.uid && !shared.memberPeople?.[sync.uid] && (
+            // Joined without naming themselves (e.g. left the invite page early)
+            <div className="mt-3 bg-surface rounded-group p-4">
+              <MemberNameForm onSubmit={(name) => addMemberPerson(list.id, sync.uid!, name)} />
+            </div>
           )}
           {inviteNotice && (
             <p role="status" className="mt-2 text-footnote text-accent">{inviteNotice}</p>
