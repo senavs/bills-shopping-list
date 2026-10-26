@@ -198,7 +198,7 @@ describe('Dashboard', () => {
 
     it('marks the card as shared', () => {
       renderShared(sharedValue('owner'))
-      expect(screen.getByText('Shared')).toBeDefined()
+      expect(screen.getByRole('img', { name: 'Shared' })).toBeDefined()
       expect(screen.queryByText('Sign in to sync this shared list')).toBeNull()
     })
 
