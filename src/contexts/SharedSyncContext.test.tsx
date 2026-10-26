@@ -206,6 +206,47 @@ describe('SharedSyncProvider', () => {
     expect(attempts).toBeGreaterThan(1)
   })
 
+  it('an item listener error restarts only the item listener', async () => {
+    const memory = createMemorySharedRemote()
+    let listSubs = 0
+    let itemSubs = 0
+    const flaky: SharedRemote = {
+      ...memory,
+      subscribeLists: (...args) => { listSubs++; return memory.subscribeLists(...args) },
+      subscribeItems: (uid, listId, cb, onError) => {
+        itemSubs++
+        if (itemSubs === 1) {
+          queueMicrotask(() => onError(Object.assign(new Error('x'), { code: 'internal' })))
+          return () => {}
+        }
+        return memory.subscribeItems(uid, listId, cb, onError)
+      },
+    }
+    const A = device(flaky, 'u1')
+    createShared(A)
+    await waitFor(() => expect(itemSubs).toBeGreaterThan(1))
+    await new Promise(r => setTimeout(r, 50))
+    expect(listSubs).toBe(1)
+  })
+
+  it('a lists listener that keeps failing backs off', async () => {
+    const memory = createMemorySharedRemote()
+    let attempts = 0
+    const broken: SharedRemote = {
+      ...memory,
+      subscribeLists: (_uid, _cb, onError) => {
+        attempts++
+        queueMicrotask(() => onError(Object.assign(new Error('x'), { code: 'internal' })))
+        return () => {}
+      },
+    }
+    device(broken, 'u1')
+    // 20 ms base: retries at ~20, 60, 140, 300 ms; a fixed 20 ms delay would give ~15 attempts
+    await new Promise(r => setTimeout(r, 300))
+    expect(attempts).toBeGreaterThanOrEqual(3)
+    expect(attempts).toBeLessThanOrEqual(6)
+  })
+
   it('a member cannot delete for everyone', async () => {
     const { B, remote, id } = await twoDevices()
     act(() => B.get().shared.deleteSharedList(id))
