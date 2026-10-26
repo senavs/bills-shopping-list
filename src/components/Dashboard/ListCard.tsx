@@ -90,7 +90,7 @@ export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, on
   return (
     <>
       <div
-        className={`relative flex items-center bg-surface active:bg-fill no-callout after:absolute after:top-0 after:right-0 after:left-[4.25rem] after:h-px after:bg-hairline first:after:hidden ${list.archived ? 'opacity-80' : ''}`}
+        className={`group relative flex items-center bg-surface active:bg-fill no-callout after:absolute after:top-0 after:right-0 after:left-[4.25rem] after:h-px after:bg-hairline first:after:hidden ${list.archived ? 'opacity-80' : ''}`}
         {...handlers}
       >
         <Link
@@ -106,7 +106,7 @@ export const ListCard = ({ list, activeTab, onArchive, onUnarchive, onDelete, on
                 role="img"
                 aria-label={t.sharedBadge}
                 title={t.sharedBadge}
-                className="absolute -bottom-0.5 -right-1 w-5 h-5 rounded-full bg-accent text-on-accent ring-2 ring-surface flex items-center justify-center"
+                className="absolute -bottom-0.5 -right-1 w-5 h-5 rounded-full bg-accent text-on-accent ring-2 ring-surface group-active:ring-fill flex items-center justify-center"
               >
                 <UsersIcon className="w-3.5 h-3.5" />
               </span>

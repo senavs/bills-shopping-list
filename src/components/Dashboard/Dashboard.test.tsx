@@ -131,6 +131,7 @@ describe('Dashboard', () => {
 
     renderDashboard()
     expect(screen.getByText('Groceries')).toBeDefined()
+    expect(screen.queryByRole('img', { name: 'Shared' })).toBeNull()
   })
 
   it('opens bottom sheet and shows delete option via more button', async () => {
