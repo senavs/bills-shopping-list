@@ -276,6 +276,7 @@ export const ListDetail = () => {
         {!isTemplate && (
           <PeopleManager
             people={list.people || []}
+            items={list.items}
             onAddPerson={(name) => addPerson(list.id, name)}
             onRemovePerson={(personId) => removePerson(list.id, personId)}
             shared={shared && {
@@ -283,6 +284,7 @@ export const ListDetail = () => {
               memberPersonIds: Object.values(shared.memberPeople ?? {}),
               onInvite: () => { void handleInvite() },
               inviteDisabled,
+              notice: inviteNotice,
             }}
           />
         )}
