@@ -73,7 +73,7 @@ export const en = {
   addPeopleToSplit: 'Add people to this list to see the split',
   split: 'split',
   grandTotal: 'Grand Total',
-  shared: 'Shared',
+  splitAmongEveryone: 'Split among everyone',
   deleteList: 'Delete List',
   deleteListMessage: 'Are you sure you want to delete this list? This action cannot be undone.',
   deleteTemplate: 'Delete Template',

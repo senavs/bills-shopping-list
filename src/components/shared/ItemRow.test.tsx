@@ -133,3 +133,23 @@ describe('ItemRow - interaction', () => {
     expect(onToggleSelected).not.toHaveBeenCalled()
   })
 })
+
+describe('ItemRow - assignment badges', () => {
+  const people = [{ id: 'p1', name: 'Ana' }, { id: 'p2', name: 'Bia' }]
+  const renderWithPeople = (item: Item) => render(
+    <LanguageProvider>
+      <ItemRow item={item} currency="USD" people={people} onToggleSelected={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} onDuplicate={vi.fn()} />
+    </LanguageProvider>
+  )
+
+  it('labels unassigned items as split among everyone', () => {
+    renderWithPeople(baseItem)
+    expect(screen.getByText('Split among everyone')).toBeDefined()
+  })
+
+  it('shows assignee names instead of the split label', () => {
+    renderWithPeople({ ...baseItem, assignedTo: ['p2'] })
+    expect(screen.getByText('Bia')).toBeDefined()
+    expect(screen.queryByText('Split among everyone')).toBeNull()
+  })
+})
