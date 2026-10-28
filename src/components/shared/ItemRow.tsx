@@ -122,7 +122,7 @@ export const ItemRow = ({
               <span className="flex flex-wrap gap-1 mt-1">
                 {assignedPeople.length === 0 ? (
                   <span className="inline-flex items-center gap-1 text-footnote px-1.5 py-0.5 bg-fill text-muted rounded">
-                    <UsersIcon className="w-3.5 h-3.5" /> {t.shared}
+                    <UsersIcon className="w-3.5 h-3.5" /> {t.splitAmongEveryone}
                   </span>
                 ) : (
                   assignedPeople.map(person => (

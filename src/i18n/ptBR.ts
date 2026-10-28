@@ -75,7 +75,7 @@ export const ptBR: TranslationKeys = {
   addPeopleToSplit: 'Adicione pessoas para ver a divisão',
   split: 'dividido',
   grandTotal: 'Total Geral',
-  shared: 'Compartilhado',
+  splitAmongEveryone: 'Dividido entre todos',
   deleteList: 'Excluir Lista',
   deleteListMessage: 'Tem certeza que deseja excluir esta lista? Esta ação não pode ser desfeita.',
   deleteTemplate: 'Excluir Modelo',
