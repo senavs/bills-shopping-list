@@ -267,6 +267,11 @@ export const en = {
   deleteForEveryoneMessage: 'The list will be deleted for all members.',
   sharedListDeletedNotice: '"{name}" was deleted by its owner',
   sharedListRemovedNotice: 'You no longer have access to "{name}"',
+  search: 'Search',
+  searchLists: 'Search lists',
+  searchItems: 'Search items',
+  closeSearch: 'Close search',
+  noSearchResults: 'No results for "{query}"',
 }
 
 export type TranslationKeys = typeof en

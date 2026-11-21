@@ -269,4 +269,9 @@ export const ptBR: TranslationKeys = {
   deleteForEveryoneMessage: 'A lista será excluída para todos os membros.',
   sharedListDeletedNotice: '"{name}" foi excluída por quem a criou',
   sharedListRemovedNotice: 'Você não tem mais acesso a "{name}"',
+  search: 'Buscar',
+  searchLists: 'Buscar listas',
+  searchItems: 'Buscar itens',
+  closeSearch: 'Fechar busca',
+  noSearchResults: 'Nenhum resultado para "{query}"',
 }
