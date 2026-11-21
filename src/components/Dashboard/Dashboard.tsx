@@ -9,7 +9,8 @@ import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { BottomSheet, type BottomSheetAction } from '../shared/BottomSheet'
 import { exportData, importData, mergeImportWithShared, stripShared } from '../../lib/importExport'
 import { getPresetTemplates } from '../../lib/presetTemplates'
-import { CloudCheckIcon, CloudIcon, DownloadIcon, EllipsisIcon, GlobeIcon, InfoIcon, MoonIcon, PlusIcon, ShareIcon, SunIcon } from '../shared/icons'
+import { CloseIcon, CloudCheckIcon, CloudIcon, DownloadIcon, EllipsisIcon, GlobeIcon, InfoIcon, MoonIcon, PlusIcon, SearchIcon, ShareIcon, SunIcon } from '../shared/icons'
+import { matchesSearch } from '../../lib/search'
 import { useSync } from '../../contexts/SyncContext'
 import { useSharedSync } from '../../contexts/SharedSyncContext'
 import { SyncStatusButton } from '../Sync/SyncStatusButton'
@@ -49,14 +50,26 @@ export const Dashboard = () => {
   const [importError, setImportError] = useState<string | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const searching = query.trim() !== ''
+  const matches = (name: string) => matchesSearch(name, query)
+
+  const closeSearch = () => {
+    setSearchOpen(false)
+    setQuery('')
+  }
 
   const regularLists = lists.filter(list => !list.isTemplate)
   const templates = lists.filter(list => list.isTemplate)
   const presetTemplates = getPresetTemplates(t, isBR)
+  const visibleTemplates = templates.filter(tpl => matches(tpl.name))
+  const visiblePresets = presetTemplates.filter(preset => matches(preset.name))
 
   const filteredLists = regularLists.filter(list =>
-    activeTab === 'active' ? !list.archived : list.archived
+    (activeTab === 'active' ? !list.archived : list.archived) && matches(list.name)
   )
+  const noResultsMessage = t.noSearchResults.replace('{query}', query.trim())
 
   const handleDeleteTemplate = (id: string) => {
     deleteTemplate(id)
@@ -150,6 +163,14 @@ export const Dashboard = () => {
               {t.appTitle}
             </h1>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
+                aria-pressed={searchOpen}
+                className="w-11 h-11 flex items-center justify-center rounded-full bg-fill text-accent"
+                aria-label={t.search}
+              >
+                <SearchIcon className="w-6 h-6" />
+              </button>
               <SyncStatusButton onOpen={() => setShowAccount(true)} />
               <button
                 onClick={openSettings}
@@ -179,6 +200,30 @@ export const Dashboard = () => {
               </button>
             ))}
           </div>
+
+          {searchOpen && (
+            <div className="mt-3 flex items-center gap-2 rounded-[10px] bg-fill pl-3 pr-1">
+              <SearchIcon className="w-5 h-5 shrink-0 text-muted" />
+              <input
+                type="search"
+                autoFocus
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Escape') closeSearch() }}
+                placeholder={t.searchLists}
+                aria-label={t.searchLists}
+                className="flex-1 min-w-0 min-h-[40px] bg-transparent text-body text-ink placeholder:text-muted outline-none [&::-webkit-search-cancel-button]:hidden"
+              />
+              <button
+                type="button"
+                onClick={closeSearch}
+                className="w-9 h-9 flex items-center justify-center rounded-full text-muted"
+                aria-label={t.closeSearch}
+              >
+                <CloseIcon className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -210,50 +255,63 @@ export const Dashboard = () => {
         <SyncBanner listCount={regularLists.length} />
 
         {activeTab === 'templates' ? (
-          <>
-            <h2 className="pl-1 min-h-[44px] flex items-center text-callout font-semibold text-ink">
-              {t.myTemplates}
-            </h2>
-            {templates.length === 0 ? (
-              <div className="bg-surface rounded-group px-4 py-6 text-center text-muted">
-                <p className="mb-1">{t.noTemplates}</p>
-                <p className="text-callout">{t.noTemplatesHint}</p>
-              </div>
-            ) : (
-              <div className="bg-surface rounded-group overflow-hidden">
-                {templates.map(template => (
-                  <TemplateCard
-                    key={template.id}
-                    template={template}
-                    activeTab={activeTab}
-                    onUseTemplate={() => createFromTemplate(template.id)}
-                    onDelete={() => setDeleteTemplateConfirm(template.id)}
-                  />
-                ))}
-              </div>
-            )}
-
-            <h2 className="pl-1 pt-4 min-h-[44px] flex items-center text-callout font-semibold text-ink">
-              {t.presetTemplates}
-            </h2>
-            <div className="bg-surface rounded-group overflow-hidden">
-              {presetTemplates.map(preset => (
-                <TemplateCard
-                  key={preset.id}
-                  template={preset}
-                  activeTab={activeTab}
-                  preset
-                  onUseTemplate={() => createFromPreset(preset)}
-                  onCopyToMyTemplates={() => copyPresetToTemplates(preset)}
-                />
-              ))}
+          searching && visibleTemplates.length === 0 && visiblePresets.length === 0 ? (
+            <div className="text-center py-12 text-muted">
+              <p>{noResultsMessage}</p>
             </div>
-          </>
+          ) : (
+            <>
+              {/* While searching, a section with no matches is hidden entirely */}
+              {!(searching && visibleTemplates.length === 0) && (
+                <h2 className="pl-1 min-h-[44px] flex items-center text-callout font-semibold text-ink">
+                  {t.myTemplates}
+                </h2>
+              )}
+              {visibleTemplates.length > 0 ? (
+                <div className="bg-surface rounded-group overflow-hidden">
+                  {visibleTemplates.map(template => (
+                    <TemplateCard
+                      key={template.id}
+                      template={template}
+                      activeTab={activeTab}
+                      onUseTemplate={() => createFromTemplate(template.id)}
+                      onDelete={() => setDeleteTemplateConfirm(template.id)}
+                    />
+                  ))}
+                </div>
+              ) : !searching && (
+                <div className="bg-surface rounded-group px-4 py-6 text-center text-muted">
+                  <p className="mb-1">{t.noTemplates}</p>
+                  <p className="text-callout">{t.noTemplatesHint}</p>
+                </div>
+              )}
+
+              {visiblePresets.length > 0 && (
+                <>
+                  <h2 className="pl-1 pt-4 min-h-[44px] flex items-center text-callout font-semibold text-ink">
+                    {t.presetTemplates}
+                  </h2>
+                  <div className="bg-surface rounded-group overflow-hidden">
+                    {visiblePresets.map(preset => (
+                      <TemplateCard
+                        key={preset.id}
+                        template={preset}
+                        activeTab={activeTab}
+                        preset
+                        onUseTemplate={() => createFromPreset(preset)}
+                        onCopyToMyTemplates={() => copyPresetToTemplates(preset)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )
         ) : (
           filteredLists.length === 0 ? (
             <div className="text-center py-12 text-muted">
-              <p>{activeTab === 'active' ? t.noActiveLists : t.noArchivedLists}</p>
-              {activeTab === 'active' && (
+              <p>{searching ? noResultsMessage : activeTab === 'active' ? t.noActiveLists : t.noArchivedLists}</p>
+              {activeTab === 'active' && !searching && (
                 <p className="mt-3 text-callout">
                   <Link to="/" className="text-accent">
                     {t.landingHint}
