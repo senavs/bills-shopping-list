@@ -214,26 +214,38 @@ describe('ItemForm - Property 8: Form submit includes selected unitType', () => 
 })
 
 describe('ItemForm - iOS keyboard and sheet', () => {
-  it('starts the unit price empty with a locale placeholder when adding', () => {
+  it('starts the unit price at 0.00 for USD and 0,00 for BRL', () => {
+    render(<LanguageProvider><ItemForm currency="USD" onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('0.00')
+    cleanup()
     render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
-    const price = screen.getByLabelText('Unit Price') as HTMLInputElement
-    expect(price.value).toBe('')
-    expect(price.placeholder).toBe('0.00')
+    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('0,00')
   })
 
-  it('pre-fills the unit price when editing', () => {
-    render(<LanguageProvider><ItemForm item={baseItem} onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
-    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('3.5')
+  it('pre-fills the unit price formatted when editing', () => {
+    render(<LanguageProvider><ItemForm item={baseItem} currency="BRL" onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('3,50')
+    cleanup()
+    render(<LanguageProvider><ItemForm item={{ ...baseItem, unitPrice: 19.99 }} currency="BRL" onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('19,99')
   })
 
-  it('submits unitPrice 0 when the price is left empty', () => {
+  it('submits 0 after clearing the price', () => {
+    const onSubmit = vi.fn()
+    render(<LanguageProvider><ItemForm item={baseItem} onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
+    fireEvent.change(screen.getByLabelText('Unit Price'), { target: { value: '' } })
+    fireEvent.submit(screen.getByLabelText('Unit Price').closest('form')!)
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ unitPrice: 0 }), '')
+  })
+
+  it('submits unitPrice 0 when the price is untouched', () => {
     const onSubmit = vi.fn()
     render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
     fillAndSubmit()
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ unitPrice: 0 }), '')
   })
 
-  it('accepts a comma decimal price', () => {
+  it('submits the typed price', () => {
     const onSubmit = vi.fn()
     render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
     fireEvent.change(screen.getByLabelText('Unit Price'), { target: { value: '6,45' } })
@@ -249,7 +261,7 @@ describe('ItemForm - iOS keyboard and sheet', () => {
     expect(name.getAttribute('enterkeyhint')).toBe('next')
     expect(screen.getByLabelText('Quantity').getAttribute('enterkeyhint')).toBe('next')
     const price = screen.getByLabelText('Unit Price')
-    expect(price.getAttribute('inputmode')).toBe('decimal')
+    expect(price.getAttribute('inputmode')).toBe('numeric')
     expect(price.getAttribute('enterkeyhint')).toBe('done')
   })
 

@@ -363,10 +363,11 @@ export const ListDetail = () => {
         />
       )}
 
-      {showItemForm && <ItemForm sections={list.sections} people={list.people || []} initialSectionId={defaultSectionId} onSubmit={handleAddItem} onCancel={() => setShowItemForm(false)} />}
+      {showItemForm && <ItemForm sections={list.sections} people={list.people || []} currency={list.currency} initialSectionId={defaultSectionId} onSubmit={handleAddItem} onCancel={() => setShowItemForm(false)} />}
       {editingItem && (
         <ItemForm
           item={editingItem}
+          currency={list.currency}
           sections={list.sections}
           people={list.people || []}
           initialSectionId={list.sections.find(s => s.itemIds.includes(editingItem.id))?.id ?? ''}
