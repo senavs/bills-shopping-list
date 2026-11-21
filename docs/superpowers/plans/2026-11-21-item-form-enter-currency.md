@@ -176,10 +176,9 @@ Add `quantityRef` and `priceRef`. `onKeyDown` on name → focus quantity; on qua
 it('Enter on name focuses quantity and does not submit')
   // keyDown(name, { key: 'Enter' }) → document.activeElement === Quantity; onSubmit not called
 it('Enter on quantity focuses price and does not submit')
-it('Enter on price submits the form')
-  // fill name, fireEvent.submit triggered via keyDown Enter on price isn't simulated by happy-dom:
-  // assert the price input has no onKeyDown preventing default — i.e. keyDown Enter on price
-  // returns true (not defaultPrevented), and fireEvent.submit(form) calls onSubmit
+it('Enter on price is left to the browser (implicit submit)')
+  // happy-dom doesn't do implicit submission, so assert fireEvent.keyDown(price, { key: 'Enter' })
+  // returns true (default not prevented)
 it('ignores Enter while composing')
   // keyDown(name, { key: 'Enter', isComposing: true }) → focus stays on name
 ```
