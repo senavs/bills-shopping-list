@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Item, Section, Person, UnitType } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { parseLocaleNumber, toCents } from '../../lib/format'
@@ -29,6 +29,15 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
   const [sectionId, setSectionId] = useState(initialSectionId)
   const [assignedTo, setAssignedTo] = useState<string[]>(item?.assignedTo || [])
   const [error, setError] = useState('')
+  const quantityRef = useRef<HTMLInputElement>(null)
+  const priceRef = useRef<HTMLInputElement>(null)
+
+  // Enter moves name → quantity → price; only Enter on the price submits
+  const focusOnEnter = (next: React.RefObject<HTMLInputElement | null>) => (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
+    e.preventDefault()
+    next.current?.focus()
+  }
 
   useEffect(() => {
     if (item) {
@@ -129,6 +138,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 id="itemName"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onKeyDown={focusOnEnter(quantityRef)}
                 className={inputClass}
                 placeholder={t.itemNamePlaceholder}
                 autoFocus={!item}
@@ -149,8 +159,10 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                   id="itemQuantity"
                   inputMode="decimal"
                   enterKeyHint="next"
+                  ref={quantityRef}
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
+                  onKeyDown={focusOnEnter(priceRef)}
                   required
                   className={inputClass}
                 />
@@ -178,6 +190,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 {t.unitPrice}
               </label>
               <CurrencyInput
+                ref={priceRef}
                 id="itemUnitPrice"
                 enterKeyHint="done"
                 valueCents={priceCents}

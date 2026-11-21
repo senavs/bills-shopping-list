@@ -303,3 +303,47 @@ describe('ItemForm - iOS keyboard and sheet', () => {
     expect(checkbox.checked).toBe(false)
   })
 })
+
+describe('ItemForm - Enter navigation', () => {
+  const setup = () => {
+    const onSubmit = vi.fn()
+    render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
+    return {
+      onSubmit,
+      name: screen.getByLabelText(/name/i),
+      quantity: screen.getByLabelText('Quantity'),
+      price: screen.getByLabelText('Unit Price'),
+    }
+  }
+
+  it('Enter on name focuses quantity and does not submit', () => {
+    const { onSubmit, name, quantity } = setup()
+    name.focus()
+    const notPrevented = fireEvent.keyDown(name, { key: 'Enter' })
+    expect(notPrevented).toBe(false)
+    expect(document.activeElement).toBe(quantity)
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('Enter on quantity focuses price and does not submit', () => {
+    const { onSubmit, quantity, price } = setup()
+    quantity.focus()
+    const notPrevented = fireEvent.keyDown(quantity, { key: 'Enter' })
+    expect(notPrevented).toBe(false)
+    expect(document.activeElement).toBe(price)
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('Enter on price is left to the browser (implicit submit)', () => {
+    const { price } = setup()
+    price.focus()
+    expect(fireEvent.keyDown(price, { key: 'Enter' })).toBe(true)
+  })
+
+  it('ignores Enter while composing', () => {
+    const { name } = setup()
+    name.focus()
+    expect(fireEvent.keyDown(name, { key: 'Enter', isComposing: true })).toBe(true)
+    expect(document.activeElement).toBe(name)
+  })
+})
