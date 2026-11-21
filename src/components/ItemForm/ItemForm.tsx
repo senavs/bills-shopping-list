@@ -66,7 +66,10 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
       return
     }
 
-    onSubmit({ name: name.trim(), quantity: qty, unitPrice: priceCents / 100, unitType, selected, includeInTax, assignedTo }, sectionId)
+    // An untouched price keeps its stored value, so editing other fields never rounds e.g. 5.899
+    const unitPrice = item && priceCents === toCents(item.unitPrice) ? item.unitPrice : priceCents / 100
+
+    onSubmit({ name: name.trim(), quantity: qty, unitPrice, unitType, selected, includeInTax, assignedTo }, sectionId)
   }
 
   const togglePerson = (personId: string) => {

@@ -238,6 +238,14 @@ describe('ItemForm - iOS keyboard and sheet', () => {
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ unitPrice: 0 }), '')
   })
 
+  it('keeps a 3-decimal price when editing other fields', () => {
+    const onSubmit = vi.fn()
+    render(<LanguageProvider><ItemForm item={{ ...baseItem, unitPrice: 5.899 }} onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Fuel' } })
+    fireEvent.submit(screen.getByLabelText('Unit Price').closest('form')!)
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ unitPrice: 5.899 }), '')
+  })
+
   it('submits unitPrice 0 when the price is untouched', () => {
     const onSubmit = vi.fn()
     render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
