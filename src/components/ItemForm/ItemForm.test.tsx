@@ -214,26 +214,46 @@ describe('ItemForm - Property 8: Form submit includes selected unitType', () => 
 })
 
 describe('ItemForm - iOS keyboard and sheet', () => {
-  it('starts the unit price empty with a locale placeholder when adding', () => {
+  it('starts the unit price at 0.00 for USD and 0,00 for BRL', () => {
+    render(<LanguageProvider><ItemForm currency="USD" onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('0.00')
+    cleanup()
     render(<LanguageProvider><ItemForm onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
-    const price = screen.getByLabelText('Unit Price') as HTMLInputElement
-    expect(price.value).toBe('')
-    expect(price.placeholder).toBe('0.00')
+    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('0,00')
   })
 
-  it('pre-fills the unit price when editing', () => {
-    render(<LanguageProvider><ItemForm item={baseItem} onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
-    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('3.5')
+  it('pre-fills the unit price formatted when editing', () => {
+    render(<LanguageProvider><ItemForm item={baseItem} currency="BRL" onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('3,50')
+    cleanup()
+    render(<LanguageProvider><ItemForm item={{ ...baseItem, unitPrice: 19.99 }} currency="BRL" onSubmit={vi.fn()} onCancel={vi.fn()} /></LanguageProvider>)
+    expect((screen.getByLabelText('Unit Price') as HTMLInputElement).value).toBe('19,99')
   })
 
-  it('submits unitPrice 0 when the price is left empty', () => {
+  it('submits 0 after clearing the price', () => {
+    const onSubmit = vi.fn()
+    render(<LanguageProvider><ItemForm item={baseItem} onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
+    fireEvent.change(screen.getByLabelText('Unit Price'), { target: { value: '' } })
+    fireEvent.submit(screen.getByLabelText('Unit Price').closest('form')!)
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ unitPrice: 0 }), '')
+  })
+
+  it('keeps a 3-decimal price when editing other fields', () => {
+    const onSubmit = vi.fn()
+    render(<LanguageProvider><ItemForm item={{ ...baseItem, unitPrice: 5.899 }} onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Fuel' } })
+    fireEvent.submit(screen.getByLabelText('Unit Price').closest('form')!)
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ unitPrice: 5.899 }), '')
+  })
+
+  it('submits unitPrice 0 when the price is untouched', () => {
     const onSubmit = vi.fn()
     render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
     fillAndSubmit()
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ unitPrice: 0 }), '')
   })
 
-  it('accepts a comma decimal price', () => {
+  it('submits the typed price', () => {
     const onSubmit = vi.fn()
     render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
     fireEvent.change(screen.getByLabelText('Unit Price'), { target: { value: '6,45' } })
@@ -249,7 +269,7 @@ describe('ItemForm - iOS keyboard and sheet', () => {
     expect(name.getAttribute('enterkeyhint')).toBe('next')
     expect(screen.getByLabelText('Quantity').getAttribute('enterkeyhint')).toBe('next')
     const price = screen.getByLabelText('Unit Price')
-    expect(price.getAttribute('inputmode')).toBe('decimal')
+    expect(price.getAttribute('inputmode')).toBe('numeric')
     expect(price.getAttribute('enterkeyhint')).toBe('done')
   })
 
@@ -289,5 +309,49 @@ describe('ItemForm - iOS keyboard and sheet', () => {
     expect(checkbox.checked).toBe(true)
     fireEvent.click(checkbox.closest('label')!)
     expect(checkbox.checked).toBe(false)
+  })
+})
+
+describe('ItemForm - Enter navigation', () => {
+  const setup = () => {
+    const onSubmit = vi.fn()
+    render(<LanguageProvider><ItemForm onSubmit={onSubmit} onCancel={vi.fn()} /></LanguageProvider>)
+    return {
+      onSubmit,
+      name: screen.getByLabelText(/name/i),
+      quantity: screen.getByLabelText('Quantity'),
+      price: screen.getByLabelText('Unit Price'),
+    }
+  }
+
+  it('Enter on name focuses quantity and does not submit', () => {
+    const { onSubmit, name, quantity } = setup()
+    name.focus()
+    const notPrevented = fireEvent.keyDown(name, { key: 'Enter' })
+    expect(notPrevented).toBe(false)
+    expect(document.activeElement).toBe(quantity)
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('Enter on quantity focuses price and does not submit', () => {
+    const { onSubmit, quantity, price } = setup()
+    quantity.focus()
+    const notPrevented = fireEvent.keyDown(quantity, { key: 'Enter' })
+    expect(notPrevented).toBe(false)
+    expect(document.activeElement).toBe(price)
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('Enter on price is left to the browser (implicit submit)', () => {
+    const { price } = setup()
+    price.focus()
+    expect(fireEvent.keyDown(price, { key: 'Enter' })).toBe(true)
+  })
+
+  it('ignores Enter while composing', () => {
+    const { name } = setup()
+    name.focus()
+    expect(fireEvent.keyDown(name, { key: 'Enter', isComposing: true })).toBe(true)
+    expect(document.activeElement).toBe(name)
   })
 })

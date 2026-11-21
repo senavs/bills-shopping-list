@@ -61,3 +61,22 @@ export const parseLocaleNumber = (value: string): number => {
 
   return parseFloat(normalized)
 }
+
+/** Largest number of cents digits the price input accepts (9.999.999,99). */
+export const MAX_PRICE_DIGITS = 9
+
+/** Convert an amount to integer cents, absorbing float imprecision (19.99 → 1999). */
+export const toCents = (amount: number): number => Math.round(amount * 100)
+
+/** Read every digit of a typed/pasted string as cents ("12,50" → 1250). Empty → 0. */
+export const digitsToCents = (raw: string): number => {
+  const digits = raw.replace(/\D/g, '')
+  return digits ? parseInt(digits, 10) : 0
+}
+
+/** Format cents as a two-decimal amount with grouping, following the currency, without symbol. */
+export const formatCents = (cents: number, currency: 'BRL' | 'USD'): string =>
+  new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / 100)

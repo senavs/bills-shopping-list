@@ -1,39 +1,50 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Item, Section, Person, UnitType } from '../../types'
 import { useLanguage } from '../../contexts/LanguageContext'
-import { parseLocaleNumber } from '../../lib/format'
+import { parseLocaleNumber, toCents } from '../../lib/format'
 import { getUnitTypeOptions } from '../../lib/unitTypes'
 import { useScrollLock } from '../../hooks/useScrollLock'
+import { CurrencyInput } from '../shared/CurrencyInput'
 
 interface ItemFormProps {
   item?: Item
   sections?: Pick<Section, 'id' | 'name'>[]
   people?: Person[]
   initialSectionId?: string
+  currency?: 'BRL' | 'USD'
   onSubmit: (item: Omit<Item, 'id'>, sectionId: string) => void
   onCancel: () => void
 }
 
-export const ItemForm = ({ item, sections = [], people = [], initialSectionId = '', onSubmit, onCancel }: ItemFormProps) => {
+export const ItemForm = ({ item, sections = [], people = [], initialSectionId = '', currency = 'BRL', onSubmit, onCancel }: ItemFormProps) => {
   const { locale, t } = useLanguage()
   useScrollLock(true)
   const [name, setName] = useState(item?.name || '')
   const [quantity, setQuantity] = useState(item?.quantity.toString() || '1')
   const [unitType, setUnitType] = useState<UnitType>(item?.unitType ?? 'unit')
-  // New items start with an empty price so the user doesn't have to delete a 0 first
-  const [unitPrice, setUnitPrice] = useState(item ? item.unitPrice.toString() : '')
+  // Price is kept in integer cents; the input fills digits from the right
+  const [priceCents, setPriceCents] = useState(item ? toCents(item.unitPrice) : 0)
   const [includeInTax, setIncludeInTax] = useState(item?.includeInTax ?? true)
   const [selected, setSelected] = useState(item?.selected ?? false)
   const [sectionId, setSectionId] = useState(initialSectionId)
   const [assignedTo, setAssignedTo] = useState<string[]>(item?.assignedTo || [])
   const [error, setError] = useState('')
+  const quantityRef = useRef<HTMLInputElement>(null)
+  const priceRef = useRef<HTMLInputElement>(null)
+
+  // Enter moves name → quantity → price; only Enter on the price submits
+  const focusOnEnter = (next: React.RefObject<HTMLInputElement | null>) => (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
+    e.preventDefault()
+    next.current?.focus()
+  }
 
   useEffect(() => {
     if (item) {
       setName(item.name)
       setQuantity(item.quantity.toString())
       setUnitType(item.unitType ?? 'unit')
-      setUnitPrice(item.unitPrice.toString())
+      setPriceCents(toCents(item.unitPrice))
       setIncludeInTax(item.includeInTax)
       setSelected(item.selected)
       setAssignedTo(item.assignedTo || [])
@@ -49,20 +60,16 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
     }
 
     const qty = parseLocaleNumber(quantity)
-    // An empty price means the user hasn't priced the item yet
-    const price = unitPrice.trim() === '' ? 0 : parseLocaleNumber(unitPrice)
 
     if (isNaN(qty) || qty < 0) {
       setError(t.quantityError)
       return
     }
 
-    if (isNaN(price) || price < 0) {
-      setError(t.priceError)
-      return
-    }
+    // An untouched price keeps its stored value, so editing other fields never rounds e.g. 5.899
+    const unitPrice = item && priceCents === toCents(item.unitPrice) ? item.unitPrice : priceCents / 100
 
-    onSubmit({ name: name.trim(), quantity: qty, unitPrice: price, unitType, selected, includeInTax, assignedTo }, sectionId)
+    onSubmit({ name: name.trim(), quantity: qty, unitPrice, unitType, selected, includeInTax, assignedTo }, sectionId)
   }
 
   const togglePerson = (personId: string) => {
@@ -134,6 +141,7 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                 id="itemName"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onKeyDown={focusOnEnter(quantityRef)}
                 className={inputClass}
                 placeholder={t.itemNamePlaceholder}
                 autoFocus={!item}
@@ -154,8 +162,10 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
                   id="itemQuantity"
                   inputMode="decimal"
                   enterKeyHint="next"
+                  ref={quantityRef}
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
+                  onKeyDown={focusOnEnter(priceRef)}
                   required
                   className={inputClass}
                 />
@@ -182,14 +192,13 @@ export const ItemForm = ({ item, sections = [], people = [], initialSectionId = 
               <label htmlFor="itemUnitPrice" className={labelClass}>
                 {t.unitPrice}
               </label>
-              <input
-                type="text"
+              <CurrencyInput
+                ref={priceRef}
                 id="itemUnitPrice"
-                inputMode="decimal"
                 enterKeyHint="done"
-                value={unitPrice}
-                onChange={(e) => setUnitPrice(e.target.value)}
-                placeholder={t.pricePlaceholder}
+                valueCents={priceCents}
+                onChange={setPriceCents}
+                currency={currency}
                 className={`${inputClass} text-lg`}
               />
             </div>
