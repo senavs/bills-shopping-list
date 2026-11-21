@@ -311,4 +311,50 @@ describe('Dashboard', () => {
       expect(setItem).not.toHaveBeenCalledWith('app', expect.anything())
     })
   })
+  describe('search', () => {
+    const mk = (id: string, name: string): List => ({
+      id, name, type: 'shopping', currency: 'BRL', taxPercentage: 0, items: [], sections: [], archived: false,
+    })
+
+    beforeEach(() => { mockUseLists.lists = [mk('a', 'Mercado Pão'), mk('b', 'Churrasco')] })
+    afterEach(() => { mockUseLists.lists = [] })
+
+    const openSearch = () => fireEvent.click(screen.getByRole('button', { name: 'Search' }))
+    const type = (q: string) => fireEvent.change(screen.getByRole('searchbox', { name: 'Search lists' }), { target: { value: q } })
+
+    it('filters lists by name ignoring accents', () => {
+      renderDashboard()
+      openSearch()
+      type('pao')
+      expect(screen.getByText('Mercado Pão')).toBeDefined()
+      expect(screen.queryByText('Churrasco')).toBeNull()
+    })
+
+    it('shows a no-results message', () => {
+      renderDashboard()
+      openSearch()
+      type('xyz')
+      expect(screen.getByText('No results for "xyz"')).toBeDefined()
+    })
+
+    it('closing the search shows every list again', () => {
+      renderDashboard()
+      openSearch()
+      type('pao')
+      fireEvent.click(screen.getByRole('button', { name: 'Close search' }))
+      expect(screen.queryByRole('searchbox')).toBeNull()
+      expect(screen.getByText('Churrasco')).toBeDefined()
+      expect(screen.getByText('Mercado Pão')).toBeDefined()
+    })
+
+    it('filters ready-made templates on the templates tab', () => {
+      renderDashboard()
+      fireEvent.click(screen.getByRole('tab', { name: 'Templates' }))
+      openSearch()
+      type('groc')
+      expect(screen.getByText('Monthly Groceries')).toBeDefined()
+      expect(screen.queryByText('Barbecue')).toBeNull()
+      expect(screen.queryByRole('heading', { name: 'My templates' })).toBeNull()
+    })
+  })
 })

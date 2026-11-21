@@ -82,3 +82,27 @@ describe('ListDetail with a shared list', () => {
     expect(screen.queryByRole('button', { name: 'Invite' })).toBeNull()
   })
 })
+
+describe('ListDetail item search', () => {
+  const groceries: List = {
+    id: 'L2', name: 'Mercado', type: 'shopping', currency: 'BRL', taxPercentage: 0, archived: false, sections: [],
+    items: [
+      { id: 'i1', name: 'Leite', quantity: 2, unitPrice: 5, selected: false, includeInTax: true },
+      { id: 'i2', name: 'Café', quantity: 1, unitPrice: 20, selected: false, includeInTax: true },
+    ],
+  }
+
+  it('selecting a result opens the editor for that item', () => {
+    renderDetail(syncValue(), groceries)
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }))
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search items' }), { target: { value: 'lei' } })
+    fireEvent.click(screen.getByRole('button', { name: /Leite/ }))
+    expect(screen.queryByRole('searchbox')).toBeNull()
+    expect((screen.getByPlaceholderText('e.g., Milk') as HTMLInputElement).value).toBe('Leite')
+  })
+
+  it('has no search button when the list has no items', () => {
+    renderDetail(syncValue(), { ...groceries, items: [] })
+    expect(screen.queryByRole('button', { name: 'Search' })).toBeNull()
+  })
+})

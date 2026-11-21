@@ -15,8 +15,9 @@ import { useSync } from '../../contexts/SyncContext'
 import { useSharedSync } from '../../contexts/SharedSyncContext'
 import { buildInviteUrl, shareInvite } from '../../lib/sharedSync/invite'
 import { MemberNameForm } from '../Join/MemberNameForm'
+import { ItemSearch } from '../ItemSearch/ItemSearch'
 import type { Item } from '../../types'
-import { ChevronLeftIcon, PencilIcon, PlusIcon, ShareIcon, UsersIcon } from '../shared/icons'
+import { ChevronLeftIcon, PencilIcon, PlusIcon, SearchIcon, ShareIcon, UsersIcon } from '../shared/icons'
 
 interface PendingDelete {
   listId: string
@@ -44,6 +45,7 @@ export const ListDetail = () => {
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null)
   const [reorderMode, setReorderMode] = useState(false)
   const [inviteNotice, setInviteNotice] = useState<string | null>(null)
+  const [showSearch, setShowSearch] = useState(false)
   const sync = useSync()
   const sharedSync = useSharedSync()
 
@@ -202,6 +204,16 @@ export const ListDetail = () => {
             <span>{t.lists}</span>
           </button>
           <div className="flex items-center gap-1">
+            {list.items.length > 0 && !reorderMode && (
+              <button
+                onClick={() => setShowSearch(true)}
+                className="w-11 h-11 flex items-center justify-center rounded-full text-accent hover:bg-accent/10"
+                title={t.search}
+                aria-label={t.search}
+              >
+                <SearchIcon className="w-6 h-6" />
+              </button>
+            )}
             {!isEmpty && (
               <button
                 type="button"
@@ -378,6 +390,14 @@ export const ListDetail = () => {
         <SectionForm
           onSubmit={(name) => { addSection(list.id, name); setShowSectionForm(false) }}
           onCancel={() => setShowSectionForm(false)}
+        />
+      )}
+
+      {showSearch && (
+        <ItemSearch
+          list={list}
+          onClose={() => setShowSearch(false)}
+          onSelect={(item) => { setShowSearch(false); setEditingItem(item) }}
         />
       )}
 

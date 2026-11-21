@@ -32,6 +32,8 @@ export const ChevronLeftIcon = (p: IconProps) => <Icon {...p}><path d="M15 5l-7 
 
 export const ChevronRightIcon = (p: IconProps) => <Icon {...p}><path d="M9 5l7 7-7 7" /></Icon>
 
+export const SearchIcon = (p: IconProps) => <Icon {...p}><circle cx="11" cy="11" r="7" /><path d="M16 16l4 4" /></Icon>
+
 export const CloseIcon = (p: IconProps) => <Icon {...p}><path d="M6 6l12 12M18 6L6 18" /></Icon>
 
 export const EllipsisIcon = (p: IconProps) => (
